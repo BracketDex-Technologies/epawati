@@ -652,6 +652,17 @@ export default function App() {
   const entryFieldsStorageKey = mandalId && festivalId
     ? `samavet:vargani-form:${mandalId}:${festivalId}`
     : '';
+  const slipsListPath = useCallback((
+    params: URLSearchParams,
+    targetMandalId = mandalId,
+    targetFestivalId = festivalId,
+  ) => {
+    const query = params.toString();
+    const basePath = targetMandalId && targetFestivalId
+      ? `/mandals/${targetMandalId}/festivals/${targetFestivalId}/vargani/slips`
+      : '/vargani/slips';
+    return query ? `${basePath}?${query}` : basePath;
+  }, [festivalId, mandalId]);
 
   useEffect(() => {
     if (!entryFieldsStorageKey) {
@@ -1090,9 +1101,18 @@ export default function App() {
   }
 
   async function restoreSession(storedSession: AuthSession, hasCachedWorkspace = false) {
-    setSession(storedSession);
+    let nextSession = storedSession;
+    if (!storedSession.accessToken) {
+      nextSession = await apiRequest<AuthSession>(
+        '/auth/refresh',
+        { body: JSON.stringify({}), method: 'POST' },
+        storedSession,
+      );
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify(sessionForStorage(nextSession)));
+    }
+    setSession(nextSession);
     if (!hasCachedWorkspace) setWorkspaceLoaded(false);
-    await loadWorkspace(storedSession);
+    await loadWorkspace(nextSession);
   }
 
   async function login(event: FormEvent<HTMLFormElement>) {
@@ -1213,9 +1233,13 @@ export default function App() {
     const festivalPath = `/mandals/${currentMandalId}/festivals/${currentFestivalId}`;
     const isCollectorSession = currentSession.user.role === 'MEMBER' || currentSession.user.role === 'GROUP_LEADER';
     const shouldRefreshSlips = !Object.values(slipListFilters).some(Boolean);
-    const [latestSlips, liveTasks, liveExpenses] = await Promise.all([
-      shouldRefreshSlips
-        ? apiRequest<{ items: Slip[]; meta: SlipPageMeta }>('/vargani/slips?limit=25&page=1', {}, currentSession)
+      const [latestSlips, liveTasks, liveExpenses] = await Promise.all([
+        shouldRefreshSlips
+        ? apiRequest<{ items: Slip[]; meta: SlipPageMeta }>(
+            slipsListPath(new URLSearchParams({ limit: '25', page: '1' }), currentMandalId, currentFestivalId),
+            {},
+            currentSession,
+          )
         : Promise.resolve(null),
       apiRequest<FestivalTask[]>(`${festivalPath}/tasks`, {}, currentSession),
       isCollectorSession
@@ -1268,7 +1292,7 @@ export default function App() {
       const params = new URLSearchParams({ limit: String(slipMeta.limit), page: String(slipMeta.page + 1) });
       Object.entries(slipListFilters).forEach(([key, value]) => { if (value) params.set(key, value); });
       const nextPage = await apiRequest<{ items: Slip[]; meta: SlipPageMeta }>(
-        `/vargani/slips?${params.toString()}`,
+        slipsListPath(params),
         {},
         session,
       );
@@ -1291,7 +1315,7 @@ export default function App() {
       const params = new URLSearchParams({ limit: '25', page: '1' });
       Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
       const page = await apiRequest<{ items: Slip[]; meta: SlipPageMeta }>(
-        `/vargani/slips?${params.toString()}`,
+        slipsListPath(params),
         {},
         session,
       );
@@ -1303,7 +1327,7 @@ export default function App() {
     } finally {
       setLoadingMoreSlips(false);
     }
-  }, [session]);
+  }, [session, slipsListPath]);
 
   async function loadWorkspace(currentSession = session) {
     if (!currentSession) return;

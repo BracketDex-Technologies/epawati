@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1328" height="800" viewBox="0 0 1328 800" role="img" aria-labelledby="title desc">
+  <title id="title">Digital Vargani Receipt Template</title>
+  <desc id="desc">Neutral receipt background for Digital Vargani mandals.</desc>
+  <rect width="1328" height="800" fill="#fffaf2"/>
+  <rect x="38" y="38" width="1252" height="724" rx="28" fill="#ffffff" stroke="#ff4b12" stroke-width="5"/>
+  <rect x="78" y="82" width="1172" height="116" rx="18" fill="#fff1e8"/>
+  <circle cx="136" cy="140" r="36" fill="#ff4b12"/>
+  <text x="136" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="900" fill="#ffffff">DV</text>
+  <text x="198" y="132" font-family="Arial, sans-serif" font-size="36" font-weight="900" fill="#1f2937">Digital Vargani</text>
+  <text x="198" y="166" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#6b7280">Festival Collection Receipt</text>
+  <text x="1030" y="144" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#ff4b12">Official Receipt</text>
+  <line x1="78" y1="236" x2="1250" y2="236" stroke="#f3d4c3" stroke-width="3"/>
+  <text x="100" y="292" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#9ca3af">Receipt No.</text>
+  <text x="100" y="374" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#9ca3af">Contributor Name</text>
+  <text x="100" y="456" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#9ca3af">Address</text>
+  <text x="100" y="538" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#9ca3af">Building / Lane</text>
+  <text x="100" y="620" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#9ca3af">Amount</text>
+  <text x="980" y="292" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#9ca3af">Date</text>
+  <rect x="82" y="682" width="1164" height="44" rx="12" fill="#f7f7f4"/>
+  <text x="664" y="711" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#6b7280">Thank you for supporting your mandal and festival community.</text>
+</svg>

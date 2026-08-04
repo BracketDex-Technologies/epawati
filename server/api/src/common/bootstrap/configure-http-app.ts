@@ -58,6 +58,7 @@ export function configureHttpApp(app: INestApplication) {
   app.useGlobalPipes(new ValidationPipe({
     forbidNonWhitelisted: true,
     transform: true,
+    transformOptions: { enableImplicitConversion: true },
     whitelist: true,
   }));
   app.useGlobalFilters(new AllExceptionsFilter());

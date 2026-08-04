@@ -9,7 +9,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CancelSlipDto } from './dto/cancel-slip.dto';
 import { CreateVarganiSlipDto } from './dto/create-vargani-slip.dto';
-import { ListVarganiSlipsQueryDto } from './dto/list-vargani-slips-query.dto';
 import { ShareSlipDto } from './dto/share-slip.dto';
 import { UpdateVarganiSlipDto } from './dto/update-vargani-slip.dto';
 import { UploadSlipReceiptImageDto } from './dto/upload-slip-receipt-image.dto';
@@ -36,7 +35,7 @@ export class VarganiController {
 
   @Get('slips')
   @Roles(UserRole.MANDAL_ADMIN, UserRole.KHAJINDAR, UserRole.GROUP_LEADER, UserRole.MEMBER)
-  listSlips(@AuthUser() ctx: AuthContext, @Query() query: ListVarganiSlipsQueryDto) {
+  listSlips(@AuthUser() ctx: AuthContext, @Query() query: Record<string, unknown>) {
     return this.varganiService.listSlips(ctx, query);
   }
 
@@ -98,6 +97,25 @@ export class VarganiController {
   @Roles(UserRole.MANDAL_ADMIN, UserRole.KHAJINDAR)
   deleteSlip(@AuthUser() ctx: AuthContext, @Param('id') id: string) {
     return this.varganiService.deleteSlip(ctx, id);
+  }
+}
+
+@ApiTags('vargani')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('mandals/:mandalId/festivals/:festivalId/vargani')
+export class FestivalVarganiController {
+  constructor(private readonly varganiService: VarganiService) {}
+
+  @Get('slips')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.MANDAL_ADMIN, UserRole.KHAJINDAR, UserRole.GROUP_LEADER, UserRole.MEMBER)
+  listFestivalSlips(
+    @AuthUser() ctx: AuthContext,
+    @Param('mandalId') mandalId: string,
+    @Param('festivalId') festivalId: string,
+    @Query() query: Record<string, unknown>,
+  ) {
+    return this.varganiService.listFestivalSlips(ctx, mandalId, festivalId, query);
   }
 }
 

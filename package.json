@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "rm -rf .next/dev",
-    "dev": "next dev --webpack",
+    "dev": "node scripts/local-server.cjs",
+    "dev:hot": "node scripts/dev-server.cjs",
     "build": "prisma generate && next build --webpack",
     "db:generate": "prisma generate",
     "start": "next start",

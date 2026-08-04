@@ -16,7 +16,7 @@ import {
 } from '@prisma/client';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { AuthContext } from '../auth/auth-context';
-import { requireMandalId } from '../auth/tenant-scope';
+import { assertSameMandal, requireMandalId } from '../auth/tenant-scope';
 import type { AppConfig } from '../config/app-config';
 import { JobsService } from '../jobs/jobs.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -37,6 +37,47 @@ type JsonWriteValue = never;
 
 function isCollectorRole(role: UserRole) {
   return role === UserRole.MEMBER || role === UserRole.GROUP_LEADER;
+}
+
+function normalizeSlipListQuery(query: ListVarganiSlipsQueryDto | Record<string, unknown>) {
+  const page = readInteger(query.page, 1, 1);
+  const limit = readInteger(query.limit, 20, 1, 100);
+  const search = readOptionalString(query.search, 120);
+  const createdByUserId = readOptionalString(query.createdByUserId, 64);
+  const date = readOptionalString(query.date, 10);
+  const statusValue = readOptionalString(query.status, 40);
+
+  if (statusValue && !Object.values(SlipStatus).includes(statusValue as SlipStatus)) {
+    throw new BadRequestException('Invalid slip status filter.');
+  }
+  if (createdByUserId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(createdByUserId)) {
+    throw new BadRequestException('Invalid collector filter.');
+  }
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new BadRequestException('Invalid date filter.');
+  }
+
+  return {
+    createdByUserId,
+    date,
+    limit,
+    page,
+    search,
+    status: statusValue as SlipStatus | undefined,
+  };
+}
+
+function readInteger(value: unknown, fallback: number, min: number, max = Number.MAX_SAFE_INTEGER) {
+  const parsed = typeof value === 'number' ? value : Number(String(value ?? ''));
+  if (!Number.isInteger(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function readOptionalString(value: unknown, maxLength: number) {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, maxLength);
 }
 
 interface TemplateFieldPlacement {
@@ -267,13 +308,33 @@ export class VarganiService {
     return slip;
   }
 
-  async listSlips(ctx: AuthContext, query: ListVarganiSlipsQueryDto) {
+  async listSlips(ctx: AuthContext, query: ListVarganiSlipsQueryDto | Record<string, unknown>) {
     const mandalId = requireMandalId(ctx);
     const festival = await this.getActiveFestival(mandalId);
+    return this.listScopedSlips(ctx, mandalId, festival.id, query);
+  }
+
+  async listFestivalSlips(
+    ctx: AuthContext,
+    mandalId: string,
+    festivalId: string,
+    query: ListVarganiSlipsQueryDto | Record<string, unknown>,
+  ) {
+    assertSameMandal(ctx, mandalId);
+    return this.listScopedSlips(ctx, mandalId, festivalId, query);
+  }
+
+  private async listScopedSlips(
+    ctx: AuthContext,
+    mandalId: string,
+    festivalId: string,
+    rawQuery: ListVarganiSlipsQueryDto | Record<string, unknown>,
+  ) {
+    const query = normalizeSlipListQuery(rawQuery);
     const skip = (query.page - 1) * query.limit;
     const selectedDate = query.date ? new Date(`${query.date}T00:00:00.000Z`) : undefined;
     const where: Prisma.VarganiSlipWhereInput = {
-      festivalId: festival.id,
+      festivalId,
       mandalId,
       collectedByUserId: query.createdByUserId,
       createdAt: selectedDate

@@ -308,6 +308,15 @@ interface Slip {
   whatsapp?: WhatsAppSendResult | null;
 }
 
+function isCollectorSession(session: AuthSession) {
+  return session.user.role === 'MEMBER' || session.user.role === 'GROUP_LEADER';
+}
+
+function slipsVisibleToSession(items: Slip[], session: AuthSession) {
+  if (!isCollectorSession(session)) return items;
+  return items.filter((slip) => slip.collectedByUserId === session.user.id || slip.collector?.id === session.user.id);
+}
+
 interface WhatsAppSendResult {
   ok: boolean;
   provider?: 'AUTHKEY';
@@ -727,7 +736,7 @@ export default function App() {
         const cachedWorkspace = readWorkspaceCache(parsed);
         if (cachedWorkspace) {
           queryClient.setQueryData(workspaceQueryKey(parsed), cachedWorkspace);
-          applyWorkspaceBootstrap(cachedWorkspace);
+          applyWorkspaceBootstrap(cachedWorkspace, parsed);
           setNotice('Showing saved data while checking for updates...');
         }
         setAuthReady(true);
@@ -845,7 +854,7 @@ export default function App() {
       if (targetMandalId && !targetFestivalId) {
         const workspace = await apiRequest<WorkspaceBootstrap>('/workspace/bootstrap', {}, session);
         queryClient.setQueryData(workspaceQueryKey(session), workspace);
-        applyWorkspaceBootstrap(workspace);
+        applyWorkspaceBootstrap(workspace, session);
         if (workspace.kind === 'MANDAL') {
           targetFestivalId = workspace.activeForm?.festival.id;
         } else {
@@ -1002,7 +1011,7 @@ export default function App() {
     }
   }
 
-  function applyWorkspaceBootstrap(payload: WorkspaceBootstrap) {
+  function applyWorkspaceBootstrap(payload: WorkspaceBootstrap, currentSession = session) {
     if (payload.kind === 'OWNER') {
       const ownerMandals = payload.mandals.items.map(mapBackendMandal);
       setActiveForm(null);
@@ -1033,7 +1042,7 @@ export default function App() {
         _count: group._count ? { ...group._count, members: members.length } : group._count,
       };
     });
-    const nextSlips = payload.slips.items;
+    const nextSlips = currentSession ? slipsVisibleToSession(payload.slips.items, currentSession) : payload.slips.items;
     setCurrentMandal(payload.mandal ? mapBackendMandal(payload.mandal) : null);
     setActiveForm(payload.activeForm);
     setGroups(activeGroups);
@@ -1233,8 +1242,8 @@ export default function App() {
     const festivalPath = `/mandals/${currentMandalId}/festivals/${currentFestivalId}`;
     const isCollectorSession = currentSession.user.role === 'MEMBER' || currentSession.user.role === 'GROUP_LEADER';
     const shouldRefreshSlips = !Object.values(slipListFilters).some(Boolean);
-      const [latestSlips, liveTasks, liveExpenses] = await Promise.all([
-        shouldRefreshSlips
+    const [latestSlips, liveTasks, liveExpenses] = await Promise.all([
+      shouldRefreshSlips
         ? apiRequest<{ items: Slip[]; meta: SlipPageMeta }>(
             slipsListPath(new URLSearchParams({ limit: '25', page: '1' }), currentMandalId, currentFestivalId),
             {},
@@ -1249,9 +1258,10 @@ export default function App() {
 
     if (latestSlips) {
       setSlips((current) => {
-        const latestIds = new Set(latestSlips.items.map((slip) => slip.id));
-        const retained = current.filter((slip) => !latestIds.has(slip.id));
-        return [...latestSlips.items, ...retained].slice(0, Math.max(25, current.length));
+        const visibleLatest = slipsVisibleToSession(latestSlips.items, currentSession);
+        const latestIds = new Set(visibleLatest.map((slip) => slip.id));
+        const retained = slipsVisibleToSession(current, currentSession).filter((slip) => !latestIds.has(slip.id));
+        return [...visibleLatest, ...retained].slice(0, Math.max(25, retained.length + visibleLatest.length));
       });
       setSlipMeta(latestSlips.meta);
     }
@@ -1296,9 +1306,13 @@ export default function App() {
         {},
         session,
       );
+      const visibleNextItems = slipsVisibleToSession(nextPage.items, session);
       setSlips((current) => {
         const knownIds = new Set(current.map((slip) => slip.id));
-        return [...current, ...nextPage.items.filter((slip) => !knownIds.has(slip.id))];
+        return [
+          ...slipsVisibleToSession(current, session),
+          ...visibleNextItems.filter((slip) => !knownIds.has(slip.id)),
+        ];
       });
       setSlipMeta(nextPage.meta);
     } catch (error) {
@@ -1320,7 +1334,7 @@ export default function App() {
         session,
       );
       setSlipListFilters(filters);
-      setSlips(page.items);
+      setSlips(slipsVisibleToSession(page.items, session));
       setSlipMeta(page.meta);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Could not filter slips.');
@@ -1336,7 +1350,7 @@ export default function App() {
       const workspace = await apiRequest<WorkspaceBootstrap>('/workspace/bootstrap', {}, currentSession);
       queryClient.setQueryData(workspaceQueryKey(currentSession), workspace);
       writeWorkspaceCache(currentSession, workspace);
-      applyWorkspaceBootstrap(workspace);
+      applyWorkspaceBootstrap(workspace, currentSession);
       void hydrateWorkspaceDetails(currentSession, workspace);
       setNotice(
         workspace.kind === 'OWNER'
@@ -5198,10 +5212,11 @@ function MemberCollectorApp({
     }
   }, []);
 
-  const { collected, filteredSlipRows, paidSlipRows, pendingSlipRows } = useMemo(() => {
-    const paid = slips.filter(isSlipPaid);
-    const pending = slips.filter((slip) => !isSlipPaid(slip));
-    const source = slipFilter === 'paid' ? paid : slipFilter === 'pending' ? pending : slips;
+  const { collected, filteredSlipRows, paidSlipRows, pendingSlipRows, visibleSlipCount } = useMemo(() => {
+    const visibleSlips = slipsVisibleToSession(slips, session);
+    const paid = visibleSlips.filter(isSlipPaid);
+    const pending = visibleSlips.filter((slip) => !isSlipPaid(slip));
+    const source = slipFilter === 'paid' ? paid : slipFilter === 'pending' ? pending : visibleSlips;
     const normalizedQuery = deferredSlipQuery.trim().toLowerCase();
     const filtered = normalizedQuery
       ? source.filter((slip) =>
@@ -5216,10 +5231,11 @@ function MemberCollectorApp({
       filteredSlipRows: filtered,
       paidSlipRows: paid,
       pendingSlipRows: pending,
+      visibleSlipCount: visibleSlips.length,
     };
-  }, [deferredSlipQuery, slipFilter, slips]);
+  }, [deferredSlipQuery, session, slipFilter, slips]);
   const paidSlips = paidSlipRows.length;
-  const totalSlipCount = Number(workspaceMetrics.slipTotalCount ?? slipMeta.total ?? slips.length);
+  const totalSlipCount = Number(workspaceMetrics.slipTotalCount ?? slipMeta.total ?? filteredSlipRows.length);
   const paidSlipCount = Number(workspaceMetrics.slipPaidCount ?? paidSlips);
   const pendingSlipCount = Number(workspaceMetrics.slipPendingCount ?? pendingSlipRows.length);
   const collectedAmount = Number(workspaceMetrics.slipPaidAmount ?? collected);
@@ -5403,7 +5419,7 @@ function MemberCollectorApp({
                 {slipMeta.page < slipMeta.totalPages && (
                   <div className="member-load-more">
                     <button disabled={loadingMoreSlips} onClick={() => void onLoadMoreSlips()} type="button">
-                      {loadingMoreSlips ? 'Loading entries...' : `Load more (${slips.length} of ${slipMeta.total})`}
+                      {loadingMoreSlips ? 'Loading entries...' : `Load more (${visibleSlipCount} of ${slipMeta.total})`}
                     </button>
                   </div>
                 )}

@@ -4609,6 +4609,318 @@ button.pending-action {
   }
 }
 
+/* Samavet warm-brown product theme.
+   Matches the public landing page: cream canvas, white surfaces, soft brown accents. */
+:root {
+  --bg: #fbf4ea;
+  --panel: #fffdf8;
+  --panel-soft: #fff7ef;
+  --ink: #22140f;
+  --muted: #8d796b;
+  --line: #eadacc;
+  --orange: #a95533;
+  --orange-2: #c7774f;
+  --orange-dark: #7a351f;
+  --orange-soft: #fff0e4;
+  --blue: #a95533;
+  --blue-soft: #fff0e4;
+  --green: #28553a;
+  --green-soft: #e8f3e8;
+}
+
+body,
+.shell,
+.member-shell,
+.auth-shell,
+.login-shell,
+.owner-shell,
+.content,
+.member-content,
+.adhyaksh-content {
+  background: #fbf4ea !important;
+  color: #22140f !important;
+}
+
+.sidebar,
+.member-sidebar,
+.adhyaksh-sidebar,
+.mobile-workspace-bar {
+  background: #fffdf8 !important;
+  border-color: #eadacc !important;
+}
+
+.brand,
+.portal-brand,
+.mandal-profile,
+.mandal-identity,
+.mandal-contact-card,
+.mandal-contact,
+.top-user,
+.top-user.mini,
+.user-chip {
+  background: #fffdf8 !important;
+  border-color: #eadacc !important;
+}
+
+.card,
+.stat,
+.metric-card,
+.wide-card,
+.action-card,
+.owner-client-card,
+.owner-detail-card,
+.owner-add-panel,
+.login-card,
+.member-hero,
+.member-table-card,
+.ops-table,
+.template-stage,
+.settings-panel,
+.partner-card,
+.partner-detail-card,
+.empty-card,
+.summary-card,
+.dashboard-stat,
+.insight-card,
+.group-chip-card,
+.vargani-modal,
+.adhyaksh-modal,
+.modal-card,
+.dialog-panel {
+  background: #fffdf8 !important;
+  border-color: #eadacc !important;
+  box-shadow: 0 10px 30px rgba(70, 38, 22, 0.045) !important;
+}
+
+.page-header,
+.adhyaksh-header,
+.member-header,
+.member-shell.adhyaksh-shell .adhyaksh-header {
+  background: #fffdf8 !important;
+  border-color: #eadacc !important;
+}
+
+.page-header h1,
+.adhyaksh-header h1,
+.member-header h1,
+.wide-card h2,
+.panel-title strong,
+.owner-list-head h2 {
+  color: #22140f !important;
+}
+
+.page-header p,
+.member-header p,
+.adhyaksh-header p,
+.owner-list-head p,
+.wide-card span,
+.panel-title span,
+.brand small,
+.portal-brand span,
+.mandal-profile p,
+.mandal-identity small,
+.stat small,
+.metric-card small,
+.summary-card small,
+.dashboard-stat small,
+.partner-card-meta span,
+.partner-mandal-card span,
+.partner-mandal-card em,
+.owner-client-main span,
+.mandal-card-meta span,
+.mandal-card-meta em,
+.year-select span,
+.top-user small,
+.top-user.mini small {
+  color: #8d796b !important;
+}
+
+.brand > span,
+.user-chip > span,
+.avatar,
+.avatar.small,
+.mandal-logo,
+.mandal-seal,
+.mobile-user-avatar,
+.stat svg,
+.metric-card svg,
+.panel-title svg,
+.top-user > span,
+.top-user.mini > span {
+  background: #fff0e4 !important;
+  color: #9a4b2d !important;
+}
+
+.sidebar nav button,
+.member-nav button,
+.adhyaksh-nav button {
+  color: #756456 !important;
+}
+
+.sidebar nav button svg,
+.member-nav button svg,
+.adhyaksh-nav button svg {
+  color: #756456 !important;
+}
+
+.sidebar nav button.active,
+.member-nav button.active,
+.adhyaksh-nav button.active {
+  background: #fff0e4 !important;
+  color: #9a4b2d !important;
+}
+
+.sidebar nav button.active::before,
+.member-nav button.active::before,
+.adhyaksh-nav button.active::before,
+.owner-client-card::before,
+.partner-card::before {
+  background: #c7774f !important;
+}
+
+.sidebar nav button.active svg,
+.member-nav button.active svg,
+.adhyaksh-nav button.active svg {
+  color: #9a4b2d !important;
+}
+
+.header-actions button,
+.primary,
+.blue-action,
+.vargani-page-actions button.primary,
+.action-card > button,
+.form-grid button.primary {
+  background: #2b1a14 !important;
+  border-color: #2b1a14 !important;
+  box-shadow: 0 12px 22px rgba(43, 26, 20, 0.14) !important;
+  color: #fffdf8 !important;
+}
+
+.header-actions button:hover,
+.primary:hover,
+.blue-action:hover,
+.vargani-page-actions button.primary:hover,
+.action-card > button:hover {
+  background: #44261b !important;
+  border-color: #44261b !important;
+}
+
+.ghost-button,
+.back-link,
+.mini-link,
+.row-actions button,
+.partner-card-actions button,
+.detail-tabs button,
+.tab-strip button,
+.segmented button,
+.mandal-card-actions button,
+.owner-client-card button,
+.partner-mandal-card button,
+.member-shell.adhyaksh-shell .adhyaksh-header-actions > button {
+  background: #fffdf8 !important;
+  border-color: #eadacc !important;
+  color: #2b1a14 !important;
+}
+
+.detail-tabs button.active,
+.tab-strip button.active,
+.segmented button.active {
+  background: #fff0e4 !important;
+  border-color: #dfb99f !important;
+  color: #9a4b2d !important;
+}
+
+input,
+select,
+textarea,
+.search-input,
+.search-box,
+.search-inline,
+.slip-filter-control,
+.year-select select,
+.member-shell.adhyaksh-shell .year-select select {
+  background: #fffdf8 !important;
+  border-color: #eadacc !important;
+  color: #22140f !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.search-input:focus-within,
+.search-box:focus-within,
+.search-inline:focus-within,
+.slip-filter-control:focus-within {
+  border-color: #d7aa85 !important;
+  box-shadow: 0 0 0 4px rgba(169, 85, 51, 0.12) !important;
+}
+
+.adhyaksh-nav button:focus-visible,
+.member-nav button:focus-visible,
+.sidebar nav button:focus-visible {
+  outline: 2px solid #d7aa85 !important;
+}
+
+.stat > span,
+.metric-card span,
+.summary-card span,
+.dashboard-stat span,
+.ops-head,
+.member-slip-head {
+  color: #8d796b !important;
+}
+
+.stat > strong,
+.metric-card strong,
+.summary-card strong,
+.dashboard-stat strong,
+.partner-card-main strong,
+.partner-detail-head strong,
+.owner-client-main strong,
+.partner-mandal-card strong {
+  color: #22140f !important;
+}
+
+.ops-head,
+.member-slip-head {
+  background: #fff7ef !important;
+  border-color: #eadacc !important;
+}
+
+.ops-row,
+.member-slip-row,
+.table-row,
+.partner-mandal-card {
+  background: #fffdf8 !important;
+  border-color: #f0e3d8 !important;
+}
+
+.ops-row:hover,
+.member-slip-row:hover,
+.table-row:hover,
+.owner-client-card:hover,
+.partner-card:hover,
+.partner-card.active {
+  border-color: #dfb99f !important;
+  box-shadow: 0 12px 28px rgba(70, 38, 22, 0.07) !important;
+}
+
+.metric-card.blue,
+.insight-card.blue {
+  background: #fff7ef !important;
+  border-color: #eadacc !important;
+}
+
+.metric-card.blue strong {
+  color: #9a4b2d !important;
+}
+
+.notice {
+  background: #fff7df !important;
+  border-color: #edd59d !important;
+  color: #7a4b16 !important;
+}
+
 /* Final desktop workspace header alignment.
    Keeps Tasks, Expenses, User Management and other admin pages in the same compact top-bar shape. */
 @media (min-width: 761px) {

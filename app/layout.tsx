@@ -9,11 +9,15 @@ const siteUrl = new URL(
     ?? process.env.PUBLIC_WEB_BASE_URL
     ?? 'https://epawati.samavet.in',
 );
+const ogImageUrl = new URL('/epawati-og.jpg', siteUrl);
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: 'Samavet ePawati',
   description: 'Digital vargani receipts, mandal collections, member management, and festival accounting by Samavet.',
+  alternates: {
+    canonical: siteUrl,
+  },
   applicationName: 'Samavet ePawati',
   appleWebApp: {
     capable: true,
@@ -36,21 +40,22 @@ export const metadata: Metadata = {
     images: [
       {
         alt: 'Samavet ePawati digital mandal receipt platform',
-        height: 1726,
-        url: '/epawati-preview.png',
-        width: 1708,
+        height: 630,
+        type: 'image/jpeg',
+        url: ogImageUrl,
+        width: 1200,
       },
     ],
     locale: 'en_IN',
     siteName: 'Samavet ePawati',
     title: 'Samavet ePawati',
     type: 'website',
-    url: '/',
+    url: siteUrl,
   },
   twitter: {
     card: 'summary_large_image',
     description: 'Digital vargani receipts, mandal collections, member management, and festival accounting by Samavet.',
-    images: ['/epawati-preview.png'],
+    images: [ogImageUrl],
     title: 'Samavet ePawati',
   },
 };

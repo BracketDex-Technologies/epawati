@@ -52,7 +52,7 @@ export class AuthController {
   @Post('refresh')
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: 'Rotates refresh token and returns a new token pair.' })
+  @ApiOkResponse({ description: 'Uses the refresh cookie to return a fresh access token.' })
   async refresh(
     @Body() dto: RefreshTokenDto,
     @Req() request: Request,

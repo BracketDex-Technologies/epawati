@@ -674,6 +674,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [themedDialog, setThemedDialog] = useState<ThemedDialogRequest | null>(null);
   const whatsappWindowRef = useRef<Window | null>(null);
+  const sessionRestoreStartedRef = useRef(false);
   const workspaceSyncTimerRef = useRef<number | null>(null);
   const workspaceSyncInFlightRef = useRef<Promise<void> | null>(null);
   const [language, setLanguage] = useState<Language>(() => {
@@ -747,6 +748,9 @@ export default function App() {
   );
   const latestTemplateVersion = activeTemplate?.versions.find((version) => version.isActive);
   useEffect(() => {
+    if (sessionRestoreStartedRef.current) return;
+    sessionRestoreStartedRef.current = true;
+
     void (async () => {
       const stored = window.localStorage.getItem(SESSION_KEY);
       if (!stored) {
@@ -1223,6 +1227,7 @@ export default function App() {
       // block navigation and keepalive lets it finish during page transitions.
       void apiRequest('/auth/logout', { keepalive: true, method: 'POST' }, endingSession).catch(() => undefined);
     }
+    sessionRestoreStartedRef.current = false;
     window.localStorage.removeItem(SESSION_KEY);
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
     queryClient.clear();

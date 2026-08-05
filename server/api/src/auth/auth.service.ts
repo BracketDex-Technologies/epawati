@@ -85,11 +85,26 @@ export class AuthService {
     const tokenMatches = await verifyRefreshTokenHash(session.refreshTokenHash, refreshToken);
 
     if (!tokenMatches) {
-      await this.revokeSession(session.id);
+      // Refresh requests can legitimately race during browser reloads or React
+      // development remounts. The first request rotates the cookie; a late
+      // duplicate may still carry the old token. Reject it without revoking the
+      // newly-rotated session, otherwise a harmless double refresh logs the user out.
       throw new UnauthorizedException('Invalid refresh token.');
     }
 
-    const nextSession = await this.createSessionTokenPair(session.user, metadata, session.id);
+    await this.prisma.userSession.update({
+      data: {
+        ipAddress: metadata.ipAddress,
+        userAgent: metadata.userAgent,
+      },
+      where: { id: session.id },
+    });
+
+    const nextSession = {
+      accessToken: await this.createAccessToken(session.user, session.id),
+      refreshToken,
+      sessionId: session.id,
+    };
     this.rememberAccessSession(nextSession.sessionId, session.user);
     return this.sessionResponse(nextSession, session.user);
   }
@@ -196,12 +211,6 @@ export class AuthService {
     existingSessionId?: string,
   ) {
     const sessionId = existingSessionId ?? randomUUID();
-    const payload: JwtPayload = {
-      mandalId: user.mandalId,
-      role: user.role,
-      sessionId,
-      sub: user.id,
-    };
     const refreshPayload: RefreshJwtPayload = {
       sessionId,
       sub: user.id,
@@ -209,10 +218,7 @@ export class AuthService {
     };
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwt.signAsync(payload, {
-        expiresIn: this.config.get('JWT_ACCESS_TTL', { infer: true }),
-        secret: this.config.get('JWT_ACCESS_SECRET', { infer: true }),
-      }),
+      this.createAccessToken(user, sessionId),
       this.jwt.signAsync(refreshPayload, {
         expiresIn: this.config.get('JWT_REFRESH_TTL', { infer: true }),
         secret: this.config.get('JWT_REFRESH_SECRET', { infer: true }),
@@ -255,6 +261,20 @@ export class AuthService {
       refreshToken,
       sessionId,
     };
+  }
+
+  private createAccessToken(user: LoginUser, sessionId: string) {
+    const payload: JwtPayload = {
+      mandalId: user.mandalId,
+      role: user.role,
+      sessionId,
+      sub: user.id,
+    };
+
+    return this.jwt.signAsync(payload, {
+      expiresIn: this.config.get('JWT_ACCESS_TTL', { infer: true }),
+      secret: this.config.get('JWT_ACCESS_SECRET', { infer: true }),
+    });
   }
 
   private sessionResponse(

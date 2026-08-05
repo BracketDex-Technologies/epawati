@@ -15,8 +15,19 @@ export const config = {
 
 let serverPromise: Promise<express.Express> | undefined;
 
+function stripNextCatchAllQuery(request: { query?: Record<string, unknown> }) {
+  if (!request.query || !('path' in request.query)) return;
+  const { path: _path, ...query } = request.query;
+  request.query = query;
+}
+
 async function bootstrapServer() {
   const server = express();
+  server.use((request, _response, next) => {
+    stripNextCatchAllQuery(request);
+    next();
+  });
+
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
     abortOnError: false,
     bodyParser: false,
@@ -41,6 +52,7 @@ function getServer() {
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
   try {
     const server = await getServer();
+    stripNextCatchAllQuery(request);
     server(request, response);
   } catch (error) {
     console.error({

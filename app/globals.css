@@ -4443,6 +4443,845 @@ button.pending-action {
   }
 }
 
+/* Absolute final workspace top-bar fix.
+   This must stay at the end: older responsive blocks above were stretching Tasks,
+   Expenses and User Management into a tall hero-like header. */
+@media (min-width: 1181px) {
+  .member-shell.adhyaksh-shell .adhyaksh-content {
+    padding-top: 0 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header {
+    align-items: center !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: grid !important;
+    gap: 18px !important;
+    grid-template-columns: minmax(240px, 1fr) auto !important;
+    height: 112px !important;
+    margin: 0 -40px !important;
+    max-height: 112px !important;
+    min-height: 112px !important;
+    overflow: hidden !important;
+    padding: 0 40px !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header h1 {
+    align-self: center !important;
+    color: #0f172a !important;
+    font-size: 34px !important;
+    font-weight: 750 !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header-actions {
+    align-items: center !important;
+    align-self: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header-actions > button {
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    gap: 8px !important;
+    height: 50px !important;
+    justify-content: center !important;
+    min-height: 50px !important;
+    padding: 0 16px !important;
+    width: auto !important;
+  }
+
+  .member-shell.adhyaksh-shell .year-select {
+    align-items: center !important;
+    display: grid !important;
+    flex: 0 0 auto !important;
+    gap: 10px !important;
+    grid-template-columns: auto 210px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .member-shell.adhyaksh-shell .year-select span {
+    color: #64748b !important;
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    max-width: 54px !important;
+    text-transform: none !important;
+  }
+
+  .member-shell.adhyaksh-shell .year-select select {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    font-size: 18px !important;
+    font-weight: 750 !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    padding: 0 42px 0 16px !important;
+    width: 210px !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini {
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex: 0 0 310px !important;
+    gap: 10px !important;
+    height: 50px !important;
+    margin: 0 !important;
+    min-height: 50px !important;
+    min-width: 310px !important;
+    padding: 6px 14px !important;
+    width: 310px !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini > span {
+    background: #ffedd5 !important;
+    color: #c2410c !important;
+    flex: 0 0 38px !important;
+    font-size: 14px !important;
+    height: 38px !important;
+    width: 38px !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini strong {
+    color: #0f172a !important;
+    font-size: 15px !important;
+    line-height: 1.05 !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini small {
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.1 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-page {
+    padding-top: 28px !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .member-shell.adhyaksh-shell .adhyaksh-header {
+    height: 88px !important;
+    max-height: 88px !important;
+    min-height: 88px !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header h1 {
+    font-size: 28px !important;
+    line-height: 1.05 !important;
+  }
+}
+
+/* Final desktop workspace header alignment.
+   Keeps Tasks, Expenses, User Management and other admin pages in the same compact top-bar shape. */
+@media (min-width: 761px) {
+  .adhyaksh-shell .adhyaksh-content {
+    padding-top: 0 !important;
+  }
+
+  .adhyaksh-shell .adhyaksh-header {
+    align-items: center !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: grid !important;
+    gap: 18px !important;
+    grid-template-columns: minmax(260px, 1fr) auto !important;
+    margin-bottom: 0 !important;
+    max-height: none !important;
+    min-height: 92px !important;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .adhyaksh-shell .adhyaksh-header h1 {
+    align-self: center !important;
+    color: #0f172a !important;
+    font-size: 34px !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .adhyaksh-shell .adhyaksh-header-actions {
+    align-items: center !important;
+    align-self: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    width: auto !important;
+  }
+
+  .adhyaksh-shell .adhyaksh-header-actions > button {
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    min-height: 50px !important;
+    padding: 0 16px !important;
+    width: auto !important;
+  }
+
+  .adhyaksh-shell .year-select {
+    align-items: center !important;
+    display: grid !important;
+    flex: 0 0 auto !important;
+    gap: 10px !important;
+    grid-template-columns: auto minmax(150px, 210px) !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .adhyaksh-shell .year-select span {
+    color: #64748b !important;
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    max-width: 54px !important;
+    text-transform: none !important;
+  }
+
+  .adhyaksh-shell .year-select select {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    font-size: 18px !important;
+    font-weight: 750 !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    padding: 0 42px 0 16px !important;
+    width: 100% !important;
+  }
+
+  .adhyaksh-shell .top-user.mini {
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex: 0 1 310px !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    min-height: 50px !important;
+    min-width: 230px !important;
+    padding: 6px 14px !important;
+    width: 310px !important;
+  }
+
+  .adhyaksh-shell .top-user.mini > span {
+    background: #ffedd5 !important;
+    color: #c2410c !important;
+    flex: 0 0 38px !important;
+    font-size: 14px !important;
+    height: 38px !important;
+    width: 38px !important;
+  }
+
+  .adhyaksh-shell .top-user.mini strong {
+    color: #0f172a !important;
+    font-size: 15px !important;
+    line-height: 1.05 !important;
+  }
+
+  .adhyaksh-shell .top-user.mini small {
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.1 !important;
+  }
+
+  .adhyaksh-nav button:focus:not(:focus-visible),
+  .member-nav button:focus:not(:focus-visible),
+  .sidebar nav button:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .adhyaksh-nav button:focus-visible,
+  .member-nav button:focus-visible,
+  .sidebar nav button:focus-visible {
+    outline: 2px solid #93c5fd !important;
+    outline-offset: 2px !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .adhyaksh-shell .adhyaksh-header {
+    grid-template-columns: minmax(160px, 1fr) auto !important;
+    min-height: 84px !important;
+  }
+
+  .adhyaksh-shell .adhyaksh-header h1 {
+    font-size: 28px !important;
+  }
+
+  .adhyaksh-shell .adhyaksh-header-actions > button,
+  .adhyaksh-shell .top-user.mini {
+    display: none !important;
+  }
+
+  .adhyaksh-shell .year-select {
+    grid-template-columns: minmax(130px, 180px) !important;
+  }
+
+  .adhyaksh-shell .year-select span {
+    display: none !important;
+  }
+}
+
+/* WiseMelon-inspired visual polish.
+   This is intentionally CSS-only so the app behavior and API logic stay unchanged. */
+:root {
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --panel-soft: #f8fafc;
+  --ink: #0f172a;
+  --muted: #94a3b8;
+  --line: #e2e8f0;
+  --orange: #2563eb;
+  --orange-2: #3b82f6;
+  --orange-soft: #eff6ff;
+  --blue: #2563eb;
+  --blue-soft: #eff6ff;
+  --green: #16a34a;
+  --green-soft: #dcfce7;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  letter-spacing: 0 !important;
+}
+
+*,
+*::before,
+*::after {
+  letter-spacing: 0 !important;
+}
+
+body {
+  background: #f8fafc !important;
+  color: #0f172a;
+}
+
+.shell,
+.member-shell,
+.auth-shell,
+.login-shell,
+.owner-shell,
+.content,
+.member-content,
+.adhyaksh-content {
+  background: #f8fafc !important;
+}
+
+.sidebar,
+.member-sidebar,
+.adhyaksh-sidebar {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.brand,
+.portal-brand,
+.mandal-profile,
+.mandal-identity {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.brand > span,
+.user-chip > span,
+.avatar,
+.mandal-logo,
+.mandal-seal,
+.mobile-user-avatar,
+.stat svg,
+.metric-card svg,
+.panel-title svg {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+.portal-brand img,
+.mobile-workspace-brand img,
+.mandal-avatar-img {
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.sidebar nav button,
+.member-nav button,
+.adhyaksh-nav button {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  color: #64748b !important;
+  font-weight: 650 !important;
+  min-height: 48px;
+}
+
+.sidebar nav button svg,
+.member-nav button svg,
+.adhyaksh-nav button svg {
+  color: #64748b !important;
+}
+
+.sidebar nav button.active,
+.member-nav button.active,
+.adhyaksh-nav button.active {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  box-shadow: none !important;
+}
+
+.sidebar nav button.active::before,
+.member-nav button.active::before,
+.adhyaksh-nav button.active::before {
+  background: #2563eb !important;
+}
+
+.sidebar nav button.active svg,
+.member-nav button.active svg,
+.adhyaksh-nav button.active svg {
+  color: #2563eb !important;
+}
+
+.page-header,
+.adhyaksh-header,
+.member-header {
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.page-header h1,
+.adhyaksh-header h1,
+.member-header h1 {
+  color: #0f172a !important;
+  font-size: 34px;
+  font-weight: 750 !important;
+}
+
+.page-header p,
+.member-header p,
+.adhyaksh-header p,
+.owner-list-head p,
+.wide-card span,
+.panel-title span,
+.brand small,
+.portal-brand span,
+.mandal-profile p,
+.mandal-identity small {
+  color: #94a3b8 !important;
+}
+
+.header-actions button,
+.primary,
+.blue-action,
+.vargani-page-actions button.primary,
+.action-card > button,
+.form-grid button.primary {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.header-actions button:hover,
+.primary:hover,
+.blue-action:hover,
+.vargani-page-actions button.primary:hover,
+.action-card > button:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.ghost-button,
+.back-link,
+.mini-link,
+.row-actions button,
+.partner-card-actions button,
+.detail-tabs button,
+.tab-strip button,
+.segmented button,
+.mandal-card-actions button,
+.owner-client-card button,
+.partner-mandal-card button {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  color: #334155 !important;
+}
+
+.detail-tabs button.active,
+.tab-strip button.active,
+.segmented button.active {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #2563eb !important;
+}
+
+.danger,
+.logout,
+.partner-card-actions .danger {
+  color: #ef4444 !important;
+}
+
+.logout {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.card,
+.stat,
+.metric-card,
+.wide-card,
+.action-card,
+.owner-client-card,
+.owner-detail-card,
+.owner-add-panel,
+.login-card,
+.member-hero,
+.member-table-card,
+.ops-table,
+.template-stage,
+.settings-panel,
+.partner-card,
+.partner-detail-card,
+.empty-card,
+.summary-card,
+.dashboard-stat,
+.insight-card,
+.group-chip-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+}
+
+.stat,
+.owner-shell .stat,
+.owner-shell .stat:nth-child(1),
+.owner-shell .stat:nth-child(2),
+.owner-shell .stat:nth-child(3),
+.owner-shell .stat:nth-child(4),
+.metric-card,
+.collector-shell .stat {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  min-height: 124px;
+}
+
+.stat > span,
+.metric-card span,
+.summary-card span,
+.dashboard-stat span {
+  color: #94a3b8 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+}
+
+.stat > strong,
+.metric-card strong,
+.summary-card strong,
+.dashboard-stat strong {
+  color: #0f172a !important;
+  font-size: 36px;
+  font-weight: 780 !important;
+}
+
+.stat small,
+.metric-card small,
+.summary-card small,
+.dashboard-stat small {
+  color: #64748b !important;
+}
+
+.owner-toolbar,
+.table-toolbar,
+.template-toolbar,
+.filters-row {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.search-input,
+.search-box,
+.slip-filter-control,
+.year-select,
+label,
+.field-control {
+  color: #475569 !important;
+}
+
+input,
+select,
+textarea,
+.search-input,
+.search-box,
+.slip-filter-control {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  border-radius: 10px !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.search-input:focus-within,
+.search-box:focus-within,
+.slip-filter-control:focus-within {
+  border-color: #93c5fd !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+  outline: none !important;
+}
+
+.badge,
+.status,
+.status-chip,
+.payment-badge,
+.pill,
+.chips span,
+.role-chip {
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+.status.paid,
+.pill.paid,
+.payment-badge.paid,
+.status-chip.good,
+.role-chip.active,
+.chips span.success {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+}
+
+.status.pending,
+.pill.pending,
+.payment-badge.pending {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+}
+
+.ops-head,
+.member-slip-head {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
+  text-transform: uppercase;
+}
+
+.ops-row,
+.member-slip-row,
+.table-row {
+  background: #ffffff !important;
+  border-color: #eef2f7 !important;
+  color: #0f172a !important;
+}
+
+.ops-row:hover,
+.member-slip-row:hover,
+.table-row:hover,
+.owner-client-card:hover,
+.partner-card:hover {
+  border-color: #bfdbfe !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06) !important;
+}
+
+.owner-client-card,
+.partner-card {
+  overflow: hidden;
+}
+
+.owner-client-card::before,
+.partner-card::before {
+  background: #2563eb !important;
+  height: 4px !important;
+}
+
+.partner-card.active {
+  border-color: #2563eb !important;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12) !important;
+}
+
+.partner-page-grid {
+  align-items: start;
+  gap: 20px !important;
+}
+
+.partner-card-main strong,
+.partner-detail-head strong,
+.owner-client-main strong,
+.partner-mandal-card strong {
+  color: #0f172a !important;
+  font-weight: 750 !important;
+}
+
+.partner-card-meta span,
+.partner-mandal-card span,
+.partner-mandal-card em,
+.owner-client-main span,
+.mandal-card-meta span,
+.mandal-card-meta em {
+  color: #64748b !important;
+}
+
+.partner-contact-grid .status-line {
+  border-color: #e2e8f0 !important;
+}
+
+.partner-contact-grid .status-line strong {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+}
+
+.partner-mandal-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  border-radius: 12px !important;
+}
+
+.notice {
+  background: #fffbeb !important;
+  border-color: #fde68a !important;
+  border-radius: 10px !important;
+  color: #92400e !important;
+}
+
+.notice:empty {
+  display: none;
+}
+
+.vargani-modal,
+.adhyaksh-modal,
+.modal-card,
+.dialog-panel {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18) !important;
+}
+
+.modal-backdrop,
+.dialog-backdrop {
+  background: rgba(15, 23, 42, 0.52) !important;
+}
+
+.mobile-workspace-bar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+}
+
+@media (min-width: 1181px) {
+  .shell.owner-shell {
+    grid-template-columns: 300px minmax(0, 1fr) !important;
+  }
+
+  .owner-shell .content,
+  .adhyaksh-shell .member-content,
+  .collector-shell .member-content {
+    padding: 38px 40px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .card,
+  .stat,
+  .metric-card,
+  .wide-card,
+  .member-table-card,
+  .owner-client-card,
+  .partner-card,
+  .partner-detail-card {
+    border-radius: 12px !important;
+  }
+
+  .page-header h1,
+  .adhyaksh-header h1,
+  .member-header h1 {
+    font-size: 28px;
+  }
+
+  .stat > strong,
+  .metric-card strong,
+  .summary-card strong,
+  .dashboard-stat strong {
+    font-size: 30px;
+  }
+}
+
 /* Owner partner attribution page. */
 .owner-shell .partner-page-grid {
   align-items: start;
@@ -10669,5 +11508,171 @@ html:lang(hi) #root {
   .adhyaksh-shell .top-user.mini {
     margin-right: 0;
     padding-right: 10px;
+  }
+}
+
+/* Absolute final workspace top-bar fix.
+   Keep this at the very end so Tasks, Expenses and User Management cannot inherit
+   the older tall header styles above. */
+@media (min-width: 1181px) {
+  .member-shell.adhyaksh-shell .adhyaksh-content {
+    padding-top: 0 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header {
+    align-items: center !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: grid !important;
+    gap: 18px !important;
+    grid-template-columns: minmax(240px, 1fr) auto !important;
+    height: 112px !important;
+    margin: 0 -40px !important;
+    max-height: 112px !important;
+    min-height: 112px !important;
+    overflow: hidden !important;
+    padding: 0 40px !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header h1 {
+    align-self: center !important;
+    color: #0f172a !important;
+    font-size: 34px !important;
+    font-weight: 750 !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header-actions {
+    align-items: center !important;
+    align-self: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header-actions > button {
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    gap: 8px !important;
+    height: 50px !important;
+    justify-content: center !important;
+    min-height: 50px !important;
+    padding: 0 16px !important;
+    width: auto !important;
+  }
+
+  .member-shell.adhyaksh-shell .year-select {
+    align-items: center !important;
+    display: grid !important;
+    flex: 0 0 auto !important;
+    gap: 10px !important;
+    grid-template-columns: auto 210px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .member-shell.adhyaksh-shell .year-select span {
+    color: #64748b !important;
+    display: block !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    max-width: 54px !important;
+    text-transform: none !important;
+  }
+
+  .member-shell.adhyaksh-shell .year-select select {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    font-size: 18px !important;
+    font-weight: 750 !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    padding: 0 42px 0 16px !important;
+    width: 210px !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini {
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex: 0 0 310px !important;
+    gap: 10px !important;
+    height: 50px !important;
+    margin: 0 !important;
+    min-height: 50px !important;
+    min-width: 310px !important;
+    padding: 6px 14px !important;
+    width: 310px !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini > span {
+    background: #ffedd5 !important;
+    color: #c2410c !important;
+    flex: 0 0 38px !important;
+    font-size: 14px !important;
+    height: 38px !important;
+    width: 38px !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini strong {
+    color: #0f172a !important;
+    font-size: 15px !important;
+    line-height: 1.05 !important;
+  }
+
+  .member-shell.adhyaksh-shell .top-user.mini small {
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.1 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-page {
+    padding-top: 28px !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .member-shell.adhyaksh-shell .adhyaksh-header {
+    height: 88px !important;
+    max-height: 88px !important;
+    min-height: 88px !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-header h1 {
+    font-size: 28px !important;
+    line-height: 1.05 !important;
   }
 }

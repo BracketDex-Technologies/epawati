@@ -1,0 +1,32 @@
+{
+  "name": "Samavet ePawati",
+  "short_name": "ePawati",
+  "description": "Digital vargani receipts, mandal collections, member management, and festival accounting by Samavet.",
+  "dir": "auto",
+  "lang": "en-IN",
+  "display": "standalone",
+  "orientation": "any",
+  "start_url": "/",
+  "background_color": "#fffdf8",
+  "theme_color": "#ff6b1a",
+  "icons": [
+    {
+      "src": "/favicon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

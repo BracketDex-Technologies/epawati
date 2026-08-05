@@ -60,7 +60,7 @@ type TextWrapMode = 'single' | 'wrap' | 'shrink';
 type TextDecoration = 'none' | 'underline' | 'line-through';
 type UserRole = 'MANDAL_ADMIN' | 'KHAJINDAR' | 'GROUP_LEADER' | 'MEMBER' | 'SUPER_ADMIN';
 type AdhyakshScreen = 'members' | 'tasks' | 'expenses' | 'template' | 'slips' | 'form' | 'users' | 'logs';
-type OwnerScreen = 'dashboard' | 'mandals';
+type OwnerScreen = 'dashboard' | 'mandals' | 'partners';
 type OwnerMandalTab = 'overview' | 'template';
 type Language = 'en' | 'mr' | 'hi';
 type ExpenseStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
@@ -400,6 +400,8 @@ interface DemoMandal {
   memberCount?: string;
   name: string;
   nameMr?: string;
+  partner?: Partner | null;
+  partnerId?: string | null;
   plan?: string;
   state?: string;
   id?: string;
@@ -412,6 +414,29 @@ interface DemoMandal {
   whatsappTemplateName?: string | null;
   whatsappTemplateVariableCount?: number | null;
   whatsappTemplateWid?: string | null;
+}
+
+interface PartnerMandalSummary {
+  city?: string | null;
+  contactPhone?: string | null;
+  id: string;
+  locality?: string | null;
+  name: string;
+  plan?: string | null;
+  slug?: string | null;
+  status?: string | null;
+}
+
+interface Partner {
+  _count?: { mandals?: number };
+  address?: string | null;
+  createdAt?: string;
+  email?: string | null;
+  id: string;
+  mandals?: PartnerMandalSummary[];
+  name: string;
+  phone?: string | null;
+  status?: string;
 }
 
 interface AuthkeyWhatsAppTemplate {
@@ -460,6 +485,7 @@ interface OwnerWorkspaceBootstrap {
     items: Array<DemoMandal & { contactName?: string | null; contactPhone?: string | null; logoUrl?: string | null; festivals?: Festival[]; users?: MandalLoginUser[] }>;
     meta: { limit: number; page: number; total: number; totalPages: number };
   };
+  partners?: Partner[];
   metrics: {
     totalMandals: number;
     totalMembers: number;
@@ -641,6 +667,7 @@ export default function App() {
   const [workspaceLoaded, setWorkspaceLoaded] = useState(false);
   const [yearChanging, setYearChanging] = useState(false);
   const [demoMandals, setDemoMandals] = useState<DemoMandal[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [currentMandal, setCurrentMandal] = useState<DemoMandal | null>(null);
   const [collectorModalOpen, setCollectorModalOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -794,6 +821,7 @@ export default function App() {
       setTemplates([]);
       setSelectedSlip(null);
       setWorkspaceLoaded(false);
+      setPartners([]);
       setNotice('Session expired. Login again to continue.');
     }
 
@@ -1025,6 +1053,7 @@ export default function App() {
       setTemplates([]);
       setSelectedSlip(null);
       setDemoMandals(ownerMandals);
+      setPartners(payload.partners ?? []);
       setCurrentMandal(null);
       setWorkspaceLoaded(true);
       return;
@@ -1058,6 +1087,7 @@ export default function App() {
     const activeVersion = findActiveTemplateVersion(payload.templates);
     setTemplatePreview(resolveTemplateAssetUrl(activeVersion?.backgroundFileUrl || TEMPLATE_IMAGE));
     setDemoMandals([]);
+    setPartners([]);
     setWorkspaceLoaded(true);
   }
 
@@ -1209,6 +1239,7 @@ export default function App() {
     setTemplates([]);
     setSelectedSlip(null);
     setWorkspaceLoaded(false);
+    setPartners([]);
     setNotice('Logged out. Login again to use the console.');
     setWorkspaceRefreshing(false);
   }
@@ -1534,6 +1565,7 @@ export default function App() {
               locality: newMandal.locality || undefined,
               name: newMandal.name,
               plan: 'starter',
+              partnerId: String(form.get('partnerId') || '') || undefined,
               slipLimit: newMandal.slipLimit || undefined,
               state: 'Maharashtra',
               whatsappMode: newMandal.whatsappMode,
@@ -1543,7 +1575,29 @@ export default function App() {
           session,
         );
         formElement.reset();
-        setDemoMandals((current) => [mapBackendMandal({ ...created.mandal, users: [created.admin] }), ...current]);
+        const createdMandal = mapBackendMandal({ ...created.mandal, users: [created.admin] });
+        setDemoMandals((current) => [createdMandal, ...current]);
+        if (createdMandal.partnerId) {
+          setPartners((current) => current.map((partner) => partner.id === createdMandal.partnerId
+            ? {
+                ...partner,
+                _count: { ...partner._count, mandals: Number(partner._count?.mandals ?? partner.mandals?.length ?? 0) + 1 },
+                mandals: [
+                  {
+                    city: createdMandal.city,
+                    contactPhone: createdMandal.contactPhone,
+                    id: createdMandal.id as string,
+                    locality: createdMandal.locality,
+                    name: createdMandal.name,
+                    plan: createdMandal.plan,
+                    slug: createdMandal.slug,
+                    status: createdMandal.status,
+                  },
+                  ...(partner.mandals ?? []),
+                ],
+              }
+            : partner));
+        }
         setNotice(`${newMandal.name} added. Admin password: ${newMandal.adminPassword}`);
         return { id: created.mandal.id, ok: true };
       } catch (error) {
@@ -1599,6 +1653,85 @@ export default function App() {
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Could not update Mandal details.');
       return null;
+    }
+  }
+
+  async function createPartner(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!session || session.user.role !== 'SUPER_ADMIN') return false;
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const rawPhone = String(form.get('phone') || '').trim();
+    const phone = normalizeOptionalIndianPhone(rawPhone);
+    if (rawPhone && !phone) {
+      setNotice('Enter partner mobile as +919876543210 or a valid 10 digit Indian number.');
+      setFormFieldError(formElement, 'phone', 'Enter partner mobile as +919876543210 or a valid 10 digit Indian number.');
+      return false;
+    }
+    try {
+      const partner = await apiRequest<Partner>(
+        '/partners',
+        {
+          body: JSON.stringify({
+            address: String(form.get('address') || '').trim() || undefined,
+            email: String(form.get('email') || '').trim().toLowerCase() || undefined,
+            name: String(form.get('name') || '').trim(),
+            phone: phone || undefined,
+          }),
+          method: 'POST',
+        },
+        session,
+      );
+      setPartners((current) => [partner, ...current]);
+      formElement.reset();
+      setNotice(`${partner.name} added as partner.`);
+      return true;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not add partner.');
+      focusFormErrorFromMessage(formElement, error);
+      return false;
+    }
+  }
+
+  async function updatePartner(partnerId: string, patch: Record<string, unknown>) {
+    if (!session || session.user.role !== 'SUPER_ADMIN') return null;
+    try {
+      const partner = await apiRequest<Partner>(
+        `/partners/${partnerId}`,
+        { body: JSON.stringify(patch), method: 'PATCH' },
+        session,
+      );
+      setPartners((current) => current.map((item) => (item.id === partnerId ? partner : item)));
+      setDemoMandals((current) => current.map((mandal) =>
+        mandal.partnerId === partnerId ? { ...mandal, partner } : mandal));
+      setNotice(`${partner.name} updated.`);
+      scheduleWorkspaceSync(session);
+      return partner;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not update partner.');
+      return null;
+    }
+  }
+
+  async function archivePartner(partner: Partner) {
+    if (!session || session.user.role !== 'SUPER_ADMIN') return false;
+    const confirmed = await askConfirm({
+      confirmLabel: 'Archive Partner',
+      danger: true,
+      message: `${partner.name} will be hidden from active partner lists. Assigned mandals will keep their attribution until changed.`,
+      title: 'Archive partner?',
+    });
+    if (!confirmed) return false;
+
+    try {
+      await apiRequest(`/partners/${partner.id}`, { method: 'DELETE' }, session);
+      setPartners((current) => current.filter((item) => item.id !== partner.id));
+      setNotice(`${partner.name} archived.`);
+      scheduleWorkspaceSync(session);
+      return true;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not archive partner.');
+      return false;
     }
   }
 
@@ -2500,6 +2633,8 @@ export default function App() {
         demoMandals={demoMandals}
         language={language}
         notice={notice}
+        onArchivePartner={archivePartner}
+        onCreatePartner={createPartner}
         onCreateMandal={createMandal}
         onArchiveMandal={archiveMandal}
         onLanguageChange={setLanguage}
@@ -2509,6 +2644,8 @@ export default function App() {
         onTemplateSaved={saveTemplateConfig}
         onUpdateMandal={updateMandalDetails}
         onUpdateMandalLogin={updateMandalLogin}
+        onUpdatePartner={updatePartner}
+        partners={partners}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         session={session}
@@ -2615,7 +2752,7 @@ function parseOwnerRoute(hash = typeof window === 'undefined' ? '' : window.loca
     };
   }
 
-  const [, screen, mandalId, tab] = route.match(/^owner\/(dashboard|mandals)(?:\/([^/]+))?(?:\/(overview|template))?$/) ?? [];
+  const [, screen, mandalId, tab] = route.match(/^owner\/(dashboard|mandals|partners)(?:\/([^/]+))?(?:\/(overview|template))?$/) ?? [];
   if (!screen) return null;
   return {
     isNew: false,
@@ -2639,6 +2776,7 @@ function routeForAdhyaksh(screen: AdhyakshScreen) {
 
 function routeForOwner(screen: OwnerScreen, mandalId?: string | null, tab: OwnerMandalTab = 'overview') {
   if (screen === 'dashboard') return '#/owner/dashboard';
+  if (screen === 'partners') return '#/owner/partners';
   if (mandalId) return `#/owner/mandals/${encodeURIComponent(mandalId)}/${tab}`;
   return '#/owner/mandals';
 }
@@ -4292,7 +4430,9 @@ function SuperAdminApp({
   language,
   notice,
   onArchiveMandal,
+  onArchivePartner,
   onCreateMandal,
+  onCreatePartner,
   onLanguageChange,
   onLogout,
   onMandalLoginCreated,
@@ -4301,6 +4441,8 @@ function SuperAdminApp({
   onTemplateSaved,
   onUpdateMandal,
   onUpdateMandalLogin,
+  onUpdatePartner,
+  partners,
   session,
   setSidebarOpen,
   sidebarOpen,
@@ -4310,7 +4452,9 @@ function SuperAdminApp({
   language: Language;
   notice: string;
   onArchiveMandal: (mandal: DemoMandal) => Promise<boolean>;
+  onArchivePartner: (partner: Partner) => Promise<boolean>;
   onCreateMandal: (event: FormEvent<HTMLFormElement>) => Promise<{ id?: string; ok: boolean }>;
+  onCreatePartner: (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
   onLanguageChange: (language: Language) => void;
   onLogout: () => void;
   onMandalLoginCreated: (mandalId: string, user: MandalLoginUser) => void;
@@ -4322,6 +4466,8 @@ function SuperAdminApp({
   ) => Promise<void> | void;
   onUpdateMandal: (mandalId: string, patch: Record<string, unknown>) => Promise<DemoMandal | null>;
   onUpdateMandalLogin: (mandalId: string, userId: string, patch: Record<string, unknown>) => Promise<MandalLoginUser | null>;
+  onUpdatePartner: (partnerId: string, patch: Record<string, unknown>) => Promise<Partner | null>;
+  partners: Partner[];
   session: AuthSession;
   setSidebarOpen: (open: boolean | ((current: boolean) => boolean)) => void;
   sidebarOpen: boolean;
@@ -4336,9 +4482,14 @@ function SuperAdminApp({
   });
   const [detailTab, setDetailTab] = useState<OwnerMandalTab>(() => parseOwnerRoute()?.tab ?? 'overview');
   const [addMandalOpen, setAddMandalOpen] = useState(false);
+  const [addPartnerOpen, setAddPartnerOpen] = useState(false);
   const [managedIndex, setManagedIndex] = useState<number | null>(null);
   const [ownerQuery, setOwnerQuery] = useState('');
   const deferredOwnerQuery = useDeferredValue(ownerQuery);
+  const [partnerQuery, setPartnerQuery] = useState('');
+  const deferredPartnerQuery = useDeferredValue(partnerQuery);
+  const [selectedPartnerId, setSelectedPartnerId] = useState('');
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginMessage, setLoginMessage] = useState('');
   const [editingLogin, setEditingLogin] = useState<MandalLoginUser | null>(null);
@@ -4351,6 +4502,7 @@ function SuperAdminApp({
   const [mandalLogins, setMandalLogins] = useState<Record<string, Array<{ name?: string; password: string; role: string; userId?: string; username: string }>>>({});
   const [ownerTemplateDrafts, setOwnerTemplateDrafts] = useState<Record<string, string>>({});
   const selectedMandal = mandals[Math.min(selectedIndex, mandals.length - 1)];
+  const selectedPartner = partners.find((partner) => partner.id === selectedPartnerId) ?? partners[0] ?? null;
   const selectedKey = selectedMandal?.id ?? selectedMandal?.name ?? '';
   const extraLogins = mandalLogins[selectedKey] ?? [];
   const selectedTemplateVersion = selectedMandal?.festivals?.[0]?.templates?.[0]?.versions?.[0];
@@ -4392,6 +4544,7 @@ function SuperAdminApp({
           mandal.locality,
           mandal.city,
           mandal.contactEmail,
+          mandal.partner?.name,
         ].filter(Boolean).some((value) => String(value).toLowerCase().includes(normalizedQuery))),
       totalMembers: mandals.reduce(
         (sum, mandal) => sum + Number(mandal._count?.members ?? mandal.memberCount ?? 0),
@@ -4403,6 +4556,31 @@ function SuperAdminApp({
       ),
     };
   }, [deferredOwnerQuery, mandals]);
+  const { attributedMandals, filteredPartners, partnerMandals } = useMemo(() => {
+    const normalizedQuery = deferredPartnerQuery.trim().toLowerCase();
+    return {
+      attributedMandals: mandals.filter((mandal) => mandal.partnerId).length,
+      filteredPartners: partners.filter((partner) => !normalizedQuery || [
+        partner.name,
+        partner.email,
+        partner.phone,
+        partner.address,
+      ].filter(Boolean).some((value) => String(value).toLowerCase().includes(normalizedQuery))),
+      partnerMandals: selectedPartner
+        ? mandals.filter((mandal) => mandal.partnerId === selectedPartner.id)
+        : [],
+    };
+  }, [deferredPartnerQuery, mandals, partners, selectedPartner]);
+
+  useEffect(() => {
+    if (!partners.length) {
+      setSelectedPartnerId('');
+      return;
+    }
+    if (!selectedPartnerId || !partners.some((partner) => partner.id === selectedPartnerId)) {
+      setSelectedPartnerId(partners[0].id);
+    }
+  }, [partners, selectedPartnerId]);
 
   const loadAuthkeyTemplates = useCallback(async (forceRefresh = false) => {
     setAuthkeyTemplatesLoading(true);
@@ -4447,6 +4625,7 @@ function SuperAdminApp({
 
     if (route.screen !== 'mandals' || !route.mandalId) {
       setManagedIndex(null);
+      setAddPartnerOpen(false);
       return;
     }
 
@@ -4478,6 +4657,7 @@ function SuperAdminApp({
     setOwnerScreen(screen);
     setManagedIndex(null);
     setAddMandalOpen(false);
+    setAddPartnerOpen(false);
     writeRoute(routeForOwner(screen));
     setSidebarOpen(false);
   }
@@ -4486,7 +4666,17 @@ function SuperAdminApp({
     setOwnerScreen('mandals');
     setManagedIndex(null);
     setAddMandalOpen(true);
+    setAddPartnerOpen(false);
     writeRoute(routeForNewMandal());
+    setSidebarOpen(false);
+  }
+
+  function openAddPartner() {
+    setOwnerScreen('partners');
+    setManagedIndex(null);
+    setAddMandalOpen(false);
+    setAddPartnerOpen(true);
+    writeRoute(routeForOwner('partners'));
     setSidebarOpen(false);
   }
 
@@ -4497,6 +4687,7 @@ function SuperAdminApp({
     setOwnerScreen('mandals');
     setDetailTab('overview');
     setAddMandalOpen(false);
+    setAddPartnerOpen(false);
     writeRoute(routeForOwner('mandals', mandal?.id, 'overview'));
     setSidebarOpen(false);
   }
@@ -4642,6 +4833,7 @@ function SuperAdminApp({
         logoDataUrl,
         name: String(form.get('name') || '').trim(),
         nameMr: String(form.get('nameMr') || '').trim() || null,
+        partnerId: String(form.get('partnerId') || '') || null,
         plan: String(form.get('plan') || 'starter'),
         slipLimit: Number(form.get('slipLimit') || 0) || null,
         state: String(form.get('state') || '').trim() || null,
@@ -4697,6 +4889,33 @@ function SuperAdminApp({
     }
   }
 
+  async function saveEditedPartner(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingPartner) return;
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const rawPhone = String(form.get('phone') || '').trim();
+    const phone = normalizeOptionalIndianPhone(rawPhone);
+    if (rawPhone && !phone) {
+      setLoginMessage('Enter a valid 10-digit Indian partner mobile number.');
+      setFormFieldError(formElement, 'phone', 'Enter a valid 10-digit Indian partner mobile number.');
+      return;
+    }
+
+    setLoginBusy(true);
+    const updated = await onUpdatePartner(editingPartner.id, {
+      address: String(form.get('address') || '').trim() || null,
+      email: String(form.get('email') || '').trim().toLowerCase() || null,
+      name: String(form.get('name') || '').trim(),
+      phone: phone || null,
+    });
+    setLoginBusy(false);
+    if (updated) {
+      setEditingPartner(null);
+      setSelectedPartnerId(updated.id);
+    }
+  }
+
   async function copyLogin(login: { password: string; role: string; username: string }) {
     const text = `Login URL: ${mandalLoginUrl()}\nRole: ${login.role}\nUsername: ${login.username}\nPassword: ${login.password}`;
     try {
@@ -4735,6 +4954,9 @@ function SuperAdminApp({
           <button className={ownerScreen === 'mandals' ? 'active' : ''} onClick={() => openOwnerScreen('mandals')} type="button">
             <Building2 size={19} />{t(language, 'Mandals')}
           </button>
+          <button className={ownerScreen === 'partners' ? 'active' : ''} onClick={() => openOwnerScreen('partners')} type="button">
+            <UsersRound size={19} />Partners
+          </button>
         </nav>
         <div className="sidebar-footer">
           <div className="user-chip">
@@ -4752,10 +4974,15 @@ function SuperAdminApp({
         <AdminTopbar language={language} onLanguageChange={onLanguageChange} session={session} />
         <header className="page-header">
           <div>
-            <h1>{ownerScreen === 'dashboard' ? t(language, 'Dashboard') : t(language, 'Mandals')}</h1>
-            <p>{ownerScreen === 'dashboard' ? 'Track all onboarded mandals and software operations.' : t(language, 'Add mandals and manage each client account.')}</p>
+            <h1>{ownerScreen === 'dashboard' ? t(language, 'Dashboard') : ownerScreen === 'partners' ? 'Partners' : t(language, 'Mandals')}</h1>
+            <p>{ownerScreen === 'dashboard'
+              ? 'Track all onboarded mandals and software operations.'
+              : ownerScreen === 'partners'
+                ? 'Track who brought each mandal into ePawati.'
+                : t(language, 'Add mandals and manage each client account.')}</p>
           </div>
           <div className="header-actions">
+            {ownerScreen === 'partners' && <button onClick={openAddPartner} type="button"><Plus size={18} />Add Partner</button>}
             <button onClick={openAddMandal} type="button"><Plus size={18} />{t(language, 'Add Mandal')}</button>
           </div>
         </header>
@@ -4765,6 +4992,7 @@ function SuperAdminApp({
           <>
             <section className="stats-grid compact owner-stat-grid">
               <Stat icon={<Building2 />} label={t(language, 'Total Mandals')} note="Onboarded client mandals" value={String(mandals.length)} />
+              <Stat icon={<UsersRound />} label="Partners" note={`${attributedMandals} attributed mandals`} value={String(partners.length)} />
               <Stat icon={<UsersRound />} label={t(language, 'Total Members')} note="Across all mandals" value={String(totalMembers)} />
               <Stat icon={<FileText />} label={t(language, 'Slips Generated')} note="Live receipt records" value={String(totalSlipsGenerated)} />
             </section>
@@ -4790,6 +5018,7 @@ function SuperAdminApp({
           <>
             <section className="stats-grid compact owner-stat-grid">
               <Stat icon={<Building2 />} label={t(language, 'Total Mandals')} note="Onboarded" value={String(mandals.length)} />
+              <Stat icon={<UsersRound />} label="Partners" note="Business developers" value={String(partners.length)} />
               <Stat icon={<UsersRound />} label={t(language, 'Total Members')} note="Declared collectors" value={String(totalMembers)} />
               <Stat icon={<ReceiptText />} label={t(language, 'Slips Generated')} note="Across mandals" value={String(totalSlipsGenerated)} />
             </section>
@@ -4825,6 +5054,7 @@ function SuperAdminApp({
                 <label>Contact Email<input name="contactEmail" placeholder="contact@mandal.local" /></label>
                 <label>No. of Members<input name="memberCount" inputMode="numeric" placeholder="50" /></label>
                 <label>Slip Generation Limit *<input inputMode="numeric" min={1} name="slipLimit" required placeholder="e.g. 1000" type="number" /></label>
+                <label>Registered By<select defaultValue="" name="partnerId"><option value="">No partner</option>{partners.map((partner) => <option key={partner.id} value={partner.id}>{partner.name}</option>)}</select></label>
                 <label>WhatsApp Delivery<select defaultValue="AUTO_API" name="whatsappMode"><option value="AUTO_API">Automatic — Paid API</option><option value="MANUAL_SHARE">Manual — Open WhatsApp App</option></select></label>
                 <label>Adhyaksh Name<input name="adhyakshName" placeholder="Main admin name" /></label>
                 <label>Adhyaksh Email *<input name="adminEmail" required placeholder="admin@mandal.local" /></label>
@@ -4844,6 +5074,118 @@ function SuperAdminApp({
           </>
         )}
 
+        {ownerScreen === 'partners' && (
+          <>
+            <section className="stats-grid compact owner-stat-grid">
+              <Stat icon={<UsersRound />} label="Total Partners" note="Active business partners" value={String(partners.length)} />
+              <Stat icon={<Building2 />} label="Attributed Mandals" note="Partner-linked clients" value={String(attributedMandals)} />
+              <Stat icon={<ReceiptText />} label="Unassigned Mandals" note="No partner selected" value={String(Math.max(0, mandals.length - attributedMandals))} />
+            </section>
+            {addPartnerOpen && (
+              <form className="card form-grid owner-add-panel" onSubmit={async (event) => {
+                const ok = await onCreatePartner(event);
+                if (ok) setAddPartnerOpen(false);
+              }}>
+                <div className="panel-title full">
+                  <Plus size={22} />
+                  <div>
+                    <strong>Add Partner</strong>
+                    <span>Create the person who helped register mandals.</span>
+                  </div>
+                  <button className="ghost-button" onClick={() => setAddPartnerOpen(false)} type="button">Close</button>
+                </div>
+                <label>Partner Name *<input name="name" required placeholder="Darshan Choudhari" /></label>
+                <label>Email<input name="email" placeholder="darshan@example.com" type="email" /></label>
+                <label>Mobile<input inputMode="tel" name="phone" placeholder="+919876543210" /></label>
+                <label className="full">Address<input name="address" placeholder="Partner address" /></label>
+                <button className="primary full" disabled={busy} type="submit"><Plus size={18} />Add Partner</button>
+              </form>
+            )}
+            <section className="owner-list-head">
+              <div>
+                <h2>Partners</h2>
+                <p>Select a partner to see the mandals registered through them.</p>
+              </div>
+              <button className="primary" onClick={openAddPartner} type="button"><Plus size={18} />Add Partner</button>
+            </section>
+            <section className="owner-toolbar">
+              <div className="search-input">
+                <Search size={20} />
+                <input onChange={(event) => setPartnerQuery(event.target.value)} placeholder="Search partners by name, email, mobile..." value={partnerQuery} />
+              </div>
+              <span>{filteredPartners.length} of {partners.length} partners</span>
+            </section>
+            <section className="partner-page-grid">
+              <div className="partner-list">
+                {filteredPartners.map((partner) => (
+                  <article className={`partner-card ${selectedPartner?.id === partner.id ? 'active' : ''}`} key={partner.id}>
+                    <div className="partner-card-main">
+                      <span className="avatar small">{partner.name.charAt(0).toUpperCase()}</span>
+                      <div>
+                        <strong>{partner.name}</strong>
+                        <small>{partner.address || 'Address not added'}</small>
+                      </div>
+                      <em>{mandals.filter((mandal) => mandal.partnerId === partner.id).length} mandals</em>
+                    </div>
+                    <div className="partner-card-meta">
+                      <span>{partner.phone || 'Mobile pending'}</span>
+                      <span>{partner.email || 'Email pending'}</span>
+                    </div>
+                    <div className="partner-card-actions">
+                      <button onClick={() => setSelectedPartnerId(partner.id)} type="button"><Eye size={16} />View</button>
+                      <button onClick={() => setEditingPartner(partner)} type="button"><Edit3 size={16} />Edit</button>
+                      <button className="danger" onClick={() => void onArchivePartner(partner)} type="button"><Trash2 size={16} />Archive</button>
+                    </div>
+                  </article>
+                ))}
+                {!filteredPartners.length && (
+                  <div className="empty-card">
+                    <UsersRound size={34} />
+                    <strong>No partners found</strong>
+                    <span>Add your first partner, then assign them while creating mandals.</span>
+                  </div>
+                )}
+              </div>
+              <div className="partner-detail-card">
+                <div className="partner-detail-head">
+                  <span className="avatar">{selectedPartner?.name.charAt(0).toUpperCase() ?? 'P'}</span>
+                  <div>
+                    <strong>{selectedPartner?.name ?? 'Partner detail'}</strong>
+                    <span>{selectedPartner ? `${partnerMandals.length} mandals registered` : 'Select a partner from the list.'}</span>
+                  </div>
+                </div>
+                {selectedPartner && (
+                  <>
+                    <div className="partner-contact-grid">
+                      <StatusLine label="Mobile" value={selectedPartner.phone || 'Not added'} />
+                      <StatusLine label="Email" value={selectedPartner.email || 'Not added'} />
+                      <StatusLine label="Address" value={selectedPartner.address || 'Not added'} />
+                    </div>
+                    <div className="partner-mandal-list">
+                      {partnerMandals.map((mandal) => (
+                        <article className="partner-mandal-card" key={mandal.id}>
+                          <MandalAvatar mandal={mandal} />
+                          <div>
+                            <strong>{mandal.name}</strong>
+                            <small>{mandal.locality || mandal.city || 'Location not set'}</small>
+                          </div>
+                          <span>{mandal.contactPhone || 'Phone pending'}</span>
+                          <em>{mandal.plan ?? 'starter'}</em>
+                          <button onClick={() => {
+                            const index = mandals.findIndex((item) => item.id === mandal.id);
+                            if (index >= 0) openMandal(index);
+                          }} type="button">Manage</button>
+                        </article>
+                      ))}
+                      {!partnerMandals.length && <div className="empty-state">No mandals assigned to this partner yet.</div>}
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+          </>
+        )}
+
         {ownerScreen === 'mandals' && managedIndex !== null && selectedMandal && (
           <section className="owner-managed-view">
             <button className="back-link" onClick={() => openOwnerScreen('mandals')} type="button">
@@ -4855,6 +5197,7 @@ function SuperAdminApp({
                 <div>
                   <strong>{selectedMandal.name}</strong>
                   <span>{selectedMandal.address || selectedMandal.locality || 'Address not added'}</span>
+                  <span>Registered by {selectedMandal.partner?.name ?? 'No partner selected'}</span>
                 </div>
               </div>
               <div className="detail-tabs">
@@ -4880,6 +5223,7 @@ function SuperAdminApp({
                     <label>State<input defaultValue={selectedMandal.state ?? 'Maharashtra'} name="state" /></label>
                     <label>Plan<select defaultValue={selectedMandal.plan ?? 'starter'} name="plan"><option value="starter">Starter</option><option value="standard">Standard</option><option value="premium">Premium</option></select></label>
                     <label>Slip Generation Limit<input defaultValue={selectedMandal.slipLimit ?? ''} inputMode="numeric" min={1} name="slipLimit" placeholder="Unlimited when blank" type="number" /></label>
+                    <label>Registered By<select defaultValue={selectedMandal.partnerId ?? ''} name="partnerId"><option value="">No partner</option>{partners.map((partner) => <option key={partner.id} value={partner.id}>{partner.name}</option>)}</select></label>
                     <label>WhatsApp Delivery<select defaultValue={selectedMandal.whatsappMode ?? 'AUTO_API'} name="whatsappMode"><option value="AUTO_API">Automatic — Paid API</option><option value="MANUAL_SHARE">Manual — Open WhatsApp App</option></select></label>
                     <div className="full whatsapp-template-setting">
                       <label>
@@ -5001,6 +5345,28 @@ function SuperAdminApp({
         )}
       </section>
     </main>
+    {editingPartner && (
+      <div className="modal-backdrop">
+        <form className="vargani-modal owner-login-edit-modal" onSubmit={saveEditedPartner}>
+          <button className="modal-close" disabled={loginBusy} onClick={() => setEditingPartner(null)} type="button"><X size={20} /></button>
+          <div className="panel-title">
+            <UsersRound size={22} />
+            <div>
+              <strong>Edit Partner</strong>
+              <span>Update partner contact details used for mandal attribution.</span>
+            </div>
+          </div>
+          <label>Name<input defaultValue={editingPartner.name} name="name" required /></label>
+          <label>Email<input defaultValue={editingPartner.email ?? ''} name="email" placeholder="partner@example.com" type="email" /></label>
+          <label>Mobile<input defaultValue={editingPartner.phone ?? ''} inputMode="tel" name="phone" placeholder="10-digit mobile number" /></label>
+          <label>Address<input defaultValue={editingPartner.address ?? ''} name="address" /></label>
+          <div className="modal-actions">
+            <button disabled={loginBusy} onClick={() => setEditingPartner(null)} type="button">Cancel</button>
+            <button className="primary" disabled={loginBusy} type="submit">{loginBusy ? 'Saving...' : 'Save Partner'}</button>
+          </div>
+        </form>
+      </div>
+    )}
     {editingLogin && (
       <div className="modal-backdrop">
         <form className="vargani-modal owner-login-edit-modal" onSubmit={saveEditedLogin}>
@@ -5032,7 +5398,7 @@ function SuperAdminApp({
         </form>
       </div>
     )}
-    {loginBusy && <ActionLoaderOverlay message={editingLogin ? 'Updating login...' : 'Creating login...'} />}
+    {loginBusy && <ActionLoaderOverlay message={editingPartner ? 'Updating partner...' : editingLogin ? 'Updating login...' : 'Creating login...'} />}
     </>
   );
 }
@@ -5062,6 +5428,7 @@ function MandalCardGrid({
             <span>{Number(mandal.memberCount || 0)} members</span>
             <span>{mandal.contactPhone || 'Phone pending'}</span>
             <span>{mandal.slipLimit ? `${mandal.slipLimit} slip limit` : 'Unlimited slips'}</span>
+            <span>Registered by {mandal.partner?.name ?? 'No partner'}</span>
             <span>{mandal.whatsappMode === 'MANUAL_SHARE' ? 'Manual WhatsApp' : 'Paid WhatsApp API'}</span>
             <span>{mandal.whatsappTemplateName ? `WhatsApp: ${mandal.whatsappTemplateName}` : 'Default WhatsApp template'}</span>
             <em>Template Ready</em>
@@ -7803,6 +8170,8 @@ function mapBackendMandal(
     memberCount: String(mandal._count?.members ?? mandal.memberCount ?? 0),
     name: mandal.name,
     nameMr: mandal.nameMr ?? '',
+    partner: mandal.partner ?? null,
+    partnerId: mandal.partnerId ?? mandal.partner?.id ?? null,
     plan: mandal.plan ?? 'starter',
     slug: mandal.slug,
     slipLimit: mandal.slipLimit ?? null,

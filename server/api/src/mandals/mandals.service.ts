@@ -70,6 +70,10 @@ export class MandalsService {
       throw new ConflictException('Mandal slug already exists.');
     }
 
+    if (dto.partnerId) {
+      await this.ensureActivePartner(dto.partnerId);
+    }
+
     const adminUniqueChecks = [
       { email: dto.admin.email.toLowerCase() },
       dto.admin.phone ? { phone: dto.admin.phone } : null,
@@ -114,6 +118,7 @@ export class MandalsService {
           locality: dto.locality,
           name: dto.name,
           nameMr: dto.nameMr?.trim() || null,
+          partnerId: dto.partnerId || null,
           plan: dto.plan ?? 'starter',
           slipLimit: dto.slipLimit,
           slug,
@@ -121,6 +126,7 @@ export class MandalsService {
           status: AccountStatus.ACTIVE,
           whatsappMode: dto.whatsappMode ?? 'AUTO_API',
         },
+        include: { partner: true },
       });
 
       const admin = await tx.user.create({
@@ -194,6 +200,7 @@ export class MandalsService {
     const skip = (query.page - 1) * query.limit;
     const [items, total] = await this.prisma.$transaction([
       this.prisma.mandal.findMany({
+        include: { partner: true },
         orderBy: { createdAt: 'desc' },
         skip,
         take: query.limit,
@@ -231,6 +238,7 @@ export class MandalsService {
             status: AccountStatus.ACTIVE,
           },
         },
+        partner: true,
         _count: {
           select: {
             festivals: true,
@@ -370,6 +378,9 @@ export class MandalsService {
 
   async updateMandal(id: string, dto: UpdateMandalDto) {
     const before = await this.ensureMandalExists(id);
+    if (dto.partnerId) {
+      await this.ensureActivePartner(dto.partnerId);
+    }
     const logoAsset = dto.logoDataUrl
       ? await this.storageService.uploadDataUrl({
           dataUrl: dto.logoDataUrl,
@@ -430,12 +441,14 @@ export class MandalsService {
         logoUrl: logoAsset?.url,
         name: dto.name,
         nameMr: dto.nameMr,
+        partnerId: dto.partnerId,
         plan: dto.plan,
         slipLimit: dto.slipLimit,
         state: dto.state,
         whatsappMode: dto.whatsappMode,
         ...whatsappTemplateUpdate,
       },
+      include: { partner: true },
       where: { id },
     });
 
@@ -451,6 +464,14 @@ export class MandalsService {
     });
 
     return updated;
+  }
+
+  private async ensureActivePartner(id: string) {
+    const partner = await this.prisma.partner.findFirst({
+      where: { id, status: AccountStatus.ACTIVE },
+    });
+    if (!partner) throw new BadRequestException('Selected partner was not found.');
+    return partner;
   }
 
   async deleteMandal(id: string) {

@@ -4443,6 +4443,192 @@ button.pending-action {
   }
 }
 
+/* Owner partner attribution page. */
+.owner-shell .partner-page-grid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(360px, 0.9fr) minmax(460px, 1.1fr);
+}
+
+.owner-shell .partner-list {
+  display: grid;
+  gap: 12px;
+}
+
+.owner-shell .partner-card,
+.owner-shell .partner-detail-card,
+.owner-shell .partner-mandal-card {
+  background: #fffdf8;
+  border: 1px solid var(--owner-line);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(54, 36, 27, 0.045);
+}
+
+.owner-shell .partner-card {
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+}
+
+.owner-shell .partner-card.active {
+  border-color: #fb923c;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12), 0 10px 26px rgba(54, 36, 27, 0.06);
+}
+
+.owner-shell .partner-card-main {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.owner-shell .partner-card-main strong,
+.owner-shell .partner-detail-head strong,
+.owner-shell .partner-mandal-card strong {
+  color: var(--ink);
+  display: block;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.owner-shell .partner-card-main small,
+.owner-shell .partner-detail-head span,
+.owner-shell .partner-mandal-card small {
+  color: var(--owner-muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.35;
+  margin-top: 3px;
+}
+
+.owner-shell .partner-card-main em,
+.owner-shell .partner-mandal-card em {
+  background: #fff1e8;
+  border-radius: 999px;
+  color: var(--owner-accent);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+.owner-shell .partner-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.owner-shell .partner-card-meta span {
+  background: #f6f4eb;
+  border-radius: 999px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 7px 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.owner-shell .partner-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.owner-shell .partner-card-actions button,
+.owner-shell .partner-mandal-card button {
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 38px;
+  padding-inline: 12px;
+}
+
+.owner-shell .partner-card-actions .danger {
+  background: #fff5f0;
+  border-color: #ffc8ad;
+  color: var(--orange-dark);
+}
+
+.owner-shell .partner-detail-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.owner-shell .partner-detail-head {
+  align-items: center;
+  border-bottom: 1px solid var(--owner-line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding-bottom: 16px;
+}
+
+.owner-shell .partner-contact-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.owner-shell .partner-contact-grid .status-line {
+  background: #faf7f0;
+  border: 1px solid var(--owner-line);
+  border-radius: 12px;
+  padding: 11px 12px;
+}
+
+.owner-shell .partner-contact-grid .status-line strong {
+  max-width: min(100%, 360px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.owner-shell .partner-mandal-list {
+  display: grid;
+  gap: 10px;
+}
+
+.owner-shell .partner-mandal-card {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) minmax(110px, auto) auto auto;
+  padding: 12px;
+}
+
+.owner-shell .partner-mandal-card > span {
+  color: var(--owner-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 1180px) {
+  .owner-shell .partner-page-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .owner-shell .partner-card-main,
+  .owner-shell .partner-mandal-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .owner-shell .partner-card-main em,
+  .owner-shell .partner-mandal-card > span,
+  .owner-shell .partner-mandal-card em,
+  .owner-shell .partner-mandal-card button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
 /* Professional loading feedback for authentication and workspace bootstrap. */
 .workspace-starting-toast {
   align-items: center;

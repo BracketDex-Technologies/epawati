@@ -89,6 +89,7 @@ enum TaskPriority {
 
 model Mandal {
   id                            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partnerId                     String?       @map("partner_id") @db.Uuid
   name                          String
   nameMr                        String?       @map("name_mr")
   slug                          String        @unique
@@ -121,8 +122,28 @@ model Mandal {
   tasks        FestivalTask[]
   auditEvents  AuditEvent[]
   jobs         BackgroundJob[]
+  partner      Partner?        @relation("MandalPartner", fields: [partnerId], references: [id], onDelete: SetNull)
 
+  @@index([partnerId])
   @@map("mandals")
+}
+
+model Partner {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  status    AccountStatus @default(ACTIVE)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mandals Mandal[] @relation("MandalPartner")
+
+  @@unique([email])
+  @@unique([phone])
+  @@index([status, createdAt])
+  @@map("partners")
 }
 
 model User {

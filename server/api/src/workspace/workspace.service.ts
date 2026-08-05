@@ -123,9 +123,10 @@ export class WorkspaceService {
       ],
     };
 
-    const [mandalRows, totalMandals, totalMembers, totalSlips, user] = await this.prisma.$transaction([
+    const [mandalRows, partners, totalMandals, totalMembers, totalSlips, user] = await this.prisma.$transaction([
       this.prisma.mandal.findMany({
         include: {
+          partner: true,
           _count: {
             select: {
               members: { where: { status: AccountStatus.ACTIVE, user: { status: AccountStatus.ACTIVE } } },
@@ -176,6 +177,31 @@ export class WorkspaceService {
         take: 24,
         where: { status: AccountStatus.ACTIVE },
       }),
+      this.prisma.partner.findMany({
+        include: {
+          _count: {
+            select: {
+              mandals: { where: { status: AccountStatus.ACTIVE } },
+            },
+          },
+          mandals: {
+            orderBy: { createdAt: 'desc' },
+            select: {
+              city: true,
+              contactPhone: true,
+              id: true,
+              locality: true,
+              name: true,
+              plan: true,
+              slug: true,
+              status: true,
+            },
+            where: { status: AccountStatus.ACTIVE },
+          },
+        },
+        orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
+        where: { status: AccountStatus.ACTIVE },
+      }),
       this.prisma.mandal.count({ where: { status: AccountStatus.ACTIVE } }),
       this.prisma.member.count({ where: { status: AccountStatus.ACTIVE, user: { status: AccountStatus.ACTIVE } } }),
       this.prisma.varganiSlip.count({ where: { mandal: { status: AccountStatus.ACTIVE }, status: SlipStatus.ACTIVE } }),
@@ -194,6 +220,7 @@ export class WorkspaceService {
           totalPages: Math.ceil(totalMandals / 24),
         },
       },
+      partners,
       metrics: {
         totalMandals,
         totalMembers,

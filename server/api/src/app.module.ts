@@ -13,6 +13,7 @@ import { HealthModule } from './health/health.module';
 import { JobsModule } from './jobs/jobs.module';
 import { MandalsModule } from './mandals/mandals.module';
 import { MembersModule } from './members/members.module';
+import { PartnersModule } from './partners/partners.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReportsModule } from './reports/reports.module';
 import { RootController } from './root.controller';
@@ -41,6 +42,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     PrismaModule,
     AuthModule,
     MandalsModule,
+    PartnersModule,
     FestivalsModule,
     MembersModule,
     VarganiModule,

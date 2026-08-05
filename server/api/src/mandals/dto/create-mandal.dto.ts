@@ -8,6 +8,7 @@ import {
   IsPhoneNumber,
   IsString,
   IsUrl,
+  IsUUID,
   Matches,
   MaxLength,
   MinLength,
@@ -91,6 +92,11 @@ export class CreateMandalDto {
   @IsInt()
   @Min(1)
   slipLimit?: number;
+
+  @ApiPropertyOptional({ description: 'Partner who registered this mandal.' })
+  @IsOptional()
+  @IsUUID()
+  partnerId?: string;
 
   @ApiPropertyOptional({ enum: ['AUTO_API', 'MANUAL_SHARE'], example: 'AUTO_API' })
   @IsOptional()

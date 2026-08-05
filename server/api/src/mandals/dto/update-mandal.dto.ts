@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsInt, IsOptional, IsPhoneNumber, IsString, Matches, MaxLength, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsPhoneNumber, IsString, IsUUID, Matches, MaxLength, Min } from 'class-validator';
 
 export class UpdateMandalDto {
   @ApiPropertyOptional()
@@ -60,6 +60,11 @@ export class UpdateMandalDto {
   @IsInt()
   @Min(1)
   slipLimit?: number | null;
+
+  @ApiPropertyOptional({ description: 'Partner who registered this mandal.', nullable: true })
+  @IsOptional()
+  @IsUUID()
+  partnerId?: string | null;
 
   @ApiPropertyOptional({ enum: ['AUTO_API', 'MANUAL_SHARE'] })
   @IsOptional()

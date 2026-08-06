@@ -11467,6 +11467,29 @@ nav button.active svg,
   gap: 4px;
 }
 
+.society-data-head,
+.society-data-row {
+  grid-template-columns: minmax(220px, 1.35fr) minmax(260px, 1.5fr) 80px minmax(140px, 0.8fr) 130px;
+}
+
+.society-data-row {
+  align-items: start;
+}
+
+.society-data-row > span {
+  display: grid;
+  gap: 4px;
+}
+
+.society-data-row small {
+  color: #71695f;
+}
+
+.society-data-row .mini-link {
+  margin-top: 8px;
+  width: max-content;
+}
+
 @media (max-width: 720px) {
   .society-registration-page {
     align-items: stretch;

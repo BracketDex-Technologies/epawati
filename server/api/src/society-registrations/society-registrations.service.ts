@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { normalizeIndianMobile } from '../common/security/indian-phone';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSocietyRegistrationDto } from './dto/create-society-registration.dto';
+import { ListSocietyRegistrationsQueryDto } from './dto/list-society-registrations-query.dto';
 
 const MAX_TEMPLATE_BYTES = 6 * 1024 * 1024;
 const DATA_URL_PATTERN = /^data:([^;]+);base64,([a-zA-Z0-9+/=\r\n]+)$/u;
@@ -9,6 +10,44 @@ const DATA_URL_PATTERN = /^data:([^;]+);base64,([a-zA-Z0-9+/=\r\n]+)$/u;
 @Injectable()
 export class SocietyRegistrationsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async list(query: ListSocietyRegistrationsQueryDto) {
+    const skip = (query.page - 1) * query.limit;
+    const search = query.search?.trim();
+    const where = search
+      ? {
+          OR: [
+            { societyName: { contains: search, mode: 'insensitive' as const } },
+            { societyAddress: { contains: search, mode: 'insensitive' as const } },
+            { chairmanName: { contains: search, mode: 'insensitive' as const } },
+            { secretaryName: { contains: search, mode: 'insensitive' as const } },
+            { chairmanMobile: { contains: search } },
+            { secretaryMobile: { contains: search } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.societyRegistration.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: query.limit,
+        where,
+      }),
+      this.prisma.societyRegistration.count({ where }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        limit: query.limit,
+        page: query.page,
+        total,
+        totalPages: Math.ceil(total / query.limit),
+      },
+    };
+  }
 
   async create(dto: CreateSocietyRegistrationDto) {
     const template = this.validateTemplate(dto);

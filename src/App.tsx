@@ -66,7 +66,7 @@ type TextWrapMode = 'single' | 'wrap' | 'shrink';
 type TextDecoration = 'none' | 'underline' | 'line-through';
 type UserRole = 'MANDAL_ADMIN' | 'KHAJINDAR' | 'GROUP_LEADER' | 'MEMBER' | 'SUPER_ADMIN';
 type AdhyakshScreen = 'members' | 'tasks' | 'expenses' | 'template' | 'slips' | 'form' | 'users' | 'logs';
-type OwnerScreen = 'dashboard' | 'mandals' | 'partners';
+type OwnerScreen = 'dashboard' | 'mandals' | 'partners' | 'society-registrations';
 type OwnerMandalTab = 'overview' | 'template';
 type Language = 'en' | 'mr' | 'hi';
 type ExpenseStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
@@ -529,6 +529,28 @@ interface MandalWorkspaceBootstrap {
   tasks?: FestivalTask[];
   templates: Template[];
   user?: WorkspaceUser | null;
+}
+
+interface SocietyRegistrationRecord {
+  chairmanMobile: string;
+  chairmanName?: string | null;
+  createdAt: string;
+  email?: string | null;
+  id: string;
+  numberOfFlats: number;
+  secretaryMobile?: string | null;
+  secretaryName?: string | null;
+  societyAddress: string;
+  societyName: string;
+  templateAvailable: boolean;
+  templateDataUrl?: string | null;
+  templateFileName?: string | null;
+  templateMimeType?: string | null;
+}
+
+interface SocietyRegistrationList {
+  items: SocietyRegistrationRecord[];
+  meta: { limit: number; page: number; total: number; totalPages: number };
 }
 
 type WorkspaceBootstrap = OwnerWorkspaceBootstrap | MandalWorkspaceBootstrap;
@@ -2837,7 +2859,7 @@ function parseOwnerRoute(hash = typeof window === 'undefined' ? '' : window.loca
     };
   }
 
-  const [, screen, mandalId, tab] = route.match(/^owner\/(dashboard|mandals|partners)(?:\/([^/]+))?(?:\/(overview|template))?$/) ?? [];
+  const [, screen, mandalId, tab] = route.match(/^owner\/(dashboard|mandals|partners|society-registrations)(?:\/([^/]+))?(?:\/(overview|template))?$/) ?? [];
   if (!screen) return null;
   return {
     isNew: false,
@@ -2866,6 +2888,7 @@ function routeForAdhyaksh(screen: AdhyakshScreen) {
 function routeForOwner(screen: OwnerScreen, mandalId?: string | null, tab: OwnerMandalTab = 'overview') {
   if (screen === 'dashboard') return '#/owner/dashboard';
   if (screen === 'partners') return '#/owner/partners';
+  if (screen === 'society-registrations') return '#/owner/society-registrations';
   if (mandalId) return `#/owner/mandals/${encodeURIComponent(mandalId)}/${tab}`;
   return '#/owner/mandals';
 }
@@ -4623,6 +4646,12 @@ function SuperAdminApp({
   const deferredOwnerQuery = useDeferredValue(ownerQuery);
   const [partnerQuery, setPartnerQuery] = useState('');
   const deferredPartnerQuery = useDeferredValue(partnerQuery);
+  const [societyQuery, setSocietyQuery] = useState('');
+  const deferredSocietyQuery = useDeferredValue(societyQuery);
+  const [societyRegistrations, setSocietyRegistrations] = useState<SocietyRegistrationRecord[]>([]);
+  const [societyRegistrationMeta, setSocietyRegistrationMeta] = useState({ limit: 100, page: 1, total: 0, totalPages: 0 });
+  const [societyRegistrationsLoading, setSocietyRegistrationsLoading] = useState(false);
+  const [societyRegistrationsError, setSocietyRegistrationsError] = useState('');
   const [selectedPartnerId, setSelectedPartnerId] = useState('');
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [loginBusy, setLoginBusy] = useState(false);
@@ -4726,8 +4755,8 @@ function SuperAdminApp({
         {},
         session,
       );
-      setAuthkeyTemplates(catalog.items);
-      setAuthkeyDefaultTemplateWid(catalog.defaultWid);
+      setAuthkeyTemplates(Array.isArray(catalog.items) ? catalog.items : []);
+      setAuthkeyDefaultTemplateWid(catalog.defaultWid ?? null);
     } catch (error) {
       setAuthkeyTemplatesError(error instanceof Error ? error.message : 'Could not load Authkey templates.');
     } finally {
@@ -4738,6 +4767,32 @@ function SuperAdminApp({
   useEffect(() => {
     void loadAuthkeyTemplates(false);
   }, [loadAuthkeyTemplates]);
+
+  const loadSocietyRegistrations = useCallback(async () => {
+    if (ownerScreen !== 'society-registrations') return;
+    setSocietyRegistrationsLoading(true);
+    setSocietyRegistrationsError('');
+    try {
+      const params = new URLSearchParams({ limit: '100', page: '1' });
+      const search = deferredSocietyQuery.trim();
+      if (search) params.set('search', search);
+      const result = await apiRequest<SocietyRegistrationList>(
+        `/society-registrations?${params.toString()}`,
+        {},
+        session,
+      );
+      setSocietyRegistrations(result.items);
+      setSocietyRegistrationMeta(result.meta);
+    } catch (error) {
+      setSocietyRegistrationsError(error instanceof Error ? error.message : 'Could not load society registrations.');
+    } finally {
+      setSocietyRegistrationsLoading(false);
+    }
+  }, [deferredSocietyQuery, ownerScreen, session]);
+
+  useEffect(() => {
+    void loadSocietyRegistrations();
+  }, [loadSocietyRegistrations]);
 
   useEffect(() => {
     setWhatsappTemplateWid(selectedMandal?.whatsappTemplateWid ?? '');
@@ -4793,6 +4848,7 @@ function SuperAdminApp({
     setManagedIndex(null);
     setAddMandalOpen(false);
     setAddPartnerOpen(false);
+    if (screen === 'society-registrations') void loadSocietyRegistrations();
     writeRoute(routeForOwner(screen));
     setSidebarOpen(false);
   }
@@ -5092,6 +5148,9 @@ function SuperAdminApp({
           <button className={ownerScreen === 'partners' ? 'active' : ''} onClick={() => openOwnerScreen('partners')} type="button">
             <UsersRound size={19} />Partners
           </button>
+          <button className={ownerScreen === 'society-registrations' ? 'active' : ''} onClick={() => openOwnerScreen('society-registrations')} type="button">
+            <ClipboardList size={19} />Society Data
+          </button>
         </nav>
         <div className="sidebar-footer">
           <div className="user-chip">
@@ -5109,16 +5168,18 @@ function SuperAdminApp({
         <AdminTopbar language={language} onLanguageChange={onLanguageChange} session={session} />
         <header className="page-header">
           <div>
-            <h1>{ownerScreen === 'dashboard' ? t(language, 'Dashboard') : ownerScreen === 'partners' ? 'Partners' : t(language, 'Mandals')}</h1>
+            <h1>{ownerScreen === 'dashboard' ? t(language, 'Dashboard') : ownerScreen === 'partners' ? 'Partners' : ownerScreen === 'society-registrations' ? 'Society Data' : t(language, 'Mandals')}</h1>
             <p>{ownerScreen === 'dashboard'
               ? 'Track all onboarded mandals and software operations.'
               : ownerScreen === 'partners'
                 ? 'Track who brought each mandal into ePawati.'
-                : t(language, 'Add mandals and manage each client account.')}</p>
+                : ownerScreen === 'society-registrations'
+                  ? 'View public society registration submissions.'
+                  : t(language, 'Add mandals and manage each client account.')}</p>
           </div>
           <div className="header-actions">
             {ownerScreen === 'partners' && <button onClick={openAddPartner} type="button"><Plus size={18} />Add Partner</button>}
-            <button onClick={openAddMandal} type="button"><Plus size={18} />{t(language, 'Add Mandal')}</button>
+            {ownerScreen !== 'society-registrations' && <button onClick={openAddMandal} type="button"><Plus size={18} />{t(language, 'Add Mandal')}</button>}
           </div>
         </header>
         <div className="notice">{notice}</div>
@@ -5317,6 +5378,55 @@ function SuperAdminApp({
                   </>
                 )}
               </div>
+            </section>
+          </>
+        )}
+
+        {ownerScreen === 'society-registrations' && (
+          <>
+            <section className="stats-grid compact owner-stat-grid">
+              <Stat icon={<ClipboardList />} label="Submissions" note="Public form entries" value={String(societyRegistrationMeta.total)} />
+              <Stat icon={<Building2 />} label="Loaded" note="Visible on this page" value={String(societyRegistrations.length)} />
+              <Stat icon={<FileText />} label="With Template" note="Uploaded template available" value={String(societyRegistrations.filter((item) => item.templateAvailable).length)} />
+            </section>
+            <section className="owner-list-head">
+              <div>
+                <h2>Society Registration Data</h2>
+                <p>All submissions from the public society registration link.</p>
+              </div>
+              <button onClick={() => void loadSocietyRegistrations()} type="button"><RefreshCw size={18} />Refresh</button>
+            </section>
+            <section className="owner-toolbar">
+              <div className="search-input">
+                <Search size={20} />
+                <input onChange={(event) => setSocietyQuery(event.target.value)} placeholder="Search society, address, mobile, email..." value={societyQuery} />
+              </div>
+              <span>{societyRegistrationsLoading ? 'Loading...' : `${societyRegistrations.length} of ${societyRegistrationMeta.total} submissions`}</span>
+            </section>
+            {societyRegistrationsError && <div className="notice">{societyRegistrationsError}</div>}
+            <section className="ops-table society-data-table">
+              <div className="ops-head society-data-head">
+                <span>Society</span><span>Contacts</span><span>Flats</span><span>Template</span><span>Submitted</span>
+              </div>
+              {societyRegistrations.map((item) => (
+                <article className="ops-row society-data-row" key={item.id}>
+                  <span><b>{item.societyName}</b><small>{item.societyAddress}</small><small>ID: {shortAuditId(item.id)}</small></span>
+                  <span><b>{item.chairmanName || 'Chairman name pending'}</b><small>Chairman: {item.chairmanMobile}</small><small>Secretary: {item.secretaryName || '-'} {item.secretaryMobile || ''}</small><small>{item.email || 'Email not added'}</small></span>
+                  <strong>{item.numberOfFlats}</strong>
+                  <span>
+                    <i className={`pill ${item.templateAvailable ? 'paid' : 'pending'}`}>{item.templateAvailable ? 'Available' : 'Not available'}</i>
+                    {item.templateDataUrl && (
+                      <a className="mini-link" download={item.templateFileName || 'society-template'} href={item.templateDataUrl}>
+                        <Download size={15} />Template
+                      </a>
+                    )}
+                  </span>
+                  <span><b>{new Date(item.createdAt).toLocaleDateString('en-IN')}</b><small>{new Date(item.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</small></span>
+                </article>
+              ))}
+              {!societyRegistrationsLoading && societyRegistrations.length === 0 && (
+                <EmptyTableState message="No society registration submissions yet." />
+              )}
             </section>
           </>
         )}

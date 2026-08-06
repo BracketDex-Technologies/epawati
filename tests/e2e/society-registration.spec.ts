@@ -40,6 +40,71 @@ test('public society registration form stores society data', async ({ page }) =>
   });
 });
 
+test('super admin society data link shows submitted registrations', async ({ page }) => {
+  const ownerSession = {
+    accessToken: 'owner-access-token',
+    user: {
+      id: '11111111-1111-4111-8111-111111111111',
+      mandalId: null,
+      name: 'Owner Admin',
+      role: 'SUPER_ADMIN',
+    },
+  };
+
+  await page.route('**/api/v1/**', async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const path = url.pathname.replace(/^\/api\/v1/, '');
+
+    if (path === '/auth/login' || path === '/auth/refresh') return json(route, ownerSession);
+    if (path === '/workspace/bootstrap') {
+      return json(route, {
+        generatedAt: new Date().toISOString(),
+        kind: 'OWNER',
+        mandals: { items: [], meta: { limit: 25, page: 1, total: 0, totalPages: 0 } },
+        metrics: { totalMandals: 0, totalMembers: 0, totalSlips: 0 },
+        partners: [],
+        user: ownerSession.user,
+      });
+    }
+    if (path === '/mandals/whatsapp/templates') {
+      return json(route, { defaultWid: null, items: [] });
+    }
+    if (path === '/society-registrations') {
+      return json(route, {
+        items: [{
+          chairmanMobile: '+919876543210',
+          chairmanName: 'Amit Patil',
+          createdAt: '2026-08-06T12:00:00.000Z',
+          email: 'society@example.com',
+          id: '99999999-9999-4999-8999-999999999999',
+          numberOfFlats: 72,
+          secretaryMobile: '+919876543211',
+          secretaryName: 'Neha Shah',
+          societyAddress: 'Main Road, Natubag, Pune',
+          societyName: 'Sai Residency CHS',
+          templateAvailable: false,
+        }],
+        meta: { limit: 100, page: 1, total: 1, totalPages: 1 },
+      });
+    }
+
+    return json(route, { ok: true });
+  });
+
+  await page.goto('/#/super-admin/login');
+  await page.getByLabel(/username/i).fill('owner@example.com');
+  await page.locator('input[name="password"]').fill('valid-password');
+  await page.getByRole('button', { name: /sign in/i }).click();
+  await page.goto('/#/owner/society-registrations');
+
+  await expect(page.getByRole('heading', { name: 'Society Data' })).toBeVisible();
+  await expect(page.getByText('Sai Residency CHS')).toBeVisible();
+  await expect(page.getByText('Amit Patil')).toBeVisible();
+  await expect(page.getByText('+919876543210')).toBeVisible();
+  await expect(page.getByText('72')).toBeVisible();
+});
+
 function json(route: Route, body: unknown) {
   return route.fulfill({
     body: JSON.stringify(body),

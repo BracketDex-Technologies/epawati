@@ -1048,6 +1048,10 @@ export class VarganiService {
       throw new BadRequestException('Cancelled slips cannot be updated.');
     }
 
+    if (dto.amount !== undefined && Number(dto.amount) !== Number(slip.amount) && ctx.role !== UserRole.MANDAL_ADMIN) {
+      throw new ForbiddenException('Only Adhyaksh can edit slip amount.');
+    }
+
     return this.prisma.$transaction(async (tx) => {
       const updated = await tx.varganiSlip.update({
         data: {

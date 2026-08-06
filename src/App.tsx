@@ -2543,6 +2543,10 @@ export default function App() {
 
   async function updateSlip(slip: Slip) {
     if (!session) return;
+    if (!canAdhyakshEditSlipAmount(session.user.role)) {
+      setNotice('Only Adhyaksh can edit Vargani slip amount.');
+      return;
+    }
     const amount = await askPrompt({
       defaultValue: String(slip.amount),
       placeholder: 'Enter slip amount',
@@ -2639,7 +2643,7 @@ export default function App() {
         entityType: 'vargani_slip',
         id: `local-delete-${slip.id}-${Date.now()}`,
         mandalId,
-      }, ...current].slice(0, 25));
+      }, ...current].slice(0, 100));
       setNotice(`${slip.slipNumber} permanently deleted.`);
       scheduleWorkspaceSync(session);
     } catch (error) {
@@ -3246,6 +3250,7 @@ function AdhyakshApp({
       role: member.user?.role.replaceAll('_', ' ') ?? 'MEMBER',
     })),
   ], [entriesByPhone, members, session.user.name, session.user.role, slipRows.length]);
+  const canEditSlipAmount = canAdhyakshEditSlipAmount(session.user.role);
 
   function showToast(message: string) {
     setLocalNotice(message);
@@ -3707,7 +3712,7 @@ function AdhyakshApp({
                   <span><i className={isSlipPaid(slip) ? 'pill paid' : 'pill pending'}>{isSlipPaid(slip) ? 'Paid' : 'Pending'}</i><i className="pill mode">{slip.paymentMode}</i></span>
                   <span>{new Date(slip.createdAt).toLocaleDateString('en-IN')}<small>Created by {slip.collector?.name || 'Unknown user'}</small></span>
                   <span className="row-actions">
-                    <button onClick={() => { setSelectedSlip(slip); void onEditSlip(slip); }} type="button"><Edit3 size={16} />Edit</button>
+                    <button disabled={!canEditSlipAmount} onClick={() => { setSelectedSlip(slip); void onEditSlip(slip); }} title={canEditSlipAmount ? 'Edit slip amount' : 'Only Adhyaksh can edit slip amount'} type="button"><Edit3 size={16} />Edit</button>
                     <button className="mini-link" onClick={() => { setSelectedSlip(slip); void onDownloadSlip(slip); }} type="button"><Download size={16} />Slip</button>
                     <button className="whatsapp-action" onClick={() => { setSelectedSlip(slip); void onShareSlip(slip); }} type="button"><WhatsAppIcon />WhatsApp</button>
                     <button aria-label={`Delete ${slip.slipNumber}`} onClick={() => void onDeleteSlip(slip)} title="Delete slip" type="button"><Trash2 size={16} /></button>
@@ -3769,17 +3774,23 @@ function AdhyakshApp({
               <div><h2>Activity History</h2><span>Real-time logs for receipts, payments, and users.</span></div>
               <span className="real-time"><History size={18} />Real-time Logs</span>
             </div>
-            <div className="ops-table logs-table">
+            <div className="ops-table logs-table detailed-logs-table">
               <div className="ops-head"><span>Time & Date</span><span>User</span><span>Action</span><span>Details</span></div>
               {auditEvents.length === 0 && <EmptyTableState message="No activity yet." />}
-              {auditEvents.slice(0, 25).map((event) => {
+              {auditEvents.map((event) => {
                 const createdAt = formatLogTimestamp(event.createdAt);
+                const changes = auditChangeLines(event);
+                const metadata = auditMetadataLines(event);
                 return (
-                <div className="ops-row" key={event.id}>
+                <div className="ops-row audit-log-row" key={event.id}>
                   <span><b>{createdAt.date}</b><small>{createdAt.time}</small></span>
-                  <i className="pill role">{event.actor?.name || session.user.name}</i>
-                  <strong>{auditActionLabel(event)}</strong>
-                  <span>{auditEventDetails(event)}</span>
+                  <span className="audit-actor"><b>{event.actor?.name || session.user.name}</b><small>{event.actor?.role?.replaceAll('_', ' ') || session.user.role.replaceAll('_', ' ')}</small><small>ID: {shortAuditId(event.actorUserId || event.actor?.id)}</small></span>
+                  <span className="audit-action"><strong>{auditActionLabel(event)}</strong><small>{event.entityType.replaceAll('_', ' ')} / {shortAuditId(event.entityId)}</small></span>
+                  <span className="audit-details">
+                    <b>{auditEventDetails(event)}</b>
+                    {changes.length > 0 && <span className="audit-change-list">{changes.map((line) => <small key={line}>{line}</small>)}</span>}
+                    {metadata.length > 0 && <span className="audit-metadata">{metadata.map((line) => <small key={line}>{line}</small>)}</span>}
+                  </span>
                 </div>
               );
               })}
@@ -8324,7 +8335,10 @@ function formatLogTimestamp(value: string) {
 
 function auditActionLabel(event: AuditEvent) {
   const entity = event.entityType.replaceAll('_', ' ').toUpperCase();
-  const action = event.action.replaceAll('_', ' ').toUpperCase();
+  const normalizedAction = event.entityType === 'vargani_slip' && event.action.startsWith('slip_')
+    ? event.action.replace(/^slip_/, '')
+    : event.action;
+  const action = normalizedAction.replaceAll('_', ' ').toUpperCase();
   return `${entity} ${action}`;
 }
 
@@ -8342,6 +8356,58 @@ function auditEventDetails(event: AuditEvent) {
   }
 
   return `${event.entityType.replaceAll('_', ' ')} ${event.action.replaceAll('_', ' ')}`;
+}
+
+function auditChangeLines(event: AuditEvent) {
+  if (!event.before || !event.after) return [];
+  const keys = new Set([...Object.keys(event.before), ...Object.keys(event.after)]);
+  return Array.from(keys)
+    .filter((key) => !['id', 'mandalId', 'festivalId', 'createdAt', 'updatedAt', 'renderStatus'].includes(key))
+    .filter((key) => auditComparableValue(event.before?.[key]) !== auditComparableValue(event.after?.[key]))
+    .slice(0, 8)
+    .map((key) => `${formatAuditKey(key)}: ${formatAuditValue(event.before?.[key])} -> ${formatAuditValue(event.after?.[key])}`);
+}
+
+function auditMetadataLines(event: AuditEvent) {
+  if (!event.metadata) return [];
+  return Object.entries(event.metadata)
+    .filter(([, value]) => value !== null && value !== undefined && value !== '')
+    .slice(0, 6)
+    .map(([key, value]) => `${formatAuditKey(key)}: ${formatAuditValue(value)}`);
+}
+
+function auditComparableValue(value: unknown) {
+  if (value instanceof Date) return value.toISOString();
+  if (value && typeof value === 'object') return JSON.stringify(value);
+  return String(value ?? '');
+}
+
+function formatAuditKey(value: string) {
+  return value
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function formatAuditValue(value: unknown) {
+  if (value === null || value === undefined || value === '') return 'blank';
+  if (typeof value === 'number') return value.toLocaleString('en-IN');
+  if (typeof value === 'boolean') return value ? 'yes' : 'no';
+  if (typeof value === 'object') {
+    const text = JSON.stringify(value);
+    return text.length > 90 ? `${text.slice(0, 87)}...` : text;
+  }
+  const text = String(value);
+  return text.length > 90 ? `${text.slice(0, 87)}...` : text;
+}
+
+function shortAuditId(value?: string | null) {
+  if (!value) return '-';
+  return value.length > 12 ? `${value.slice(0, 8)}...${value.slice(-4)}` : value;
+}
+
+function canAdhyakshEditSlipAmount(role: UserRole) {
+  return role === 'MANDAL_ADMIN';
 }
 
 function readAuditText(value: Record<string, unknown>, key: string) {

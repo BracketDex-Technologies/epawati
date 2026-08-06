@@ -123,3 +123,76 @@ describe('VarganiService receipt auto-share', () => {
     }));
   });
 });
+
+describe('VarganiService updateSlip', () => {
+  it('blocks non-Adhyaksh users from changing a slip amount', async () => {
+    const slip = {
+      amount: 500,
+      collectedByUserId: '11111111-1111-1111-1111-111111111111',
+      id: '33333333-3333-3333-3333-333333333333',
+      mandalId: '22222222-2222-2222-2222-222222222222',
+      status: SlipStatus.ACTIVE,
+    };
+    const prisma = {
+      $transaction: jest.fn(),
+      varganiSlip: { findFirst: jest.fn().mockResolvedValue(slip) },
+    } as unknown as PrismaService;
+    const service = new VarganiService(
+      prisma,
+      {} as ConfigService<AppConfig, true>,
+      {} as WhatsAppReceiptService,
+      {} as StorageService,
+      {} as JobsService,
+    );
+
+    await expect(service.updateSlip({
+      mandalId: slip.mandalId,
+      role: UserRole.KHAJINDAR,
+      userId: slip.collectedByUserId,
+    }, slip.id, { amount: 700 })).rejects.toThrow('Only Adhyaksh can edit slip amount.');
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('allows Adhyaksh to change a slip amount and records the audit event', async () => {
+    const slip = {
+      amount: 500,
+      collectedByUserId: '11111111-1111-1111-1111-111111111111',
+      id: '33333333-3333-3333-3333-333333333333',
+      mandalId: '22222222-2222-2222-2222-222222222222',
+      status: SlipStatus.ACTIVE,
+    };
+    const updated = { ...slip, amount: 700 };
+    const transactionClient = {
+      auditEvent: { create: jest.fn().mockResolvedValue({ id: 'audit-id' }) },
+      varganiSlip: { update: jest.fn().mockResolvedValue(updated) },
+    };
+    const prisma = {
+      $transaction: jest.fn(async (operation: (client: typeof transactionClient) => Promise<unknown>) => operation(transactionClient)),
+      varganiSlip: { findFirst: jest.fn().mockResolvedValue(slip) },
+    } as unknown as PrismaService;
+    const service = new VarganiService(
+      prisma,
+      {} as ConfigService<AppConfig, true>,
+      {} as WhatsAppReceiptService,
+      {} as StorageService,
+      {} as JobsService,
+    );
+
+    await expect(service.updateSlip({
+      mandalId: slip.mandalId,
+      role: UserRole.MANDAL_ADMIN,
+      userId: slip.collectedByUserId,
+    }, slip.id, { amount: 700 })).resolves.toEqual(updated);
+    expect(transactionClient.varganiSlip.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ amount: 700 }),
+      where: { id: slip.id },
+    }));
+    expect(transactionClient.auditEvent.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        action: 'slip_updated',
+        before: slip,
+        after: updated,
+      }),
+    }));
+  });
+});

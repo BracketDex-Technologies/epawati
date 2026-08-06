@@ -414,8 +414,11 @@ export class WorkspaceService {
         where: { mandalId, status: AccountStatus.ACTIVE },
       }),
       isCollectorWorkspace ? Promise.resolve([]) : this.prisma.auditEvent.findMany({
+        include: {
+          actor: { select: { id: true, name: true, role: true } },
+        },
         orderBy: { createdAt: 'desc' },
-        take: 25,
+        take: 100,
         where: { mandalId },
       }),
       this.getUser(ctx.userId),

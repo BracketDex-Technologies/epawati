@@ -11299,6 +11299,46 @@ nav button.active svg,
   font-size: 14px;
 }
 
+.adhyaksh-shell .detailed-logs-table .ops-row {
+  align-items: start;
+}
+
+.adhyaksh-shell .audit-log-row {
+  grid-template-columns: 150px 190px 220px minmax(280px, 1fr);
+}
+
+.adhyaksh-shell .audit-actor,
+.adhyaksh-shell .audit-action,
+.adhyaksh-shell .audit-details {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.adhyaksh-shell .audit-actor small,
+.adhyaksh-shell .audit-action small,
+.adhyaksh-shell .audit-details small {
+  color: #6f685f;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.adhyaksh-shell .audit-change-list,
+.adhyaksh-shell .audit-metadata {
+  background: #fbfaf8;
+  border: 1px solid #eee2d8;
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  margin-top: 5px;
+  padding: 8px 10px;
+}
+
+.adhyaksh-shell .audit-metadata {
+  background: #f7fbf8;
+  border-color: #dcefe2;
+}
+
 @media (min-width: 1181px) {
   .member-shell.adhyaksh-shell {
     grid-template-columns: 248px minmax(0, 1fr);

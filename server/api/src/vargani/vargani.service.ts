@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -134,6 +135,8 @@ type SlipWithTemplate = Awaited<ReturnType<VarganiService['getSlip']>> & {
 
 @Injectable()
 export class VarganiService {
+  private readonly logger = new Logger(VarganiService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService<AppConfig, true>,
@@ -459,7 +462,7 @@ export class VarganiService {
     });
 
     const share = autoShare && !slip.receiptImageUrl && slip.mandal.whatsappMode !== 'MANUAL_SHARE'
-      ? await this.recordShare(ctx, slip.id, { channel: 'WHATSAPP', phone: slip.contributorPhone ?? undefined })
+      ? await this.recordAutoShareSafely(ctx, slip.id, slip)
       : undefined;
 
     return {
@@ -509,7 +512,7 @@ export class VarganiService {
       },
     });
     const share = autoShare && !slip.receiptImageUrl && slip.mandal.whatsappMode !== 'MANUAL_SHARE'
-      ? await this.recordShare(ctx, slip.id, { channel: 'WHATSAPP', phone: slip.contributorPhone ?? undefined })
+      ? await this.recordAutoShareSafely(ctx, slip.id, slip)
       : undefined;
     return {
       ok: true,
@@ -592,6 +595,32 @@ export class VarganiService {
       sharedAt: event.createdAt,
       whatsapp,
     };
+  }
+
+  private async recordAutoShareSafely(
+    ctx: AuthContext,
+    slipId: string,
+    slip: Awaited<ReturnType<VarganiService['getSlip']>>,
+  ) {
+    try {
+      return await this.recordShare(ctx, slipId, { channel: 'WHATSAPP', phone: slip.contributorPhone ?? undefined });
+    } catch (error) {
+      this.logger.warn(JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown auto-share error',
+        mandalId: slip.mandalId,
+        scope: 'vargani.auto_share',
+        slipId,
+        slipNumber: slip.slipNumber,
+      }));
+      return {
+        ok: true,
+        whatsapp: {
+          ok: false,
+          reason: 'auto_share_failed',
+          status: 'failed' as const,
+        },
+      };
+    }
   }
 
   async renderPublicReceiptHtmlByToken(token: string) {

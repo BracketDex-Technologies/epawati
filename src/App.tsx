@@ -502,6 +502,7 @@ interface OwnerWorkspaceBootstrap {
 
 interface MandalWorkspaceBootstrap {
   activeForm: ActiveForm | null;
+  expenses?: Expense[];
   generatedAt: string;
   groups: Group[];
   kind: 'MANDAL';
@@ -510,6 +511,7 @@ interface MandalWorkspaceBootstrap {
   metrics?: Record<string, number>;
   report: CollectionReport | null;
   slips: { items: Slip[]; meta: { limit: number; page: number; total: number; totalPages: number } };
+  tasks?: FestivalTask[];
   templates: Template[];
   user?: WorkspaceUser | null;
 }
@@ -1087,12 +1089,12 @@ export default function App() {
     setActiveForm(payload.activeForm);
     setGroups(activeGroups);
     setMembers(activeMembers);
-    setExpenses([]);
+    setExpenses(payload.expenses ?? []);
     setSlips(nextSlips);
     setSlipMeta(payload.slips.meta);
     setWorkspaceMetrics(payload.metrics ?? {});
     setSlipListFilters({});
-    setTasks([]);
+    setTasks(payload.tasks ?? []);
     setTemplates(payload.templates);
     setSelectedSlip(nextSlips[0] ?? null);
     const activeVersion = findActiveTemplateVersion(payload.templates);
@@ -1916,11 +1918,12 @@ export default function App() {
               setNotice(whatsappStatusMessage(slip, share?.whatsapp, 'generated'));
             }
           } catch (shareError) {
-            setNotice(
-              `Slip ${slip.slipNumber} generated, but WhatsApp could not be sent: ${
-                shareError instanceof Error ? shareError.message : 'receipt image upload failed'
-              }`,
-            );
+            const detail = shareError instanceof ApiError && shareError.status >= 500
+              ? 'server could not finish receipt sharing'
+              : shareError instanceof Error
+                ? shareError.message
+                : 'receipt sharing failed';
+            setNotice(`Slip ${slip.slipNumber} generated. Receipt sharing needs manual retry: ${detail}.`);
           } finally {
             scheduleWorkspaceSync(session, 1200);
           }

@@ -21,6 +21,7 @@ function run(command, args) {
         ...process.env,
         NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED || '1',
       },
+      shell: process.platform === 'win32',
       stdio: 'inherit',
     });
 
@@ -66,6 +67,7 @@ async function main() {
       ...process.env,
       NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED || '1',
     },
+    shell: process.platform === 'win32',
     stdio: 'inherit',
   });
 

@@ -4609,6 +4609,28 @@ button.pending-action {
   }
 }
 
+/* Final payment state colors: paid must read as clear green in every theme. */
+.payment-status-field .payment-status-grid .payment-card.paid.active {
+  background: #dcfce7 !important;
+  border-color: #16a34a !important;
+  color: #166534 !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16) !important;
+}
+
+.payment-status-field .payment-status-grid .payment-card.pending.active {
+  background: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  color: #92400e !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16) !important;
+}
+
+button.success,
+a.success {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
 /* EOF owner console: only white and brown shades, calmer professional type. */
 #root .owner-shell {
   --owner-accent: #5a3a2b !important;

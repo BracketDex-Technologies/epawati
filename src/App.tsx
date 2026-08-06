@@ -4556,9 +4556,10 @@ function AdminTopbar({
   onLanguageChange: (language: Language) => void;
   session: AuthSession;
 }) {
+  const isOwner = session.user.role === 'SUPER_ADMIN';
   return (
     <div className="app-topbar">
-      <strong>{t(language, 'Digital Vargani')}</strong>
+      <strong>{isOwner ? 'ePawati' : t(language, 'Digital Vargani')}</strong>
       <div className="top-search">
         <Search size={18} />
         <span>{t(language, 'Search')}</span>
@@ -5132,10 +5133,10 @@ function SuperAdminApp({
       {sidebarOpen && <button aria-label="Close menu" className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} type="button" />}
       <aside className="sidebar">
         <div className="brand">
-          <span>DV</span>
+          <span>eP</span>
           <div>
-            <strong>{t(language, 'Digital Vargani')}</strong>
-            <small>{t(language, 'Super Admin Console')}</small>
+            <strong>ePawati</strong>
+            <small>Samavet Admin</small>
           </div>
         </div>
         <nav>

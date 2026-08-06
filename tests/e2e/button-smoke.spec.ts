@@ -184,6 +184,7 @@ async function mockApi(page: Page) {
     if (path === '/translation/marathi/transliterate') return json(route, { text: 'मराठी मजकूर' });
     if (path.includes('/reports/collections.xlsx')) return file(route, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     if (path.includes('/reports/collections.pdf')) return file(route, 'application/pdf');
+    if (path.includes('/reports/vargani-slips.pdf')) return file(route, 'application/pdf');
     if (method === 'GET' && path.endsWith('/vargani/slips')) return json(route, workspace().slips);
     if (method === 'GET' && path.endsWith('/expenses')) return json(route, workspace().expenses);
     if (method === 'GET' && path.endsWith('/tasks')) return json(route, workspace().tasks);
@@ -287,12 +288,15 @@ test('admin slip buttons perform their duties without client errors', async ({ p
   await page.getByRole('button', { name: /accounting pdf/i }).click();
   await expect(page.getByText(/accounting pdf downloaded successfully/i)).toBeVisible();
 
+  await page.getByRole('button', { name: /complete slips pdf/i }).click();
+  await expect(page.getByText(/all vargani slips pdf downloaded successfully/i)).toBeVisible();
+
   await page.getByRole('button', { name: /^paid/i }).click();
   await expect(page.getByText('Mahesh Traders').first()).toBeVisible();
   await page.getByRole('button', { name: /^pending/i }).click();
   await expect(page.getByText('Pending Donor')).toBeVisible();
   await page.getByPlaceholder(/search by name/i).fill('Mahesh');
-  await page.getByRole('button', { name: /^all/i }).click();
+  await page.getByRole('button', { name: /^all \(/i }).click();
   await expect(page.getByText('Mahesh Traders').first()).toBeVisible();
 
   await page.getByRole('button', { name: /new vargani entry/i }).click();

@@ -110,6 +110,68 @@ describe('ReportsService', () => {
       }),
     );
   });
+
+  it('exports every generated Vargani slip as a PDF register', async () => {
+    const prisma = {
+      festival: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'festival-1' }),
+        findUnique: jest.fn().mockResolvedValue({
+          endDate: new Date('2026-08-11T00:00:00.000Z'),
+          name: 'Ganeshotsav 2026',
+          startDate: new Date('2026-08-01T00:00:00.000Z'),
+        }),
+      },
+      mandal: { findUnique: jest.fn().mockResolvedValue({ name: 'Ganesh Mitra Mandal' }) },
+      varganiSlip: {
+        aggregate: jest.fn().mockResolvedValue({
+          _count: { id: 2 },
+          _sum: { amount: 1951 },
+        }),
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'slip-1',
+            amount: 1251,
+            areaName: 'Pune',
+            collector: { name: 'Sagar Jadhav', phone: '+919999999999' },
+            contributorName: 'Mahesh Traders',
+            contributorPhone: '+918888888888',
+            createdAt: new Date('2026-07-26T07:30:00.000Z'),
+            paymentMode: PaymentMode.UPI,
+            slipNumber: '003',
+            status: SlipStatus.ACTIVE,
+          },
+          {
+            id: 'slip-2',
+            amount: 700,
+            areaName: 'Pune',
+            collector: { name: 'Sagar Jadhav', phone: '+919999999999' },
+            contributorName: 'Pending Donor',
+            contributorPhone: null,
+            createdAt: new Date('2026-07-26T08:30:00.000Z'),
+            paymentMode: PaymentMode.CASH,
+            slipNumber: '004',
+            status: SlipStatus.PENDING,
+          },
+        ]),
+      },
+    };
+    const service = new ReportsService(prisma as never);
+
+    const fileStream = await service.exportAllVarganiSlipsPdf(mandalScopedCtx, 'mandal-1', 'festival-1', {});
+    const chunks: Buffer[] = [];
+    for await (const chunk of fileStream) chunks.push(Buffer.from(chunk));
+    const file = Buffer.concat(chunks);
+
+    expect(file.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(file.length).toBeGreaterThan(2_000);
+    expect(file.toString('latin1')).toContain('/Title');
+    expect(prisma.varganiSlip.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 500,
+        where: expect.not.objectContaining({ status: expect.anything() }),
+      }),
+    );
+  });
 });
 
 describe('toCsv', () => {

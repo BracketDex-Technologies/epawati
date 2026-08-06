@@ -3043,7 +3043,7 @@ function AdhyakshApp({
   const [slipFilter, setSlipFilter] = useState<'all' | 'paid' | 'pending'>('all');
   const [slipCreatorFilter, setSlipCreatorFilter] = useState('');
   const [slipDateFilter, setSlipDateFilter] = useState('');
-  const [entriesExporting, setEntriesExporting] = useState<null | 'excel' | 'pdf'>(null);
+  const [entriesExporting, setEntriesExporting] = useState<null | 'excel' | 'pdf' | 'slipsPdf'>(null);
   const deferredQuery = useDeferredValue(query);
   const slipFilterStartedRef = useRef(false);
   const activeYear = optimisticYear ?? festivalYear(activeForm?.festival);
@@ -3307,6 +3307,36 @@ function AdhyakshApp({
       showToast('Accounting PDF downloaded successfully.');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Could not download accounting PDF.');
+    } finally {
+      setEntriesExporting(null);
+    }
+  }
+
+  async function downloadAllVarganiSlipsPdf() {
+    const mandalId = mandal?.id;
+    const festivalId = activeForm?.festival.id;
+    if (!mandalId || !festivalId) {
+      showToast('Active mandal festival not found. Refresh and try again.');
+      return;
+    }
+
+    setEntriesExporting('slipsPdf');
+    try {
+      const { blob, fileName } = await apiDownload(
+        `/mandals/${mandalId}/festivals/${festivalId}/reports/vargani-slips.pdf`,
+        session,
+      );
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fileName || `${slugify(mandal.name)}-all-vargani-slips.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      showToast('All Vargani slips PDF downloaded successfully.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not download all slips PDF.');
     } finally {
       setEntriesExporting(null);
     }
@@ -3623,6 +3653,7 @@ function AdhyakshApp({
               <div className="vargani-page-actions">
                 <button disabled={entriesExporting !== null} onClick={() => void downloadAllVarganiEntries()} type="button"><Download size={18} />{entriesExporting === 'excel' ? 'Preparing Excel...' : 'Download Excel'}</button>
                 <button disabled={entriesExporting !== null} onClick={() => void downloadAccountingPdf()} type="button"><FileText size={18} />{entriesExporting === 'pdf' ? 'Preparing PDF...' : 'Accounting PDF'}</button>
+                <button disabled={entriesExporting !== null} onClick={() => void downloadAllVarganiSlipsPdf()} type="button"><FileText size={18} />{entriesExporting === 'slipsPdf' ? 'Preparing Slips PDF...' : 'Complete Slips PDF'}</button>
                 <button className="blue-action" onClick={() => setEntryOpen(true)} type="button"><Plus size={18} />New Vargani Entry</button>
               </div>
             </div>

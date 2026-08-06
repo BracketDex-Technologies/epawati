@@ -7,6 +7,7 @@ import { assertFestivalInMandal, assertSameMandal } from '../auth/tenant-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { CollectionReportQueryDto } from './dto/collection-report-query.dto';
 import { createAccountingPdf } from './accounting-pdf';
+import { VarganiSlipsPdfWriter } from './vargani-slips-pdf';
 
 interface SlipReportWhere {
   areaName?: string;
@@ -525,6 +526,92 @@ export class ReportsService {
         totalReceiptCount: statusSummary.reduce((sum, row) => sum + row._count.id, 0),
       },
     });
+  }
+
+  async exportAllVarganiSlipsPdf(
+    ctx: AuthContext,
+    mandalId: string,
+    festivalId: string,
+    query: CollectionReportQueryDto,
+  ): Promise<PassThrough> {
+    assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
+
+    const createdAt =
+      query.dateFrom || query.dateTo
+        ? {
+            gte: query.dateFrom ? new Date(query.dateFrom) : undefined,
+            lte: query.dateTo ? reportEndDate(query.dateTo) : undefined,
+          }
+        : undefined;
+    const where = {
+      areaName: query.areaName,
+      collectedByUserId: query.memberId,
+      createdAt,
+      festivalId,
+      groupId: query.groupId,
+      mandalId,
+      paymentMode: query.paymentMode,
+    };
+
+    const [summary, mandal, festival] = await Promise.all([
+      this.prisma.varganiSlip.aggregate({
+        _count: { id: true },
+        _sum: { amount: true },
+        where,
+      }),
+      this.prisma.mandal.findUnique({ select: { name: true }, where: { id: mandalId } }),
+      this.prisma.festival.findUnique({
+        select: { endDate: true, name: true, startDate: true },
+        where: { id: festivalId },
+      }),
+    ]);
+
+    const writer = new VarganiSlipsPdfWriter({
+      festivalName: festival?.name ?? 'Festival',
+      filters: describeReportFilters(query),
+      generatedAt: new Date(),
+      mandalName: mandal?.name ?? 'Mandal',
+      reportPeriod: describeReportPeriod(query, festival?.startDate, festival?.endDate),
+      totalAmount: Number(summary._sum.amount ?? 0),
+      totalCount: summary._count.id,
+    });
+
+    void (async () => {
+      let cursorId: string | undefined;
+      do {
+        const slips = await this.prisma.varganiSlip.findMany({
+          cursor: cursorId ? { id: cursorId } : undefined,
+          include: {
+            collector: { select: { name: true, phone: true } },
+          },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          skip: cursorId ? 1 : 0,
+          take: 500,
+          where,
+        });
+
+        for (const slip of slips) {
+          writer.addRow({
+            amount: Number(slip.amount),
+            area: slip.areaName ?? '',
+            collector: slip.collector.name,
+            contributor: slip.contributorName,
+            date: slip.createdAt,
+            paymentMode: formatEnumLabel(slip.paymentMode),
+            phone: slip.contributorPhone ?? '',
+            slipNumber: slip.slipNumber,
+            status: formatSlipStatus(slip.status),
+          });
+        }
+
+        cursorId = slips.length === 500 ? slips.at(-1)?.id : undefined;
+      } while (cursorId);
+
+      writer.finalize();
+    })().catch((error: unknown) => writer.stream.destroy(error instanceof Error ? error : new Error(String(error))));
+
+    return writer.stream;
   }
 }
 

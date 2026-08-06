@@ -67,4 +67,18 @@ export class ReportsController {
     const file = await this.reportsService.exportAccountingSummaryPdf(ctx, mandalId, festivalId, query);
     return new StreamableFile(file);
   }
+
+  @Get('vargani-slips.pdf')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'attachment; filename="digital-vargani-all-slips.pdf"')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.MANDAL_ADMIN, UserRole.KHAJINDAR, UserRole.GROUP_LEADER)
+  async exportAllVarganiSlipsPdf(
+    @AuthUser() ctx: AuthContext,
+    @Param('mandalId') mandalId: string,
+    @Param('festivalId') festivalId: string,
+    @Query() query: CollectionReportQueryDto,
+  ) {
+    const file = await this.reportsService.exportAllVarganiSlipsPdf(ctx, mandalId, festivalId, query);
+    return new StreamableFile(file);
+  }
 }

@@ -8,6 +8,7 @@ export const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE
 const SESSION_KEY = 'digital-vargani-admin-session';
 const SESSION_EXPIRED_EVENT = 'digital-vargani-session-expired';
 const REQUEST_TIMEOUT_MS = 30_000;
+const DOWNLOAD_TIMEOUT_MS = 180_000;
 let refreshInFlight: Promise<boolean> | null = null;
 
 export interface ApiRequestOptions extends RequestInit {
@@ -70,12 +71,20 @@ export async function apiDownload(
   path: string,
   session?: ApiAuthSession | null,
 ): Promise<{ blob: Blob; fileName?: string }> {
-  let response = await fetchWithAuth(path, { headers: { Accept: 'application/octet-stream' } }, session);
+  if (session && !session.accessToken) {
+    await refreshSessionOnce(session);
+  }
+
+  const downloadOptions = {
+    headers: { Accept: 'application/octet-stream' },
+    timeoutMs: DOWNLOAD_TIMEOUT_MS,
+  };
+  let response = await fetchWithAuth(path, downloadOptions, session);
 
   if (response.status === 401 && session) {
     const refreshed = await refreshSessionOnce(session);
     if (refreshed) {
-      response = await fetchWithAuth(path, { headers: { Accept: 'application/octet-stream' } }, session);
+      response = await fetchWithAuth(path, downloadOptions, session);
     }
   }
 

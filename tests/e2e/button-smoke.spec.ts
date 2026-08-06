@@ -91,6 +91,18 @@ const pendingSlip = {
 function workspace() {
   return {
     activeForm: { customFields: [], festival, member: null },
+    auditEvents: [{
+      action: 'deleted',
+      actor: { id: session.user.id, name: session.user.name, role: 'MANDAL_ADMIN' },
+      actorUserId: session.user.id,
+      before: paidSlip,
+      createdAt: '2026-08-06T11:00:00.000Z',
+      entityId: paidSlip.id,
+      entityType: 'vargani_slip',
+      id: 'audit-delete-slip',
+      mandalId: session.user.mandalId,
+      metadata: null,
+    }],
     expenses: [{
       amount: 250,
       createdAt: '2026-08-06T09:00:00.000Z',
@@ -352,6 +364,10 @@ test('admin navigation and creation buttons open, submit, and close smoothly', a
   await page.getByRole('button', { name: /add question/i }).click();
   await fieldRequest;
   await expect(page.getByText('Donor Type')).toBeVisible();
+
+  await openAdminScreen(page, /system logs/i);
+  await expect(page.getByText('VARGANI SLIP DELETED')).toBeVisible();
+  await expect(page.getByText(/Slip DM-GAN-2026-000001/)).toBeVisible();
 });
 
 function json(route: Route, body: unknown) {

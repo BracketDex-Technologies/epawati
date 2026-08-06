@@ -388,6 +388,20 @@ interface FestivalTask {
   title: string;
 }
 
+interface AuditEvent {
+  action: string;
+  actor?: { id: string; name: string; role: UserRole } | null;
+  actorUserId?: string | null;
+  after?: Record<string, unknown> | null;
+  before?: Record<string, unknown> | null;
+  createdAt: string;
+  entityId: string;
+  entityType: string;
+  id: string;
+  mandalId?: string | null;
+  metadata?: Record<string, unknown> | null;
+}
+
 interface DemoMandal {
   _count?: { festivals?: number; members?: number; slips?: number };
   additionalMembers: string;
@@ -502,6 +516,7 @@ interface OwnerWorkspaceBootstrap {
 
 interface MandalWorkspaceBootstrap {
   activeForm: ActiveForm | null;
+  auditEvents?: AuditEvent[];
   expenses?: Expense[];
   generatedAt: string;
   groups: Group[];
@@ -659,6 +674,7 @@ export default function App() {
   const [loadingMoreSlips, setLoadingMoreSlips] = useState(false);
   const [slipListFilters, setSlipListFilters] = useState<SlipListFilters>({});
   const [tasks, setTasks] = useState<FestivalTask[]>([]);
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [, setSelectedSlip] = useState<Slip | null>(null);
   const [templatePreview, setTemplatePreview] = useState<string>(TEMPLATE_IMAGE);
@@ -831,6 +847,7 @@ export default function App() {
       setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
       setWorkspaceMetrics({});
       setTasks([]);
+      setAuditEvents([]);
       setTemplates([]);
       setSelectedSlip(null);
       setWorkspaceLoaded(false);
@@ -1063,6 +1080,7 @@ export default function App() {
       setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
       setWorkspaceMetrics({});
       setTasks([]);
+      setAuditEvents([]);
       setTemplates([]);
       setSelectedSlip(null);
       setDemoMandals(ownerMandals);
@@ -1095,6 +1113,7 @@ export default function App() {
     setWorkspaceMetrics(payload.metrics ?? {});
     setSlipListFilters({});
     setTasks(payload.tasks ?? []);
+    setAuditEvents(payload.auditEvents ?? []);
     setTemplates(payload.templates);
     setSelectedSlip(nextSlips[0] ?? null);
     const activeVersion = findActiveTemplateVersion(payload.templates);
@@ -1250,6 +1269,7 @@ export default function App() {
     setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
     setWorkspaceMetrics({});
     setTasks([]);
+    setAuditEvents([]);
     setTemplates([]);
     setSelectedSlip(null);
     setWorkspaceLoaded(false);
@@ -1457,6 +1477,7 @@ export default function App() {
       setSlipListFilters({});
       setSelectedSlip(null);
       setTasks([]);
+      setAuditEvents([]);
       setExpenses([]);
       setWorkspaceMetrics({});
       setNotice(`Year ${year} is active. Entries are saved separately for this year.`);
@@ -2608,6 +2629,17 @@ export default function App() {
         total: Math.max(0, current.total - 1),
         totalPages: Math.max(1, Math.ceil(Math.max(0, current.total - 1) / current.limit)),
       }));
+      setAuditEvents((current) => [{
+        action: 'deleted',
+        actor: { id: session.user.id, name: session.user.name, role: session.user.role },
+        actorUserId: session.user.id,
+        before: slip as unknown as Record<string, unknown>,
+        createdAt: new Date().toISOString(),
+        entityId: slip.id,
+        entityType: 'vargani_slip',
+        id: `local-delete-${slip.id}-${Date.now()}`,
+        mandalId,
+      }, ...current].slice(0, 25));
       setNotice(`${slip.slipNumber} permanently deleted.`);
       scheduleWorkspaceSync(session);
     } catch (error) {
@@ -2700,6 +2732,7 @@ export default function App() {
   return withActionOverlay(
     <AdhyakshApp
       activeForm={activeForm}
+      auditEvents={auditEvents}
       busy={busy}
       entryFields={entryFields}
       expenses={expenses}
@@ -2875,6 +2908,7 @@ function LoadingCard({ compact = false, detail }: { compact?: boolean; detail: s
 function AdhyakshApp({
   activeTemplate,
   activeForm,
+  auditEvents,
   busy,
   entryFields,
   expenses,
@@ -2935,6 +2969,7 @@ function AdhyakshApp({
 }: {
   activeTemplate?: Template;
   activeForm: ActiveForm | null;
+  auditEvents: AuditEvent[];
   busy: boolean;
   entryFields: EntryFieldConfig[];
   expenses: Expense[];
@@ -3705,15 +3740,15 @@ function AdhyakshApp({
             </div>
             <div className="ops-table logs-table">
               <div className="ops-head"><span>Time & Date</span><span>User</span><span>Action</span><span>Details</span></div>
-              {slipRows.length === 0 && <EmptyTableState message="No activity yet." />}
-              {slipRows.slice(0, 8).map((slip) => {
-                const createdAt = formatLogTimestamp(slip.createdAt);
+              {auditEvents.length === 0 && <EmptyTableState message="No activity yet." />}
+              {auditEvents.slice(0, 25).map((event) => {
+                const createdAt = formatLogTimestamp(event.createdAt);
                 return (
-                <div className="ops-row" key={`${slip.id}-log`}>
+                <div className="ops-row" key={event.id}>
                   <span><b>{createdAt.date}</b><small>{createdAt.time}</small></span>
-                  <i className="pill role">{slip.collector?.name || session.user.name}</i>
-                  <strong>VARGANI SLIP CREATED</strong>
-                  <span>Slip {slip.slipNumber} for {slip.contributorName} - {money(Number(slip.amount))} (paid)</span>
+                  <i className="pill role">{event.actor?.name || session.user.name}</i>
+                  <strong>{auditActionLabel(event)}</strong>
+                  <span>{auditEventDetails(event)}</span>
                 </div>
               );
               })}
@@ -8254,6 +8289,33 @@ function formatLogTimestamp(value: string) {
       minute: '2-digit',
     }).format(date),
   };
+}
+
+function auditActionLabel(event: AuditEvent) {
+  const entity = event.entityType.replaceAll('_', ' ').toUpperCase();
+  const action = event.action.replaceAll('_', ' ').toUpperCase();
+  return `${entity} ${action}`;
+}
+
+function auditEventDetails(event: AuditEvent) {
+  const snapshot = event.before ?? event.after ?? event.metadata ?? {};
+  const slipNumber = readAuditText(snapshot, 'slipNumber') || readAuditText(snapshot, 'slip_number');
+  const contributorName = readAuditText(snapshot, 'contributorName') || readAuditText(snapshot, 'contributor_name');
+  const amount = Number(readAuditText(snapshot, 'amount') || 0);
+
+  if (event.entityType === 'vargani_slip' && slipNumber) {
+    const parts = [`Slip ${slipNumber}`];
+    if (contributorName) parts.push(`for ${contributorName}`);
+    if (Number.isFinite(amount) && amount > 0) parts.push(money(amount));
+    return parts.join(' - ');
+  }
+
+  return `${event.entityType.replaceAll('_', ' ')} ${event.action.replaceAll('_', ' ')}`;
+}
+
+function readAuditText(value: Record<string, unknown>, key: string) {
+  const item = value[key];
+  return item === null || item === undefined ? '' : String(item);
 }
 
 function slugify(value: string) {

@@ -96,7 +96,10 @@ test('super admin society data link shows submitted registrations', async ({ pag
   await page.getByLabel(/username/i).fill('owner@example.com');
   await page.locator('input[name="password"]').fill('valid-password');
   await page.getByRole('button', { name: /sign in/i }).click();
-  await page.goto('/#/owner/society-registrations');
+  if (test.info().project.name.includes('mobile')) {
+    await page.getByLabel('Open navigation menu').click();
+  }
+  await page.getByRole('button', { name: 'Society Data' }).click();
 
   await expect(page.getByRole('heading', { name: 'Society Data' })).toBeVisible();
   await expect(page.getByText('Sai Residency CHS')).toBeVisible();

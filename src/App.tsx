@@ -5126,7 +5126,7 @@ function SuperAdminApp({
   return (
     <>
     <main className={`shell owner-shell ${sidebarOpen ? 'sidebar-open' : ''}`}>
-      <button className="mobile-menu-toggle" onClick={() => setSidebarOpen((open) => !open)} type="button">
+      <button aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'} className="mobile-menu-toggle" onClick={() => setSidebarOpen((open) => !open)} type="button">
         {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
       {sidebarOpen && <button aria-label="Close menu" className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} type="button" />}

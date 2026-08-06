@@ -11415,6 +11415,16 @@ nav button.active svg,
   padding: 11px 12px;
 }
 
+.society-registration-form input[type="radio"] {
+  accent-color: #157347;
+  border-radius: 999px;
+  flex: 0 0 24px;
+  height: 24px;
+  min-height: 0;
+  padding: 0;
+  width: 24px;
+}
+
 .society-registration-form textarea {
   min-height: 92px;
   resize: vertical;
@@ -11455,7 +11465,10 @@ nav button.active svg,
   border-radius: 10px;
   display: flex;
   gap: 9px;
+  line-height: 1.35;
   min-height: 44px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 10px 12px;
 }
 
@@ -11499,7 +11512,7 @@ nav button.active svg,
   .society-registration-shell {
     border-radius: 0;
     min-height: 100vh;
-    padding: 22px 16px;
+    padding: 18px 10px 24px;
   }
 
   .society-registration-brand h1 {
@@ -11509,6 +11522,15 @@ nav button.active svg,
   .society-registration-form .form-grid.two,
   .template-choice {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .template-choice {
+    padding: 10px;
+  }
+
+  .template-choice label {
+    font-size: 12px;
+    padding: 10px;
   }
 }
 
@@ -12390,6 +12412,61 @@ nav button.active svg,
 
   .owner-shell .mandal-card-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .owner-shell .society-data-table {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .owner-shell .society-data-head {
+    display: none;
+  }
+
+  .owner-shell .society-data-row {
+    background: #fff;
+    border: 1px solid var(--owner-line);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(49, 38, 30, 0.05);
+    gap: 13px;
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: 12px;
+    min-width: 0;
+    padding: 16px;
+  }
+
+  .owner-shell .society-data-row > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .owner-shell .society-data-row > :not(:first-child)::before {
+    color: #8a8078;
+    display: block;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .owner-shell .society-data-row > :nth-child(2)::before {
+    content: "Contacts";
+  }
+
+  .owner-shell .society-data-row > :nth-child(3)::before {
+    content: "Flats";
+  }
+
+  .owner-shell .society-data-row > :nth-child(4)::before {
+    content: "Template";
+  }
+
+  .owner-shell .society-data-row > :nth-child(5)::before {
+    content: "Submitted";
   }
 }
 

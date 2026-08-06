@@ -5,6 +5,7 @@ import { PassThrough } from 'node:stream';
 import type { AuthContext } from '../auth/auth-context';
 import { assertFestivalInMandal, assertSameMandal } from '../auth/tenant-scope';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CollectionReportQueryDto } from './dto/collection-report-query.dto';
 import { createAccountingPdf } from './accounting-pdf';
 import { VarganiSlipsPdfWriter } from './vargani-slips-pdf';
@@ -53,7 +54,10 @@ interface PaymentModeSummaryRow {
 
 @Injectable()
 export class ReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService?: StorageService,
+  ) {}
 
   async getCollectionReport(
     ctx: AuthContext,
@@ -569,11 +573,9 @@ export class ReportsService {
 
     const writer = new VarganiSlipsPdfWriter({
       festivalName: festival?.name ?? 'Festival',
-      filters: describeReportFilters(query),
       generatedAt: new Date(),
       mandalName: mandal?.name ?? 'Mandal',
       reportPeriod: describeReportPeriod(query, festival?.startDate, festival?.endDate),
-      totalAmount: Number(summary._sum.amount ?? 0),
       totalCount: summary._count.id,
     });
 
@@ -585,27 +587,22 @@ export class ReportsService {
           include: {
             collector: { select: { name: true, phone: true } },
           },
-          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          orderBy: [{ slipNumber: 'asc' }, { id: 'asc' }],
           skip: cursorId ? 1 : 0,
-          take: 500,
+          take: 100,
           where,
         });
 
         for (const slip of slips) {
-          writer.addRow({
-            amount: Number(slip.amount),
-            area: slip.areaName ?? '',
-            collector: slip.collector.name,
+          writer.addSlip({
             contributor: slip.contributorName,
-            date: slip.createdAt,
-            paymentMode: formatEnumLabel(slip.paymentMode),
-            phone: slip.contributorPhone ?? '',
+            image: await this.loadReceiptImage(slip.receiptImageUrl),
+            note: slip.receiptImageUrl ? 'Stored receipt image could not be loaded.' : 'Receipt image has not been generated or uploaded yet.',
             slipNumber: slip.slipNumber,
-            status: formatSlipStatus(slip.status),
           });
         }
 
-        cursorId = slips.length === 500 ? slips.at(-1)?.id : undefined;
+        cursorId = slips.length === 100 ? slips.at(-1)?.id : undefined;
       } while (cursorId);
 
       writer.finalize();
@@ -613,6 +610,32 @@ export class ReportsService {
 
     return writer.stream;
   }
+
+  private async loadReceiptImage(receiptImageUrl: string | null): Promise<Buffer | undefined> {
+    if (!receiptImageUrl) return undefined;
+    const resolvedUrl = await this.storageService?.resolveUrl(receiptImageUrl, 60 * 60) ?? receiptImageUrl;
+    if (!resolvedUrl) return undefined;
+
+    const dataUrl = parseImageDataUrl(resolvedUrl);
+    if (dataUrl) return dataUrl;
+    if (!/^https?:\/\//i.test(resolvedUrl)) return undefined;
+
+    try {
+      const response = await fetch(resolvedUrl);
+      if (!response.ok) return undefined;
+      const contentType = response.headers.get('content-type') ?? '';
+      if (contentType && !contentType.startsWith('image/')) return undefined;
+      return Buffer.from(await response.arrayBuffer());
+    } catch {
+      return undefined;
+    }
+  }
+}
+
+function parseImageDataUrl(value: string): Buffer | undefined {
+  const match = /^data:image\/[a-z0-9.+-]+;base64,([a-zA-Z0-9+/=\r\n]+)$/iu.exec(value);
+  if (!match) return undefined;
+  return Buffer.from(match[1].replace(/\s/g, ''), 'base64');
 }
 
 function formatSlipStatus(status: SlipStatus): string {

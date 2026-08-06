@@ -111,7 +111,8 @@ describe('ReportsService', () => {
     );
   });
 
-  it('exports every generated Vargani slip as a PDF register', async () => {
+  it('exports every generated Vargani WhatsApp receipt image as a PDF bundle', async () => {
+    const receiptImageDataUrl = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQEBAQEBAQEA8PEA8PEA8QDw8PDw8PFREWFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGxAQGi0lHyUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAAEAAQMBIgACEQEDEQH/xAAVAAEBAAAAAAAAAAAAAAAAAAAABf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAVAQEBAAAAAAAAAAAAAAAAAAAABP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AKkA/9k=';
     const prisma = {
       festival: {
         findFirst: jest.fn().mockResolvedValue({ id: 'festival-1' }),
@@ -137,6 +138,7 @@ describe('ReportsService', () => {
             contributorPhone: '+918888888888',
             createdAt: new Date('2026-07-26T07:30:00.000Z'),
             paymentMode: PaymentMode.UPI,
+            receiptImageUrl: receiptImageDataUrl,
             slipNumber: '003',
             status: SlipStatus.ACTIVE,
           },
@@ -149,13 +151,15 @@ describe('ReportsService', () => {
             contributorPhone: null,
             createdAt: new Date('2026-07-26T08:30:00.000Z'),
             paymentMode: PaymentMode.CASH,
+            receiptImageUrl: null,
             slipNumber: '004',
             status: SlipStatus.PENDING,
           },
         ]),
       },
     };
-    const service = new ReportsService(prisma as never);
+    const storage = { resolveUrl: jest.fn(async (value: string) => value) };
+    const service = new ReportsService(prisma as never, storage as never);
 
     const fileStream = await service.exportAllVarganiSlipsPdf(mandalScopedCtx, 'mandal-1', 'festival-1', {});
     const chunks: Buffer[] = [];
@@ -165,9 +169,11 @@ describe('ReportsService', () => {
     expect(file.subarray(0, 5).toString()).toBe('%PDF-');
     expect(file.length).toBeGreaterThan(2_000);
     expect(file.toString('latin1')).toContain('/Title');
+    expect(storage.resolveUrl).toHaveBeenCalledWith(receiptImageDataUrl, 60 * 60);
     expect(prisma.varganiSlip.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        take: 500,
+        orderBy: [{ slipNumber: 'asc' }, { id: 'asc' }],
+        take: 100,
         where: expect.not.objectContaining({ status: expect.anything() }),
       }),
     );

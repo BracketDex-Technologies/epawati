@@ -8,57 +8,46 @@ const DEVANAGARI_FONT_PATH = path.join(
   'server/api/assets/noto-sans-devanagari-devanagari-400-normal.woff',
 );
 const DEVANAGARI_PATTERN = /[\u0900-\u097F]/u;
-const GRAPHEME_SEGMENTER = new Intl.Segmenter('mr', { granularity: 'grapheme' });
 
 const PAGE_WIDTH = 841.89;
-const MARGIN = 42;
-const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
+const PAGE_HEIGHT = 595.28;
+const MARGIN = 28;
 const INK = '#241914';
 const MUTED = '#6B7280';
 const GREEN = '#157347';
 const GREEN_SOFT = '#EAF7EF';
-const ORANGE = '#C2410C';
-const ORANGE_SOFT = '#FFF2E8';
-const RED = '#B42318';
-const RED_SOFT = '#FDECEC';
 const LINE = '#E5E7EB';
 const PANEL = '#F8FAFC';
 
-export interface VarganiSlipsPdfMeta {
+export interface VarganiSlipImagesPdfMeta {
   festivalName: string;
-  filters: string[];
   generatedAt: Date;
   mandalName: string;
   reportPeriod: string;
-  totalAmount: number;
   totalCount: number;
 }
 
-export interface VarganiSlipsPdfRow {
-  amount: number;
-  area: string;
-  collector: string;
+export interface VarganiSlipImagePage {
   contributor: string;
-  date: Date;
-  paymentMode: string;
-  phone: string;
+  image?: Buffer;
+  note?: string;
   slipNumber: string;
-  status: string;
 }
 
 export class VarganiSlipsPdfWriter {
   private readonly doc: PDFKit.PDFDocument;
-  private pageNumber = 1;
+  private pageNumber = 0;
 
   readonly stream = new PassThrough();
 
-  constructor(private readonly meta: VarganiSlipsPdfMeta) {
+  constructor(private readonly meta: VarganiSlipImagesPdfMeta) {
     this.doc = new PDFDocument({
+      autoFirstPage: false,
       info: {
         Author: 'Samavet ePawati',
         CreationDate: meta.generatedAt,
-        Subject: 'Complete generated Vargani slip register',
-        Title: `${meta.mandalName} - ${meta.festivalName} Vargani Slips`,
+        Subject: 'Actual generated Vargani receipt slip images',
+        Title: `${meta.mandalName} - ${meta.festivalName} Generated Receipt Slips`,
       },
       layout: 'landscape',
       margin: MARGIN,
@@ -66,170 +55,114 @@ export class VarganiSlipsPdfWriter {
     });
     this.doc.registerFont(DEVANAGARI_FONT, DEVANAGARI_FONT_PATH);
     this.doc.pipe(this.stream);
-    this.drawHeader();
-    this.drawTableHeader();
   }
 
-  addRow(row: VarganiSlipsPdfRow): void {
-    this.ensureRowSpace();
-    const widths = [70, 90, 140, 76, 86, 95, 65, 60, 75];
-    const values = [
-      formatDate(row.date),
-      row.slipNumber,
-      row.contributor,
-      row.phone,
-      row.area,
-      row.collector,
-      row.paymentMode,
-      row.status,
-      money(row.amount),
-    ];
-    const y = this.doc.y;
-    const fill = row.status === 'Paid' ? GREEN_SOFT : row.status === 'Pending' ? ORANGE_SOFT : RED_SOFT;
-    this.doc.rect(MARGIN, y, CONTENT_WIDTH, 25).fillAndStroke('#FFFFFF', LINE);
-    this.doc.rect(MARGIN + CONTENT_WIDTH - widths[8] - widths[7], y, widths[7], 25).fillAndStroke(fill, LINE);
+  addSlip(page: VarganiSlipImagePage): void {
+    this.doc.addPage();
+    this.pageNumber += 1;
+    this.drawPageHeader(page);
 
-    let x = MARGIN;
-    values.forEach((value, index) => {
-      const align = index === values.length - 1 ? 'right' : 'left';
-      const color = index === 7 ? statusColor(row.status) : INK;
-      drawMultiscriptText(
-        this.doc,
-        truncate(value, widths[index] > 100 ? 32 : 18),
-        x + 6,
-        y + 8,
-        widths[index] - 12,
-        10,
-        align,
-        color,
-        7.2,
-        index === 7,
-      );
-      x += widths[index];
-    });
-    this.doc.y = y + 25;
+    const imageX = MARGIN;
+    const imageY = 94;
+    const imageWidth = PAGE_WIDTH - MARGIN * 2;
+    const imageHeight = PAGE_HEIGHT - imageY - 54;
+
+    this.doc.roundedRect(imageX, imageY, imageWidth, imageHeight, 10).fillAndStroke('#FFFFFF', LINE);
+    if (page.image) {
+      try {
+        this.doc.image(page.image, imageX + 10, imageY + 10, {
+          align: 'center',
+          fit: [imageWidth - 20, imageHeight - 20],
+          valign: 'center',
+        });
+      } catch {
+        this.drawMissingImage(imageX, imageY, imageWidth, imageHeight, 'Stored receipt image could not be embedded in PDF.');
+      }
+    } else {
+      this.drawMissingImage(imageX, imageY, imageWidth, imageHeight, page.note ?? 'Receipt image has not been generated yet.');
+    }
+
+    this.drawFooter();
   }
 
   finalize(): void {
-    this.drawFooter();
+    if (this.pageNumber === 0) {
+      this.addSlip({
+        contributor: 'No slips found',
+        note: 'No generated Vargani slip records were found for this report.',
+        slipNumber: '-',
+      });
+    }
     this.doc.end();
   }
 
-  private drawHeader(): void {
-    this.doc.roundedRect(MARGIN, MARGIN, CONTENT_WIDTH, 82, 10).fill(INK);
-    this.doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(20)
-      .text('All Generated Vargani Slips', MARGIN + 20, MARGIN + 16, { width: 450 });
+  private drawPageHeader(page: VarganiSlipImagePage): void {
+    this.doc.roundedRect(MARGIN, MARGIN, PAGE_WIDTH - MARGIN * 2, 50, 10).fill(INK);
+    this.doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(16)
+      .text('Generated Vargani Slip', MARGIN + 16, MARGIN + 10, { width: 260 });
     drawMultiscriptText(
       this.doc,
-      `${this.meta.mandalName}  |  ${this.meta.festivalName}`,
-      MARGIN + 20,
-      MARGIN + 47,
-      500,
-      12,
-      'left',
-      '#BBF7D0',
-      9,
-    );
-    this.doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(9)
-      .text(this.meta.reportPeriod, PAGE_WIDTH - MARGIN - 260, MARGIN + 17, {
-        align: 'right',
-        width: 238,
-      });
-    this.doc.fillColor('#D1D5DB').font('Helvetica').fontSize(8)
-      .text(`Generated ${formatDateTime(this.meta.generatedAt)}`, PAGE_WIDTH - MARGIN - 260, MARGIN + 38, {
-        align: 'right',
-        width: 238,
-      });
-    this.doc.fillColor('#BBF7D0').font('Helvetica-Bold').fontSize(9)
-      .text(`${this.meta.totalCount} slips | ${money(this.meta.totalAmount)}`, PAGE_WIDTH - MARGIN - 260, MARGIN + 58, {
-        align: 'right',
-        width: 238,
-      });
-
-    this.doc.y = MARGIN + 98;
-    if (this.meta.filters.length > 0) {
-      this.doc.fillColor(MUTED).font('Helvetica').fontSize(8)
-        .text(`Applied filters: ${this.meta.filters.join(' | ')}`, MARGIN, this.doc.y, { width: CONTENT_WIDTH });
-      this.doc.moveDown(0.8);
-    }
-  }
-
-  private drawTableHeader(): void {
-    const headers = ['Date', 'Slip', 'Contributor', 'Phone', 'Area', 'Collector', 'Mode', 'Status', 'Amount'];
-    const widths = [70, 90, 140, 76, 86, 95, 65, 60, 75];
-    const y = this.doc.y;
-    this.doc.rect(MARGIN, y, CONTENT_WIDTH, 24).fill(INK);
-    let x = MARGIN;
-    headers.forEach((header, index) => {
-      const align = index === headers.length - 1 ? 'right' : 'left';
-      this.doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7.4)
-        .text(header.toUpperCase(), x + 6, y + 8, {
-          align,
-          ellipsis: true,
-          height: 10,
-          lineBreak: false,
-          width: widths[index] - 12,
-        });
-      x += widths[index];
-    });
-    this.doc.y = y + 24;
-  }
-
-  private ensureRowSpace(): void {
-    if (this.doc.y + 25 <= this.doc.page.height - 72) return;
-    this.drawFooter();
-    this.doc.addPage();
-    this.pageNumber += 1;
-    this.doc.x = MARGIN;
-    this.doc.y = MARGIN;
-    this.doc.rect(MARGIN, MARGIN, CONTENT_WIDTH, 36).fillAndStroke(PANEL, LINE);
-    drawMultiscriptText(
-      this.doc,
-      `${this.meta.mandalName} - ${this.meta.festivalName}`,
-      MARGIN + 12,
-      MARGIN + 13,
-      420,
+      `${this.meta.mandalName} | ${this.meta.festivalName}`,
+      MARGIN + 16,
+      MARGIN + 32,
+      360,
       10,
-      'left',
-      INK,
+      '#BBF7D0',
       8,
-      true,
     );
-    this.doc.fillColor(MUTED).font('Helvetica').fontSize(8)
-      .text('All generated slips continued', PAGE_WIDTH - MARGIN - 260, MARGIN + 13, {
+
+    this.doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(9)
+      .text(page.slipNumber, PAGE_WIDTH - MARGIN - 260, MARGIN + 10, {
         align: 'right',
-        width: 248,
+        width: 244,
       });
-    this.doc.y = MARGIN + 50;
-    this.drawTableHeader();
+    drawMultiscriptText(
+      this.doc,
+      page.contributor,
+      PAGE_WIDTH - MARGIN - 260,
+      MARGIN + 29,
+      244,
+      10,
+      '#D1D5DB',
+      8,
+      'right',
+    );
+
+    this.doc.roundedRect(MARGIN, MARGIN + 58, PAGE_WIDTH - MARGIN * 2, 24, 7).fillAndStroke(GREEN_SOFT, GREEN_SOFT);
+    this.doc.fillColor(GREEN).font('Helvetica-Bold').fontSize(8)
+      .text(`${this.meta.reportPeriod} | ${this.pageNumber} of ${this.meta.totalCount} slips`, MARGIN + 12, MARGIN + 66, {
+        width: PAGE_WIDTH - MARGIN * 2 - 24,
+      });
+  }
+
+  private drawMissingImage(x: number, y: number, width: number, height: number, message: string): void {
+    this.doc.roundedRect(x + 22, y + 22, width - 44, height - 44, 12).fillAndStroke(PANEL, LINE);
+    this.doc.fillColor(INK).font('Helvetica-Bold').fontSize(16)
+      .text('Receipt image not available', x + 42, y + height / 2 - 22, {
+        align: 'center',
+        width: width - 84,
+      });
+    this.doc.fillColor(MUTED).font('Helvetica').fontSize(10)
+      .text(message, x + 42, y + height / 2 + 4, {
+        align: 'center',
+        width: width - 84,
+      });
   }
 
   private drawFooter(): void {
-    const y = this.doc.page.height - 54;
+    const y = PAGE_HEIGHT - 38;
     this.doc.moveTo(MARGIN, y - 8).lineTo(PAGE_WIDTH - MARGIN, y - 8).strokeColor(LINE).lineWidth(0.7).stroke();
     this.doc.fillColor(MUTED).font('Helvetica').fontSize(7)
-      .text('Samavet ePawati - Generated Vargani slip register', MARGIN, y, { lineBreak: false, width: 360 });
+      .text(`Generated ${formatDateTime(this.meta.generatedAt)} by Samavet ePawati`, MARGIN, y, {
+        lineBreak: false,
+        width: 360,
+      });
     this.doc.text(`Page ${this.pageNumber}`, PAGE_WIDTH - MARGIN - 120, y, {
       align: 'right',
       lineBreak: false,
       width: 120,
     });
   }
-}
-
-function statusColor(status: string): string {
-  if (status === 'Paid') return GREEN;
-  if (status === 'Pending') return ORANGE;
-  return RED;
-}
-
-function money(value: number): string {
-  const sign = value < 0 ? '-' : '';
-  return `${sign}INR ${Math.abs(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatDate(value: Date): string {
-  return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(value);
 }
 
 function formatDateTime(value: Date): string {
@@ -242,12 +175,6 @@ function formatDateTime(value: Date): string {
   }).format(value);
 }
 
-function truncate(value: string, limit: number): string {
-  const graphemes = Array.from(GRAPHEME_SEGMENTER.segment(value), ({ segment }) => segment);
-  if (graphemes.length <= limit) return value;
-  return `${graphemes.slice(0, Math.max(0, limit - 3)).join('')}...`;
-}
-
 function drawMultiscriptText(
   doc: PDFKit.PDFDocument,
   value: string,
@@ -255,16 +182,14 @@ function drawMultiscriptText(
   y: number,
   width: number,
   height: number,
-  align: 'left' | 'right',
   color: string,
   fontSize: number,
-  bold = false,
+  align: 'left' | 'right' = 'left',
 ): void {
   const normalized = value.normalize('NFC');
   const runs = splitFontRuns(normalized);
-  const fallbackFont = bold ? 'Helvetica-Bold' : 'Helvetica';
   const measuredRuns = runs.map((run) => {
-    const font = run.devanagari ? DEVANAGARI_FONT : fallbackFont;
+    const font = run.devanagari ? DEVANAGARI_FONT : 'Helvetica';
     doc.font(font).fontSize(fontSize);
     return { ...run, font, width: doc.widthOfString(run.text) };
   });

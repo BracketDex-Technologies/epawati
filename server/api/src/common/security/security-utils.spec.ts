@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { maskPhone, sanitizeAuditPayload } from './audit-redaction';
 import { indianMobileForWhatsApp, normalizeIndianMobile } from './indian-phone';
 
@@ -32,5 +33,18 @@ describe('security utilities', () => {
       slipNumber: 'DM-GAN-2026-1000001',
     });
     expect(maskPhone('+919876543210')).toBe('******3210');
+  });
+
+  it('converts audit snapshots to JSON-safe scalar values', () => {
+    expect(sanitizeAuditPayload({
+      amount: new Prisma.Decimal('100.00'),
+      createdAt: new Date('2026-08-06T10:00:00.000Z'),
+      ignored: () => 'not-json',
+      sequence: 18n,
+    })).toEqual({
+      amount: '100',
+      createdAt: '2026-08-06T10:00:00.000Z',
+      sequence: '18',
+    });
   });
 });

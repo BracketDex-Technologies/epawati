@@ -54,6 +54,7 @@ import {
   useGlobalFormErrorNavigation,
 } from './forms/useFormErrorNavigation';
 import {
+  editableIndianMobileNumber,
   nationalIndianMobileNumber,
   normalizeIndianPhone,
   normalizeOptionalIndianPhone,
@@ -4112,10 +4113,10 @@ function EntryCoreFields({
               maxLength={10}
               minLength={10}
               name="contributorPhone"
-              onInput={(event) => { event.currentTarget.value = nationalIndianMobileNumber(event.currentTarget.value); }}
+              onInput={(event) => { event.currentTarget.value = editableIndianMobileNumber(event.currentTarget.value); }}
               onPaste={(event) => {
                 event.preventDefault();
-                event.currentTarget.value = nationalIndianMobileNumber(event.clipboardData.getData('text'));
+                event.currentTarget.value = editableIndianMobileNumber(event.clipboardData.getData('text'));
               }}
               pattern="[6-9][0-9]{9}"
               placeholder="9876543210"

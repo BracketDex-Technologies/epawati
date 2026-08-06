@@ -320,7 +320,9 @@ test('admin slip buttons perform their duties without client errors', async ({ p
   await expect(paidCard).toHaveCSS('border-color', 'rgb(22, 163, 74)');
   await page.getByLabel(/^Name \*/).fill('Fresh Paid Donor');
   await page.getByLabel(/^Amount \*/).fill('1200');
-  await page.getByLabel(/whatsapp number/i).fill('9876543210');
+  const whatsappInput = page.getByLabel(/whatsapp number/i);
+  await whatsappInput.pressSequentially('9876543210');
+  await expect(whatsappInput).toHaveValue('9876543210');
   await page.getByRole('button', { name: /confirm & generate slip/i }).click();
   await expect(page.getByText(/slip dm-gan-2026-000003 generated/i)).toBeVisible();
 

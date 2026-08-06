@@ -1,4 +1,5 @@
 import {
+  editableIndianMobileNumber,
   nationalIndianMobileNumber,
   normalizeIndianPhone,
   printableSlipSequence,
@@ -14,6 +15,13 @@ describe('receipt identifiers', () => {
   it('normalizes the same phone consistently for storage and WhatsApp', () => {
     expect(nationalIndianMobileNumber('+91 98765 43210')).toBe('9876543210');
     expect(normalizeIndianPhone('09876543210')).toBe('919876543210');
+  });
+
+  it('keeps partial mobile typing editable while cleaning pasted values', () => {
+    expect(editableIndianMobileNumber('9')).toBe('9');
+    expect(editableIndianMobileNumber('98765')).toBe('98765');
+    expect(editableIndianMobileNumber('+91 98765 43210')).toBe('9876543210');
+    expect(editableIndianMobileNumber('987654321099')).toBe('9876543210');
   });
 
   it('does not silently truncate invalid input', () => {

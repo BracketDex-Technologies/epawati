@@ -4,9 +4,10 @@ import {
   IsEmail,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
   IsString,
+  Matches,
   Max,
   MaxLength,
   Min,
@@ -21,12 +22,17 @@ const ALLOWED_TEMPLATE_MIME_TYPES = [
   'image/webp',
 ] as const;
 
+const TEN_DIGIT_INDIAN_MOBILE = /^[6-9]\d{9}$/;
+const TEN_DIGIT_INDIAN_MOBILE_MESSAGE = 'Enter a valid 10-digit Indian mobile number.';
+
 export class CreateSocietyRegistrationDto {
   @IsString()
+  @IsNotEmpty()
   @MaxLength(180)
   societyName!: string;
 
   @IsString()
+  @IsNotEmpty()
   @MaxLength(800)
   societyAddress!: string;
 
@@ -42,12 +48,12 @@ export class CreateSocietyRegistrationDto {
   @MaxLength(180)
   secretaryName?: string;
 
-  @IsPhoneNumber('IN')
+  @Matches(TEN_DIGIT_INDIAN_MOBILE, { message: TEN_DIGIT_INDIAN_MOBILE_MESSAGE })
   chairmanMobile!: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsPhoneNumber('IN')
+  @Matches(TEN_DIGIT_INDIAN_MOBILE, { message: TEN_DIGIT_INDIAN_MOBILE_MESSAGE })
   secretaryMobile?: string;
 
   @IsInt()

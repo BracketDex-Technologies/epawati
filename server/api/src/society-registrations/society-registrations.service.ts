@@ -6,6 +6,7 @@ import { ListSocietyRegistrationsQueryDto } from './dto/list-society-registratio
 
 const MAX_TEMPLATE_BYTES = 6 * 1024 * 1024;
 const DATA_URL_PATTERN = /^data:([^;]+);base64,([a-zA-Z0-9+/=\r\n]+)$/u;
+const TEN_DIGIT_INDIAN_MOBILE = /^[6-9]\d{9}$/;
 
 @Injectable()
 export class SocietyRegistrationsService {
@@ -51,12 +52,14 @@ export class SocietyRegistrationsService {
 
   async create(dto: CreateSocietyRegistrationDto) {
     const template = this.validateTemplate(dto);
-    const chairmanMobile = normalizeIndianMobile(dto.chairmanMobile);
+    const societyName = cleanRequiredText(dto.societyName, 'Society name is required.');
+    const societyAddress = cleanRequiredText(dto.societyAddress, 'Society address is required.');
+    const chairmanMobile = normalizeSocietyMobile(dto.chairmanMobile, 'Chairman mobile number must be exactly 10 digits.');
     if (!chairmanMobile) {
       throw new BadRequestException('Chairman mobile number must be a valid Indian mobile number.');
     }
     const secretaryMobileText = cleanOptionalText(dto.secretaryMobile);
-    const secretaryMobile = secretaryMobileText ? normalizeIndianMobile(secretaryMobileText) : undefined;
+    const secretaryMobile = secretaryMobileText ? normalizeSocietyMobile(secretaryMobileText, 'Secretary mobile number must be exactly 10 digits.') : undefined;
     if (secretaryMobileText && !secretaryMobile) {
       throw new BadRequestException('Secretary mobile number must be a valid Indian mobile number.');
     }
@@ -68,8 +71,8 @@ export class SocietyRegistrationsService {
         numberOfFlats: dto.numberOfFlats,
         secretaryMobile,
         secretaryName: cleanOptionalText(dto.secretaryName),
-        societyAddress: dto.societyAddress.trim(),
-        societyName: dto.societyName.trim(),
+        societyAddress,
+        societyName,
         templateAvailable: dto.templateAvailable,
         templateDataUrl: template?.dataUrl,
         templateFileName: template?.fileName,
@@ -117,4 +120,20 @@ export class SocietyRegistrationsService {
 function cleanOptionalText(value?: string | null): string | undefined {
   const text = value?.trim();
   return text || undefined;
+}
+
+function cleanRequiredText(value: string | undefined, message: string): string {
+  const text = value?.trim();
+  if (!text) throw new BadRequestException(message);
+  return text;
+}
+
+function normalizeSocietyMobile(value: string | undefined, message: string): string {
+  const text = value?.trim();
+  if (!text || !TEN_DIGIT_INDIAN_MOBILE.test(text)) {
+    throw new BadRequestException(message);
+  }
+  const normalized = normalizeIndianMobile(text);
+  if (!normalized) throw new BadRequestException(message);
+  return normalized;
 }

@@ -6202,6 +6202,11 @@ function SocietyRegistrationPage() {
   const [message, setMessage] = useState('');
   const [submittedId, setSubmittedId] = useState('');
 
+  function keepTenDigitsOnly(event: FormEvent<HTMLInputElement>) {
+    const input = event.currentTarget;
+    input.value = input.value.replace(/\D/g, '').slice(0, 10);
+  }
+
   async function submitSocietyRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage('');
@@ -6209,11 +6214,48 @@ function SocietyRegistrationPage() {
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const templateFile = form.get('templateFile');
+    const societyName = String(form.get('societyName') || '').trim();
+    const societyAddress = String(form.get('societyAddress') || '').trim();
+    const chairmanMobile = String(form.get('chairmanMobile') || '').trim();
+    const secretaryMobile = String(form.get('secretaryMobile') || '').trim();
+    const email = String(form.get('email') || '').trim();
+    const numberOfFlats = Number(form.get('numberOfFlats') || 0);
     let templatePayload: {
       templateDataUrl?: string;
       templateFileName?: string;
       templateMimeType?: string;
     } = {};
+
+    if (!societyName) {
+      setFormFieldError(formElement, 'societyName', 'Society name is required.');
+      setMessage('Society name is required.');
+      return;
+    }
+    if (!Number.isInteger(numberOfFlats) || numberOfFlats < 1 || numberOfFlats > 5000) {
+      setFormFieldError(formElement, 'numberOfFlats', 'Enter number of flats between 1 and 5000.');
+      setMessage('Enter number of flats between 1 and 5000.');
+      return;
+    }
+    if (!societyAddress) {
+      setFormFieldError(formElement, 'societyAddress', 'Society address is required.');
+      setMessage('Society address is required.');
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(chairmanMobile)) {
+      setFormFieldError(formElement, 'chairmanMobile', 'Chairman mobile number must be exactly 10 digits.');
+      setMessage('Chairman mobile number must be exactly 10 digits.');
+      return;
+    }
+    if (secretaryMobile && !/^[6-9]\d{9}$/.test(secretaryMobile)) {
+      setFormFieldError(formElement, 'secretaryMobile', 'Secretary mobile number must be exactly 10 digits.');
+      setMessage('Secretary mobile number must be exactly 10 digits.');
+      return;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFormFieldError(formElement, 'email', 'Enter a valid email address.');
+      setMessage('Enter a valid email address.');
+      return;
+    }
 
     if (templateAvailable) {
       if (!(templateFile instanceof File) || templateFile.size === 0) {
@@ -6240,14 +6282,14 @@ function SocietyRegistrationPage() {
     try {
       const result = await apiRequest<{ id: string; ok: boolean; societyName: string }>('/society-registrations', {
         body: JSON.stringify({
-          chairmanMobile: String(form.get('chairmanMobile') || '').trim(),
+          chairmanMobile,
           chairmanName: String(form.get('chairmanName') || '').trim() || undefined,
-          email: String(form.get('email') || '').trim() || undefined,
-          numberOfFlats: Number(form.get('numberOfFlats') || 0),
-          secretaryMobile: String(form.get('secretaryMobile') || '').trim() || undefined,
+          email: email || undefined,
+          numberOfFlats,
+          secretaryMobile: secretaryMobile || undefined,
           secretaryName: String(form.get('secretaryName') || '').trim() || undefined,
-          societyAddress: String(form.get('societyAddress') || '').trim(),
-          societyName: String(form.get('societyName') || '').trim(),
+          societyAddress,
+          societyName,
           templateAvailable,
           ...templatePayload,
         }),
@@ -6275,21 +6317,21 @@ function SocietyRegistrationPage() {
           </div>
         </div>
 
-        <form className="society-registration-form" onSubmit={submitSocietyRegistration}>
+        <form className="society-registration-form" noValidate onSubmit={submitSocietyRegistration}>
           <div className="form-grid two">
-            <label>Society Name *<input name="societyName" placeholder="Sai Residency CHS" required /></label>
-            <label>No. of Flats *<input inputMode="numeric" min={1} name="numberOfFlats" placeholder="72" required type="number" /></label>
+            <label>Society Name *<input maxLength={180} name="societyName" placeholder="Sai Residency CHS" required /></label>
+            <label>No. of Flats *<input inputMode="numeric" max={5000} min={1} name="numberOfFlats" placeholder="72" required step={1} type="number" /></label>
           </div>
-          <label>Society Address *<textarea name="societyAddress" placeholder="Building name, road, locality, city" required rows={3} /></label>
+          <label>Society Address *<textarea maxLength={800} name="societyAddress" placeholder="Building name, road, locality, city" required rows={3} /></label>
           <div className="form-grid two">
-            <label>Chairman Name<input name="chairmanName" placeholder="Chairman name" /></label>
-            <label>Secretary Name<input name="secretaryName" placeholder="Secretary name" /></label>
+            <label>Chairman Name<input maxLength={180} name="chairmanName" placeholder="Chairman name" /></label>
+            <label>Secretary Name<input maxLength={180} name="secretaryName" placeholder="Secretary name" /></label>
           </div>
           <div className="form-grid two">
-            <label>Chairman Mobile No. *<input inputMode="tel" name="chairmanMobile" placeholder="9876543210" required /></label>
-            <label>Secretary Mobile No.<input inputMode="tel" name="secretaryMobile" placeholder="9876543210" /></label>
+            <label>Chairman Mobile No. *<input inputMode="numeric" maxLength={10} name="chairmanMobile" onInput={keepTenDigitsOnly} pattern="[6-9][0-9]{9}" placeholder="9876543210" required title="Enter exactly 10 digits starting with 6, 7, 8, or 9" /></label>
+            <label>Secretary Mobile No.<input inputMode="numeric" maxLength={10} name="secretaryMobile" onInput={keepTenDigitsOnly} pattern="[6-9][0-9]{9}" placeholder="9876543210" title="Enter exactly 10 digits starting with 6, 7, 8, or 9" /></label>
           </div>
-          <label>Email ID<input inputMode="email" name="email" placeholder="society@example.com" type="email" /></label>
+          <label>Email ID<input inputMode="email" maxLength={240} name="email" placeholder="society@example.com" type="email" /></label>
 
           <fieldset className="template-choice">
             <legend>Template Available?</legend>

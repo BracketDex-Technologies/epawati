@@ -46,10 +46,11 @@ describe('SocietyRegistrationsService', () => {
     const service = new SocietyRegistrationsService(prisma as never);
 
     await expect(service.create({
-      chairmanMobile: '+919876543210',
+      chairmanMobile: '9876543210',
       chairmanName: 'Amit Patil',
       email: 'chairman@example.com',
       numberOfFlats: 72,
+      secretaryMobile: '9876543211',
       secretaryName: 'Neha Shah',
       societyAddress: 'Main Road, Pune',
       societyName: 'Sai Residency',
@@ -73,11 +74,32 @@ describe('SocietyRegistrationsService', () => {
     const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn() } } as never);
 
     await expect(service.create({
-      chairmanMobile: '+919876543210',
+      chairmanMobile: '9876543210',
       numberOfFlats: 72,
       societyAddress: 'Main Road, Pune',
       societyName: 'Sai Residency',
       templateAvailable: true,
     })).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rejects society mobile numbers that are not exactly 10 digits', async () => {
+    const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn() } } as never);
+
+    await expect(service.create({
+      chairmanMobile: '+919876543210',
+      numberOfFlats: 72,
+      societyAddress: 'Main Road, Pune',
+      societyName: 'Sai Residency',
+      templateAvailable: false,
+    })).rejects.toThrow('Chairman mobile number must be exactly 10 digits.');
+
+    await expect(service.create({
+      chairmanMobile: '9876543210',
+      numberOfFlats: 72,
+      secretaryMobile: '12345',
+      societyAddress: 'Main Road, Pune',
+      societyName: 'Sai Residency',
+      templateAvailable: false,
+    })).rejects.toThrow('Secretary mobile number must be exactly 10 digits.');
   });
 });

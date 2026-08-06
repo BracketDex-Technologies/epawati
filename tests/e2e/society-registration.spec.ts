@@ -40,6 +40,33 @@ test('public society registration form stores society data', async ({ page }) =>
   });
 });
 
+test('public society registration validates mobile numbers before submit', async ({ page }) => {
+  let submitCount = 0;
+
+  await page.route('**/api/v1/society-registrations', async (route) => {
+    submitCount += 1;
+    return json(route, { ok: true });
+  });
+
+  await page.goto('/#/society-registration');
+  await page.getByLabel(/society name/i).fill('Sai Residency CHS');
+  await page.getByLabel(/no\. of flats/i).fill('72');
+  await page.getByLabel(/society address/i).fill('Main Road, Natubag, Pune');
+  await page.getByLabel(/chairman mobile/i).fill('98765');
+  await page.getByLabel(/no, continue without template/i).check();
+  await page.getByRole('button', { name: /submit registration/i }).click();
+
+  await expect(page.locator('.notice', { hasText: /chairman mobile number must be exactly 10 digits/i })).toBeVisible();
+  expect(submitCount).toBe(0);
+
+  await page.getByLabel(/chairman mobile/i).fill('9876543210');
+  await page.getByLabel(/secretary mobile/i).fill('12345');
+  await page.getByRole('button', { name: /submit registration/i }).click();
+
+  await expect(page.locator('.notice', { hasText: /secretary mobile number must be exactly 10 digits/i })).toBeVisible();
+  expect(submitCount).toBe(0);
+});
+
 test('super admin society data link shows submitted registrations', async ({ page }) => {
   const ownerSession = {
     accessToken: 'owner-access-token',

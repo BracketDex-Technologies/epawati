@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccountStatus, Prisma, TaskPriority, TaskStatus, UserRole } from '@prisma/client';
 import type { AuthContext } from '../auth/auth-context';
-import { assertSameMandal } from '../auth/tenant-scope';
+import { assertFestivalInMandal, assertSameMandal } from '../auth/tenant-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -14,6 +14,7 @@ export class TasksService {
 
   async createTask(ctx: AuthContext, mandalId: string, festivalId: string, dto: CreateTaskDto) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
     this.assertCanManageTasks(ctx);
 
     const task = await this.prisma.festivalTask.create({
@@ -38,6 +39,7 @@ export class TasksService {
 
   async listTasks(ctx: AuthContext, mandalId: string, festivalId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
     const where: Prisma.FestivalTaskWhereInput = { festivalId, mandalId };
 
     if (this.isCollector(ctx)) {
@@ -72,6 +74,7 @@ export class TasksService {
     dto: UpdateTaskDto,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const before = await this.prisma.festivalTask.findFirst({
       where: { festivalId, id: taskId, mandalId },
@@ -107,6 +110,7 @@ export class TasksService {
 
   async deleteTask(ctx: AuthContext, mandalId: string, festivalId: string, taskId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
     this.assertCanManageTasks(ctx);
 
     const before = await this.prisma.festivalTask.findFirst({

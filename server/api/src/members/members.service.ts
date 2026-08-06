@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { AccountStatus, Prisma, UserRole } from '@prisma/client';
 import argon2 from 'argon2';
 import type { AuthContext } from '../auth/auth-context';
-import { assertSameMandal } from '../auth/tenant-scope';
+import { assertFestivalInMandal, assertSameMandal } from '../auth/tenant-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
@@ -23,6 +23,7 @@ export class MembersService {
 
   async createGroup(ctx: AuthContext, mandalId: string, festivalId: string, dto: CreateGroupDto) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     return this.prisma.$transaction(async (tx) => {
       const group = await tx.memberGroup.create({
@@ -52,6 +53,7 @@ export class MembersService {
 
   async listGroups(ctx: AuthContext, mandalId: string, festivalId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     return this.prisma.memberGroup.findMany({
       include: this.groupInclude(),
@@ -68,6 +70,7 @@ export class MembersService {
     dto: UpdateGroupDto,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const before = await this.prisma.memberGroup.findFirst({
       where: { festivalId, id: groupId, mandalId },
@@ -123,6 +126,7 @@ export class MembersService {
 
   async createMember(ctx: AuthContext, mandalId: string, festivalId: string, dto: CreateMemberDto) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const role = this.normalizeCreatedMemberRole(dto.role);
 
@@ -207,6 +211,7 @@ export class MembersService {
 
   async listMembers(ctx: AuthContext, mandalId: string, festivalId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     return this.prisma.member.findMany({
       include: {
@@ -228,6 +233,7 @@ export class MembersService {
     dto: UpdateMemberDto,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const role = dto.role;
 
@@ -332,6 +338,7 @@ export class MembersService {
 
   async archiveMember(ctx: AuthContext, mandalId: string, festivalId: string, memberId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const before = await this.prisma.member.findFirst({
       include: { user: true },

@@ -3,7 +3,7 @@ import { ExpenseStatus, PaymentMode, SlipStatus } from '@prisma/client';
 import { stream as ExcelStream } from 'exceljs';
 import { PassThrough } from 'node:stream';
 import type { AuthContext } from '../auth/auth-context';
-import { assertSameMandal } from '../auth/tenant-scope';
+import { assertFestivalInMandal, assertSameMandal } from '../auth/tenant-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { CollectionReportQueryDto } from './dto/collection-report-query.dto';
 import { createAccountingPdf } from './accounting-pdf';
@@ -61,6 +61,7 @@ export class ReportsService {
     query: CollectionReportQueryDto,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const createdAt =
       query.dateFrom || query.dateTo
@@ -154,6 +155,7 @@ export class ReportsService {
     query: CollectionReportQueryDto,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const createdAt =
       query.dateFrom || query.dateTo
@@ -224,6 +226,7 @@ export class ReportsService {
     query: CollectionReportQueryDto,
   ): Promise<PassThrough> {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const createdAt =
       query.dateFrom || query.dateTo
@@ -372,6 +375,7 @@ export class ReportsService {
     query: CollectionReportQueryDto,
   ): Promise<PassThrough> {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const createdAt =
       query.dateFrom || query.dateTo

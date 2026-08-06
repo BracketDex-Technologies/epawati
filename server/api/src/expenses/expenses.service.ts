@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ExpenseStatus } from '@prisma/client';
 import type { AuthContext } from '../auth/auth-context';
-import { assertSameMandal } from '../auth/tenant-scope';
+import { assertFestivalInMandal, assertSameMandal } from '../auth/tenant-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto';
@@ -46,6 +46,7 @@ export class ExpensesService {
     proofPhoto?: { buffer: Buffer; mimetype: string; originalname: string },
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const proofAsset = proofPhoto
       ? await this.storageService.uploadBuffer({
@@ -92,6 +93,7 @@ export class ExpensesService {
 
   async listExpenses(ctx: AuthContext, mandalId: string, festivalId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const expenses = await this.prisma.expense.findMany({
       include: {
@@ -143,6 +145,7 @@ export class ExpensesService {
     dto: UpdateExpenseDto,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const before = await this.prisma.expense.findFirst({
       where: { festivalId, id: expenseId, mandalId },
@@ -171,6 +174,7 @@ export class ExpensesService {
 
   async deleteExpense(ctx: AuthContext, mandalId: string, festivalId: string, expenseId: string) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
 
     const before = await this.prisma.expense.findFirst({
       where: { festivalId, id: expenseId, mandalId },

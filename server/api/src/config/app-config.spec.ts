@@ -12,7 +12,7 @@ describe('validateAppConfig', () => {
     expect(config.AUTH_COOKIE_SECURE).toBe(false);
     expect(config.AUTH_STRICT_SESSION_CHECK).toBe(true);
     expect(config.CORS_ORIGINS).toContain('http://localhost:5173');
-    expect(config.SWAGGER_ENABLED).toBe(true);
+    expect(config.SWAGGER_ENABLED).toBe(false);
   });
 
   it('falls back to the public web origin in production', () => {

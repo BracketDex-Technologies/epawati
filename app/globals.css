@@ -4609,6 +4609,1121 @@ button.pending-action {
   }
 }
 
+/* EOF owner console: only white and brown shades, calmer professional type. */
+#root .owner-shell {
+  --owner-accent: #5a3a2b !important;
+  --owner-bg: #f7f4ef !important;
+  --owner-dark: #2b211b !important;
+  --owner-line: #e7ded3 !important;
+  --owner-muted: #786b60 !important;
+  background: var(--owner-bg) !important;
+  color: var(--owner-dark) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+#root .owner-shell *,
+#root .owner-shell *::before,
+#root .owner-shell *::after {
+  letter-spacing: 0 !important;
+}
+
+#root .owner-shell :where(h1, h2, h3, strong, b, button, label, input, select, textarea, span, small, p, em) {
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  text-transform: none !important;
+}
+
+#root .owner-shell :where(h1, h2, h3) {
+  color: var(--owner-dark) !important;
+  font-weight: 600 !important;
+  line-height: 1.18 !important;
+}
+
+#root .owner-shell :where(strong, b) {
+  color: var(--owner-dark) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(span, small, p, em, label) {
+  color: var(--owner-muted) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+#root .owner-shell :where(button, input, select, textarea) {
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell :where(.content, .app-main, .page-content) {
+  background: var(--owner-bg) !important;
+}
+
+#root .owner-shell :where(.sidebar, .brand, .user-chip, .app-topbar, .owner-client-card, .owner-detail-card, .owner-add-panel, .login-card, .empty-card, .card, .stat, .owner-toolbar, .search-input, .table-row, .partner-card, .partner-detail-card, .partner-mandal-card) {
+  background: #ffffff !important;
+  border-color: var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 24px rgba(43, 33, 27, 0.07) !important;
+}
+
+#root .owner-shell .brand {
+  box-shadow: none !important;
+}
+
+#root .owner-shell :where(.brand > span, .user-chip > span, .avatar, .avatar.small, .mandal-logo, .owner-client-main .mandal-logo, .stat div) {
+  background: #efe7dd !important;
+  border: 1px solid var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(svg, .sidebar > nav button svg, .header-actions svg, .primary svg, .logout svg) {
+  color: var(--owner-accent) !important;
+  stroke: currentColor !important;
+}
+
+#root .owner-shell .sidebar > nav button {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--owner-muted) !important;
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .sidebar > nav button.active {
+  background: #efe7dd !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 500 !important;
+}
+
+#root .owner-shell .sidebar > nav button.active::before,
+#root .owner-shell .owner-client-card::before {
+  background: var(--owner-accent) !important;
+}
+
+#root .owner-shell :where(.primary, .header-actions button, .owner-client-card button, .mandal-card-actions button, .partner-card-actions button, .partner-mandal-card button, .owner-edit-login-button, .detail-tabs button, .back-link, .logout) {
+  background: #ffffff !important;
+  border: 1px solid var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell :where(.primary, .header-actions button:first-child, .owner-add-panel .primary) {
+  background: var(--owner-accent) !important;
+  border-color: var(--owner-accent) !important;
+  color: #ffffff !important;
+}
+
+#root .owner-shell :where(.primary, .header-actions button:first-child, .owner-add-panel .primary) svg {
+  color: #ffffff !important;
+}
+
+#root .owner-shell :where(button:hover:not(:disabled), .logout:hover:not(:disabled)) {
+  background: #efe7dd !important;
+  border-color: #d8c8ba !important;
+  color: var(--owner-accent) !important;
+  transform: none !important;
+}
+
+#root .owner-shell :where(.primary:hover:not(:disabled), .header-actions button:first-child:hover:not(:disabled), .owner-add-panel .primary:hover:not(:disabled)) {
+  background: #4a2f24 !important;
+  border-color: #4a2f24 !important;
+  color: #ffffff !important;
+}
+
+#root .owner-shell .stat {
+  border-top: 1px solid var(--owner-line) !important;
+}
+
+#root .owner-shell .stat strong {
+  color: var(--owner-dark) !important;
+  font-size: clamp(24px, 5.8vw, 34px) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(input, select, textarea) {
+  background: #ffffff !important;
+  border-color: var(--owner-line) !important;
+  box-shadow: none !important;
+  color: var(--owner-dark) !important;
+}
+
+#root .owner-shell :where(.notice, .chip, .badge, .status, .mandal-card-meta span, .mandal-card-meta em, .partner-card-main em, .partner-mandal-card em) {
+  background: #efe7dd !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .sidebar-backdrop {
+  background: rgba(43, 33, 27, 0.48) !important;
+}
+
+@media (max-width: 760px) {
+  #root .owner-shell {
+    font-size: 14px !important;
+  }
+
+  #root .owner-shell .sidebar {
+    width: min(86vw, 420px) !important;
+  }
+
+  #root .owner-shell .brand strong {
+    font-size: 24px !important;
+    line-height: 1.1 !important;
+  }
+
+  #root .owner-shell .sidebar > nav button {
+    min-height: 52px !important;
+  }
+
+  #root .owner-shell .user-chip strong {
+    font-size: 16px !important;
+  }
+
+  #root .owner-shell .owner-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Owner console final brown-and-white typography pass. */
+#root .owner-shell {
+  --owner-bg: #f7f4ef !important;
+  --owner-panel: #ffffff !important;
+  --owner-panel-soft: #fbf8f4 !important;
+  --owner-line: #e7ded3 !important;
+  --owner-dark: #2b211b !important;
+  --owner-muted: #786b60 !important;
+  --owner-accent: #5a3a2b !important;
+  --owner-accent-soft: #efe7dd !important;
+  --owner-danger: #5a3a2b !important;
+  --owner-shadow: 0 10px 24px rgba(43, 33, 27, 0.07) !important;
+  background: var(--owner-bg) !important;
+  color: var(--owner-dark) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+}
+
+#root .owner-shell *,
+#root .owner-shell *::before,
+#root .owner-shell *::after {
+  letter-spacing: 0 !important;
+}
+
+#root .owner-shell :where(h1, h2, h3, h4, strong, b, button, label, input, select, textarea, small, span, p, em) {
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  text-transform: none !important;
+}
+
+#root .owner-shell :where(h1, h2, h3, h4) {
+  color: var(--owner-dark) !important;
+  font-weight: 600 !important;
+  line-height: 1.18 !important;
+}
+
+#root .owner-shell h1,
+#root .owner-shell .page-header h1 {
+  font-size: clamp(24px, 4.5vw, 34px) !important;
+}
+
+#root .owner-shell h2,
+#root .owner-shell .owner-list-head h2,
+#root .owner-shell .panel-title strong {
+  font-size: clamp(18px, 3.6vw, 24px) !important;
+}
+
+#root .owner-shell :where(strong, b) {
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(p, span, small, em, label) {
+  color: var(--owner-muted) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+#root .owner-shell :where(button, input, select, textarea) {
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .content,
+#root .owner-shell .app-main,
+#root .owner-shell .page-content {
+  background: var(--owner-bg) !important;
+}
+
+#root .owner-shell .sidebar,
+#root .owner-shell .mobile-sidebar,
+#root .owner-shell .brand,
+#root .owner-shell .user-chip,
+#root .owner-shell .app-topbar,
+#root .owner-shell .owner-client-card,
+#root .owner-shell .owner-detail-card,
+#root .owner-shell .owner-add-panel,
+#root .owner-shell .login-card,
+#root .owner-shell .empty-card,
+#root .owner-shell .card,
+#root .owner-shell .stat,
+#root .owner-shell .owner-toolbar,
+#root .owner-shell .search-input,
+#root .owner-shell .table-row,
+#root .owner-shell .partner-card,
+#root .owner-shell .partner-detail-card,
+#root .owner-shell .partner-mandal-card {
+  background: var(--owner-panel) !important;
+  border-color: var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--owner-shadow) !important;
+}
+
+#root .owner-shell .brand {
+  box-shadow: none !important;
+}
+
+#root .owner-shell .brand > span,
+#root .owner-shell .user-chip > span,
+#root .owner-shell .avatar,
+#root .owner-shell .avatar.small,
+#root .owner-shell .mandal-logo,
+#root .owner-shell .owner-client-main .mandal-logo {
+  background: var(--owner-accent-soft) !important;
+  border: 1px solid var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell .brand strong,
+#root .owner-shell .user-chip strong,
+#root .owner-shell .owner-client-main strong,
+#root .owner-shell .owner-detail-header strong,
+#root .owner-shell .partner-card-main strong,
+#root .owner-shell .partner-detail-head strong,
+#root .owner-shell .partner-mandal-card strong {
+  color: var(--owner-dark) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell .brand small,
+#root .owner-shell .user-chip small,
+#root .owner-shell .page-header p,
+#root .owner-shell .owner-list-head p,
+#root .owner-shell .owner-client-main span,
+#root .owner-shell .mandal-card-meta span,
+#root .owner-shell .mandal-card-meta em,
+#root .owner-shell .status-line span,
+#root .owner-shell .table-row span,
+#root .owner-shell .table-row em {
+  color: var(--owner-muted) !important;
+}
+
+#root .owner-shell :where(svg, .sidebar > nav button svg, .header-actions svg, .primary svg, .logout svg) {
+  color: var(--owner-accent) !important;
+  stroke: currentColor !important;
+}
+
+#root .owner-shell .sidebar > nav button {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--owner-muted) !important;
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .sidebar > nav button.active {
+  background: var(--owner-accent-soft) !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 500 !important;
+}
+
+#root .owner-shell .sidebar > nav button.active::before,
+#root .owner-shell .owner-client-card::before {
+  background: var(--owner-accent) !important;
+}
+
+#root .owner-shell .primary,
+#root .owner-shell .header-actions button,
+#root .owner-shell .owner-client-card button,
+#root .owner-shell .mandal-card-actions button,
+#root .owner-shell .partner-card-actions button,
+#root .owner-shell .partner-mandal-card button,
+#root .owner-shell .owner-edit-login-button,
+#root .owner-shell .detail-tabs button,
+#root .owner-shell .back-link,
+#root .owner-shell .logout {
+  background: var(--owner-panel) !important;
+  border: 1px solid var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .primary,
+#root .owner-shell .header-actions button:first-child,
+#root .owner-shell .owner-add-panel .primary {
+  background: var(--owner-accent) !important;
+  border-color: var(--owner-accent) !important;
+  color: #ffffff !important;
+}
+
+#root .owner-shell .primary svg,
+#root .owner-shell .header-actions button:first-child svg,
+#root .owner-shell .owner-add-panel .primary svg {
+  color: #ffffff !important;
+}
+
+#root .owner-shell :where(button:hover:not(:disabled), .primary:hover:not(:disabled), .logout:hover:not(:disabled)) {
+  background: var(--owner-accent-soft) !important;
+  border-color: #d8c8ba !important;
+  color: var(--owner-accent) !important;
+  transform: none !important;
+}
+
+#root .owner-shell .primary:hover:not(:disabled),
+#root .owner-shell .header-actions button:first-child:hover:not(:disabled),
+#root .owner-shell .owner-add-panel .primary:hover:not(:disabled) {
+  background: #4a2f24 !important;
+  border-color: #4a2f24 !important;
+  color: #ffffff !important;
+}
+
+#root .owner-shell .stat {
+  background: var(--owner-panel) !important;
+  border-top: 1px solid var(--owner-line) !important;
+}
+
+#root .owner-shell .stat div {
+  background: var(--owner-accent-soft) !important;
+  color: var(--owner-accent) !important;
+}
+
+#root .owner-shell .stat strong {
+  color: var(--owner-dark) !important;
+  font-size: clamp(24px, 5.8vw, 34px) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell .stat span,
+#root .owner-shell .stat small {
+  color: var(--owner-muted) !important;
+  font-weight: 400 !important;
+}
+
+#root .owner-shell input,
+#root .owner-shell select,
+#root .owner-shell textarea {
+  background: #ffffff !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-dark) !important;
+  box-shadow: none !important;
+}
+
+#root .owner-shell input::placeholder,
+#root .owner-shell textarea::placeholder {
+  color: #9a9088 !important;
+}
+
+#root .owner-shell .notice,
+#root .owner-shell .chip,
+#root .owner-shell .badge,
+#root .owner-shell .status,
+#root .owner-shell .mandal-card-meta span,
+#root .owner-shell .mandal-card-meta em,
+#root .owner-shell .partner-card-main em,
+#root .owner-shell .partner-mandal-card em {
+  background: var(--owner-accent-soft) !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .sidebar-backdrop {
+  background: rgba(43, 33, 27, 0.48) !important;
+}
+
+@media (max-width: 760px) {
+  #root .owner-shell {
+    font-size: 14px !important;
+  }
+
+  #root .owner-shell .sidebar {
+    width: min(86vw, 420px) !important;
+  }
+
+  #root .owner-shell .brand strong {
+    font-size: 24px !important;
+    line-height: 1.1 !important;
+  }
+
+  #root .owner-shell .sidebar > nav button {
+    min-height: 52px !important;
+  }
+
+  #root .owner-shell .user-chip strong {
+    font-size: 16px !important;
+  }
+
+  #root .owner-shell .owner-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Absolute final professional workspace ownership. */
+#root .member-shell.adhyaksh-shell,
+#root .member-shell:not(.adhyaksh-shell) {
+  --pro-bg: #f6f3ef;
+  --pro-surface: #ffffff;
+  --pro-line: #e6dfd6;
+  --pro-ink: #1f2933;
+  --pro-muted: #667085;
+  --pro-brand: #25110b;
+  --pro-accent: #c85f23;
+  --pro-accent-soft: #fff1e6;
+  --pro-success: #087443;
+  --pro-success-soft: #e9f8ef;
+  --pro-danger: #b42318;
+  --pro-danger-soft: #fff0ed;
+  --pro-shadow: 0 10px 28px rgba(51, 34, 24, 0.08);
+  background: var(--pro-bg) !important;
+  color: var(--pro-ink) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+}
+
+#root .member-shell.adhyaksh-shell *,
+#root .member-shell:not(.adhyaksh-shell) * {
+  letter-spacing: 0 !important;
+}
+
+#root .member-shell.adhyaksh-shell .adhyaksh-content,
+#root .member-shell:not(.adhyaksh-shell) .member-content {
+  background: var(--pro-bg) !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.wide-card, .metric-card, .insight-card, .ops-table, .group-chip-card),
+#root .member-shell:not(.adhyaksh-shell) :where(.member-hero, .stat, .member-table-card, .member-task-card, .member-task-item) {
+  background: var(--pro-surface) !important;
+  border: 1px solid var(--pro-line) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--pro-shadow) !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.adhyaksh-sidebar, .mobile-workspace-bar, .adhyaksh-header),
+#root .member-shell:not(.adhyaksh-shell) :where(.member-sidebar, .mobile-workspace-bar, .member-header) {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: var(--pro-line) !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(h1, h2, h3, strong, b),
+#root .member-shell:not(.adhyaksh-shell) :where(h1, h2, h3, strong, b) {
+  color: var(--pro-ink) !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.wide-card h2, .member-section-title h2),
+#root .member-shell:not(.adhyaksh-shell) :where(.member-hero h2, .member-section-title h2) {
+  font-size: 22px !important;
+  font-weight: 750 !important;
+  line-height: 1.16 !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.wide-card span, .metric-card span, .metric-card small),
+#root .member-shell:not(.adhyaksh-shell) :where(.member-hero p, .stat span, .stat small, .member-section-title p) {
+  color: var(--pro-muted) !important;
+  overflow-wrap: anywhere;
+}
+
+#root .member-shell.adhyaksh-shell :where(button, .blue-action),
+#root .member-shell:not(.adhyaksh-shell) :where(button, .primary, .mini-link) {
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  text-transform: none !important;
+  white-space: normal !important;
+}
+
+#root .member-shell.adhyaksh-shell .blue-action,
+#root .member-shell:not(.adhyaksh-shell) .primary {
+  background: var(--pro-brand) !important;
+  border-color: var(--pro-brand) !important;
+  color: #ffffff !important;
+  min-height: 44px !important;
+}
+
+#root .member-shell.adhyaksh-shell .blue-action svg,
+#root .member-shell:not(.adhyaksh-shell) .primary svg {
+  color: #ffffff !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.adhyaksh-nav button.active, .segmented button.active),
+#root .member-shell:not(.adhyaksh-shell) :where(.member-nav button.active, .tab-strip button.active) {
+  background: var(--pro-accent-soft) !important;
+  color: var(--pro-brand) !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.metric-card, .stat),
+#root .member-shell:not(.adhyaksh-shell) .stat {
+  min-height: 112px !important;
+  padding: 16px !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card strong,
+#root .member-shell:not(.adhyaksh-shell) .stat strong {
+  font-size: 28px !important;
+  font-weight: 750 !important;
+  line-height: 1.05 !important;
+  overflow-wrap: anywhere;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.green {
+  background: linear-gradient(180deg, #ffffff 0%, var(--pro-success-soft) 100%) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.green strong,
+#root .member-shell.adhyaksh-shell .pill.paid,
+#root .member-shell:not(.adhyaksh-shell) .pill.paid {
+  color: var(--pro-success) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.red {
+  background: linear-gradient(180deg, #ffffff 0%, var(--pro-danger-soft) 100%) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.red strong,
+#root .member-shell.adhyaksh-shell .pill.pending,
+#root .member-shell:not(.adhyaksh-shell) .pill.pending {
+  color: var(--pro-danger) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.blue,
+#root .member-shell.adhyaksh-shell .insight-card.blue {
+  background: linear-gradient(180deg, #ffffff 0%, var(--pro-accent-soft) 100%) !important;
+  border-color: #f0d8c8 !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.blue strong {
+  color: var(--pro-accent) !important;
+}
+
+#root .member-shell.adhyaksh-shell .ops-head {
+  background: #f9f6f1 !important;
+  color: var(--pro-muted) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  text-transform: none !important;
+}
+
+#root .member-shell.adhyaksh-shell .ops-row,
+#root .member-shell:not(.adhyaksh-shell) .member-slip-row {
+  border-color: var(--pro-line) !important;
+  color: var(--pro-ink) !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+#root .member-shell.adhyaksh-shell .ops-row > *,
+#root .member-shell:not(.adhyaksh-shell) :where(.member-slip-row > *, .member-task-item > *) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#root .member-shell.adhyaksh-shell .row-actions button,
+#root .member-shell.adhyaksh-shell .row-actions .mini-link,
+#root .member-shell:not(.adhyaksh-shell) .row-actions button,
+#root .member-shell:not(.adhyaksh-shell) .row-actions .mini-link {
+  align-items: center !important;
+  border-color: var(--pro-line) !important;
+  color: var(--pro-brand) !important;
+  display: inline-flex !important;
+  gap: 6px !important;
+  justify-content: center !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.segmented, .table-toolbar),
+#root .member-shell:not(.adhyaksh-shell) :where(.tab-strip, .table-toolbar) {
+  gap: 10px !important;
+}
+
+#root .member-shell.adhyaksh-shell .segmented,
+#root .member-shell:not(.adhyaksh-shell) .tab-strip {
+  background: #efe8df !important;
+  border: 1px solid var(--pro-line) !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+}
+
+@media (max-width: 760px) {
+  #root .member-shell.adhyaksh-shell .adhyaksh-content,
+  #root .member-shell:not(.adhyaksh-shell) .member-content {
+    padding: 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header,
+  #root .member-shell:not(.adhyaksh-shell) .member-header {
+    border-radius: 8px !important;
+    box-shadow: var(--pro-shadow) !important;
+    margin: 0 0 12px !important;
+    padding: 14px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header h1,
+  #root .member-shell:not(.adhyaksh-shell) .member-header h1 {
+    font-size: 24px !important;
+    font-weight: 750 !important;
+    line-height: 1.12 !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .top-user.mini {
+    grid-column: 1 / -1;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-strip,
+  #root .member-shell.adhyaksh-shell .metric-strip.six,
+  #root .member-shell.adhyaksh-shell .metric-strip.five-cols,
+  #root .member-shell:not(.adhyaksh-shell) .member-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-card,
+  #root .member-shell:not(.adhyaksh-shell) .stat {
+    min-height: 94px !important;
+    padding: 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-card strong,
+  #root .member-shell:not(.adhyaksh-shell) .stat strong {
+    font-size: clamp(20px, 7.2vw, 25px) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .ops-row,
+  #root .member-shell.adhyaksh-shell .ops-row.five,
+  #root .member-shell.adhyaksh-shell .ops-row.six,
+  #root .member-shell.adhyaksh-shell .members-table .ops-row,
+  #root .member-shell:not(.adhyaksh-shell) .member-slip-row,
+  #root .member-shell:not(.adhyaksh-shell) .member-task-item {
+    border-radius: 8px !important;
+    gap: 9px !important;
+    padding: 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .row-actions,
+  #root .member-shell:not(.adhyaksh-shell) .row-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Professional mobile-first workspace polish.
+   This layer owns the operational screens shown in the review screenshots. */
+#root .member-shell.adhyaksh-shell,
+#root .member-shell:not(.adhyaksh-shell) {
+  --workspace-bg: #f6f3ef;
+  --workspace-surface: #ffffff;
+  --workspace-surface-warm: #fff8f1;
+  --workspace-ink: #1f2933;
+  --workspace-muted: #667085;
+  --workspace-line: #e6dfd6;
+  --workspace-brand: #3b2016;
+  --workspace-brand-strong: #25110b;
+  --workspace-accent: #c85f23;
+  --workspace-accent-soft: #fff1e6;
+  --workspace-success: #087443;
+  --workspace-success-soft: #e9f8ef;
+  --workspace-danger: #b42318;
+  --workspace-danger-soft: #fff0ed;
+  --workspace-shadow: 0 10px 28px rgba(51, 34, 24, 0.08);
+  background: var(--workspace-bg) !important;
+  color: var(--workspace-ink) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+}
+
+#root .member-shell.adhyaksh-shell *,
+#root .member-shell:not(.adhyaksh-shell) * {
+  letter-spacing: 0 !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(h1, h2, h3, strong, b),
+#root .member-shell:not(.adhyaksh-shell) :where(h1, h2, h3, strong, b) {
+  color: var(--workspace-ink);
+}
+
+#root .member-shell.adhyaksh-shell :where(.mobile-workspace-bar, .adhyaksh-header, .member-header) {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: var(--workspace-line) !important;
+}
+
+#root .member-shell.adhyaksh-shell .adhyaksh-content,
+#root .member-shell:not(.adhyaksh-shell) .member-content {
+  background: var(--workspace-bg) !important;
+}
+
+#root .member-shell.adhyaksh-shell .adhyaksh-sidebar,
+#root .member-shell:not(.adhyaksh-shell) .member-sidebar {
+  background: #fffdf9 !important;
+  border-color: var(--workspace-line) !important;
+}
+
+#root .member-shell.adhyaksh-shell .adhyaksh-nav button,
+#root .member-shell:not(.adhyaksh-shell) .member-nav button {
+  border-radius: 10px !important;
+  color: #475467 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  min-height: 42px !important;
+}
+
+#root .member-shell.adhyaksh-shell .adhyaksh-nav button.active,
+#root .member-shell:not(.adhyaksh-shell) .member-nav button.active {
+  background: var(--workspace-accent-soft) !important;
+  color: var(--workspace-brand) !important;
+}
+
+#root .member-shell.adhyaksh-shell .adhyaksh-nav button.active svg,
+#root .member-shell:not(.adhyaksh-shell) .member-nav button.active svg,
+#root .member-shell.adhyaksh-shell .blue-action svg,
+#root .member-shell:not(.adhyaksh-shell) .primary svg {
+  color: var(--workspace-accent) !important;
+}
+
+#root .member-shell.adhyaksh-shell .wide-card,
+#root .member-shell.adhyaksh-shell .metric-card,
+#root .member-shell.adhyaksh-shell .insight-card,
+#root .member-shell.adhyaksh-shell .ops-table,
+#root .member-shell.adhyaksh-shell .group-chip-card,
+#root .member-shell:not(.adhyaksh-shell) .member-hero,
+#root .member-shell:not(.adhyaksh-shell) .stat,
+#root .member-shell:not(.adhyaksh-shell) .member-table-card,
+#root .member-shell:not(.adhyaksh-shell) .member-task-card,
+#root .member-shell:not(.adhyaksh-shell) .member-task-item {
+  background: var(--workspace-surface) !important;
+  border: 1px solid var(--workspace-line) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--workspace-shadow) !important;
+}
+
+#root .member-shell.adhyaksh-shell .action-card,
+#root .member-shell:not(.adhyaksh-shell) .member-hero {
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+#root .member-shell.adhyaksh-shell .wide-card h2,
+#root .member-shell:not(.adhyaksh-shell) .member-hero h2,
+#root .member-shell:not(.adhyaksh-shell) .member-section-title h2 {
+  color: var(--workspace-ink) !important;
+  font-size: 22px !important;
+  font-weight: 750 !important;
+  line-height: 1.16 !important;
+  margin: 0 !important;
+}
+
+#root .member-shell.adhyaksh-shell .wide-card span,
+#root .member-shell:not(.adhyaksh-shell) .member-hero p,
+#root .member-shell:not(.adhyaksh-shell) .member-section-title p {
+  color: var(--workspace-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(button, .blue-action),
+#root .member-shell:not(.adhyaksh-shell) :where(button, .primary, .mini-link) {
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  text-transform: none !important;
+  white-space: normal !important;
+}
+
+#root .member-shell.adhyaksh-shell .blue-action,
+#root .member-shell:not(.adhyaksh-shell) .primary {
+  background: var(--workspace-brand-strong) !important;
+  border: 1px solid var(--workspace-brand-strong) !important;
+  color: #ffffff !important;
+  min-height: 44px !important;
+}
+
+#root .member-shell.adhyaksh-shell .blue-action svg,
+#root .member-shell:not(.adhyaksh-shell) .primary svg {
+  color: #ffffff !important;
+}
+
+#root .member-shell.adhyaksh-shell .blue-action:hover:not(:disabled),
+#root .member-shell:not(.adhyaksh-shell) .primary:hover:not(:disabled) {
+  background: #3a1b11 !important;
+  transform: translateY(-1px);
+}
+
+#root .member-shell.adhyaksh-shell .metric-strip,
+#root .member-shell:not(.adhyaksh-shell) .member-stats {
+  gap: 12px !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card,
+#root .member-shell:not(.adhyaksh-shell) .stat {
+  min-height: 112px !important;
+  padding: 16px !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card span,
+#root .member-shell:not(.adhyaksh-shell) .stat span {
+  color: var(--workspace-muted) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1.25 !important;
+  overflow-wrap: anywhere;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card strong,
+#root .member-shell:not(.adhyaksh-shell) .stat strong {
+  color: var(--workspace-ink) !important;
+  font-size: 28px !important;
+  font-weight: 750 !important;
+  line-height: 1.05 !important;
+  overflow-wrap: anywhere;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card small,
+#root .member-shell:not(.adhyaksh-shell) .stat small {
+  color: var(--workspace-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.green,
+#root .member-shell:not(.adhyaksh-shell) .stat:has(svg) {
+  background: linear-gradient(180deg, #ffffff 0%, var(--workspace-success-soft) 100%) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.green strong,
+#root .member-shell.adhyaksh-shell .pill.paid,
+#root .member-shell:not(.adhyaksh-shell) .pill.paid {
+  color: var(--workspace-success) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.red,
+#root .member-shell.adhyaksh-shell .pill.pending,
+#root .member-shell:not(.adhyaksh-shell) .pill.pending {
+  color: var(--workspace-danger) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.red {
+  background: linear-gradient(180deg, #ffffff 0%, var(--workspace-danger-soft) 100%) !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.blue,
+#root .member-shell.adhyaksh-shell .insight-card.blue {
+  background: linear-gradient(180deg, #ffffff 0%, var(--workspace-accent-soft) 100%) !important;
+  border-color: #f0d8c8 !important;
+}
+
+#root .member-shell.adhyaksh-shell .metric-card.blue strong {
+  color: var(--workspace-accent) !important;
+}
+
+#root .member-shell.adhyaksh-shell .ops-head {
+  background: #f9f6f1 !important;
+  border-color: var(--workspace-line) !important;
+  color: #667085 !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  text-transform: none !important;
+}
+
+#root .member-shell.adhyaksh-shell .ops-row,
+#root .member-shell:not(.adhyaksh-shell) .member-slip-row {
+  border-color: var(--workspace-line) !important;
+  color: var(--workspace-ink) !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+#root .member-shell.adhyaksh-shell .ops-row strong,
+#root .member-shell:not(.adhyaksh-shell) .member-slip-row span,
+#root .member-shell:not(.adhyaksh-shell) .member-task-item strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#root .member-shell.adhyaksh-shell .row-actions button,
+#root .member-shell.adhyaksh-shell .row-actions .mini-link,
+#root .member-shell:not(.adhyaksh-shell) .row-actions button,
+#root .member-shell:not(.adhyaksh-shell) .row-actions .mini-link {
+  align-items: center !important;
+  border-color: var(--workspace-line) !important;
+  color: var(--workspace-brand) !important;
+  display: inline-flex !important;
+  gap: 6px !important;
+}
+
+#root .member-shell.adhyaksh-shell .table-toolbar,
+#root .member-shell:not(.adhyaksh-shell) .table-toolbar {
+  background: transparent !important;
+  gap: 10px !important;
+}
+
+#root .member-shell.adhyaksh-shell .segmented,
+#root .member-shell:not(.adhyaksh-shell) .tab-strip {
+  background: #efe8df !important;
+  border: 1px solid var(--workspace-line) !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+}
+
+#root .member-shell.adhyaksh-shell .segmented button.active,
+#root .member-shell:not(.adhyaksh-shell) .tab-strip button.active {
+  background: #ffffff !important;
+  color: var(--workspace-brand) !important;
+  box-shadow: 0 4px 12px rgba(51, 34, 24, 0.08) !important;
+}
+
+#root .member-shell.adhyaksh-shell :where(.search-inline, .slip-filter-control, .year-select select),
+#root .member-shell:not(.adhyaksh-shell) :where(.search-box, .member-header select) {
+  border-color: var(--workspace-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 760px) {
+  #root .member-shell.adhyaksh-shell,
+  #root .member-shell:not(.adhyaksh-shell) {
+    background: var(--workspace-bg) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .mobile-workspace-bar,
+  #root .member-shell:not(.adhyaksh-shell) .mobile-workspace-bar {
+    min-height: 64px !important;
+    padding: 10px 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .mobile-workspace-brand strong,
+  #root .member-shell:not(.adhyaksh-shell) .mobile-workspace-brand strong {
+    font-size: 16px !important;
+    font-weight: 750 !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .mobile-workspace-brand small,
+  #root .member-shell:not(.adhyaksh-shell) .mobile-workspace-brand small {
+    color: var(--workspace-muted) !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-content,
+  #root .member-shell:not(.adhyaksh-shell) .member-content {
+    padding: 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header,
+  #root .member-shell:not(.adhyaksh-shell) .member-header {
+    border-radius: 8px !important;
+    box-shadow: var(--workspace-shadow) !important;
+    margin: 0 0 12px !important;
+    padding: 14px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header h1,
+  #root .member-shell:not(.adhyaksh-shell) .member-header h1 {
+    font-size: 24px !important;
+    font-weight: 750 !important;
+    line-height: 1.12 !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .adhyaksh-header-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .top-user.mini {
+    grid-column: 1 / -1;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .wide-card,
+  #root .member-shell:not(.adhyaksh-shell) .member-hero {
+    padding: 14px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .wide-card h2,
+  #root .member-shell:not(.adhyaksh-shell) .member-hero h2 {
+    font-size: 20px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-strip,
+  #root .member-shell.adhyaksh-shell .metric-strip.six,
+  #root .member-shell.adhyaksh-shell .metric-strip.five-cols,
+  #root .member-shell:not(.adhyaksh-shell) .member-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-card,
+  #root .member-shell:not(.adhyaksh-shell) .stat {
+    min-height: 94px !important;
+    padding: 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-card strong,
+  #root .member-shell:not(.adhyaksh-shell) .stat strong {
+    font-size: clamp(20px, 7.2vw, 25px) !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-card span,
+  #root .member-shell:not(.adhyaksh-shell) .stat span {
+    font-size: 10px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .ops-row,
+  #root .member-shell.adhyaksh-shell .ops-row.five,
+  #root .member-shell.adhyaksh-shell .ops-row.six,
+  #root .member-shell.adhyaksh-shell .expenses-table .ops-row.six,
+  #root .member-shell.adhyaksh-shell .members-table .ops-row,
+  #root .member-shell:not(.adhyaksh-shell) .member-slip-row,
+  #root .member-shell:not(.adhyaksh-shell) .member-task-item {
+    border-radius: 8px !important;
+    gap: 9px !important;
+    padding: 12px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .row-actions,
+  #root .member-shell:not(.adhyaksh-shell) .row-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #root .member-shell.adhyaksh-shell .metric-strip,
+  #root .member-shell.adhyaksh-shell .metric-strip.six,
+  #root .member-shell.adhyaksh-shell .metric-strip.five-cols,
+  #root .member-shell:not(.adhyaksh-shell) .member-stats {
+    gap: 8px !important;
+  }
+
+  #root .member-shell.adhyaksh-shell .metric-card,
+  #root .member-shell:not(.adhyaksh-shell) .stat {
+    min-height: 88px !important;
+    padding: 10px !important;
+  }
+}
+
 /* Samavet warm-brown product theme.
    Matches the public landing page: cream canvas, white surfaces, soft brown accents. */
 :root {

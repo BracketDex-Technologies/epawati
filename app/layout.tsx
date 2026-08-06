@@ -1,6 +1,8 @@
 import '@fontsource-variable/inter';
 import '@fontsource-variable/noto-sans-devanagari';
 import './globals.css';
+import './design-tokens.css';
+import './owner-final.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 

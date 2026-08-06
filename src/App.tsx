@@ -53,6 +53,12 @@ import {
   setFormFieldError,
   useGlobalFormErrorNavigation,
 } from './forms/useFormErrorNavigation';
+import {
+  nationalIndianMobileNumber,
+  normalizeIndianPhone,
+  normalizeOptionalIndianPhone,
+  printableSlipSequence,
+} from './features/slips/receipt-identifiers';
 
 type PaymentMode = 'CASH' | 'UPI' | 'CHEQUE' | 'BANK_TRANSFER' | 'OTHER';
 type TextAlign = 'left' | 'center' | 'right';
@@ -666,6 +672,7 @@ export default function App() {
   const [workspaceRefreshing, setWorkspaceRefreshing] = useState(false);
   const [workspaceLoaded, setWorkspaceLoaded] = useState(false);
   const [yearChanging, setYearChanging] = useState(false);
+  const [pendingFestivalYear, setPendingFestivalYear] = useState<number | null>(null);
   const [demoMandals, setDemoMandals] = useState<DemoMandal[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [currentMandal, setCurrentMandal] = useState<DemoMandal | null>(null);
@@ -1429,19 +1436,53 @@ export default function App() {
     if (!session?.user.mandalId || yearChanging) return;
     if (festivalYear(activeForm?.festival) === year) return;
 
+    const currentSession = session;
+    const currentMandalId = session.user.mandalId;
+    setPendingFestivalYear(year);
     setYearChanging(true);
-    setNotice(`Opening Year ${year}...`);
+    setNotice(`Switching to Year ${year}...`);
     try {
-      await apiRequest(
+      const activatedFestival = await apiRequest<Festival>(
         `/mandals/${session.user.mandalId}/festivals/years/${year}/activate`,
         { method: 'POST', timeoutMs: 30_000 },
         session,
       );
-      await loadWorkspace(session);
+      setActiveForm((current) => current
+        ? { ...current, festival: activatedFestival }
+        : { customFields: [], festival: activatedFestival });
+      setSlips([]);
+      setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
+      setSlipListFilters({});
+      setSelectedSlip(null);
+      setTasks([]);
+      setExpenses([]);
+      setWorkspaceMetrics({});
       setNotice(`Year ${year} is active. Entries are saved separately for this year.`);
+
+      void (async () => {
+        try {
+          const summaryRequest = apiRequest<{ kind: 'MANDAL' | 'OWNER'; metrics: Record<string, number> }>(
+            '/workspace/summary',
+            {},
+            currentSession,
+          );
+          const detailsRequest = refreshLiveCollections(currentSession, currentMandalId, activatedFestival.id);
+          const [summary] = await Promise.all([summaryRequest, detailsRequest]);
+          if (summary.kind === 'MANDAL') setWorkspaceMetrics(summary.metrics);
+
+          const workspace = await apiRequest<WorkspaceBootstrap>('/workspace/bootstrap', {}, currentSession);
+          queryClient.setQueryData(workspaceQueryKey(currentSession), workspace);
+          writeWorkspaceCache(currentSession, workspace);
+          applyWorkspaceBootstrap(workspace, currentSession);
+          void hydrateWorkspaceDetails(currentSession, workspace);
+        } catch {
+          scheduleWorkspaceSync(currentSession, 1_500);
+        }
+      })();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : `Could not open Year ${year}.`);
     } finally {
+      setPendingFestivalYear(null);
       setYearChanging(false);
     }
   }
@@ -1945,7 +1986,7 @@ export default function App() {
         createdAt: formattedDate,
         paymentMode: slip.paymentMode || 'CASH',
         shopName: slip.shopName || '',
-        slipNumber: slip.slipNumber || '001',
+        slipNumber: printableSlipSequence(slip.slipNumber || '001'),
         areaName: slip.areaName || '',
         collectorName: session?.user.name || 'Collector',
       };
@@ -1954,12 +1995,6 @@ export default function App() {
         const baseKey = baseTemplateFieldKey(key);
         let text = values[baseKey] ?? slip.customData?.[baseKey] ?? sampleFieldValue(baseKey, baseKey);
         if (!text) return;
-
-        if (baseKey === 'slipNumber' && p.width < 150 && text.includes('-')) {
-          const parts = text.split('-');
-          const lastPart = parts[parts.length - 1];
-          text = lastPart.length > 3 ? lastPart.slice(-3) : lastPart;
-        }
 
         const renderText = transformTemplateText(receiptRenderText(baseKey, text, rawAmount), p);
         ctx.save();
@@ -2691,6 +2726,7 @@ export default function App() {
       onLoadMoreSlips={loadMoreSlips}
       onLogout={logout}
       onPrompt={askPrompt}
+      optimisticYear={pendingFestivalYear}
       onRemindMember={remindMember}
       onRefresh={() => loadWorkspace()}
       onYearChange={changeFestivalYear}
@@ -2868,6 +2904,7 @@ function AdhyakshApp({
   onPreviewChange,
   onPrepareWhatsApp,
   onPrompt,
+  optimisticYear,
   onRemindMember,
   onRefresh,
   onYearChange,
@@ -2927,6 +2964,7 @@ function AdhyakshApp({
   onPreviewChange: (url: string) => void;
   onPrepareWhatsApp: (paymentStatus: 'ACTIVE' | 'PENDING') => void;
   onPrompt: (options: ThemedPromptOptions) => Promise<string | null>;
+  optimisticYear: number | null;
   onRemindMember: (member: Member) => void;
   onRefresh: () => void;
   onYearChange: (year: number) => Promise<void> | void;
@@ -2970,7 +3008,7 @@ function AdhyakshApp({
   const [entriesExporting, setEntriesExporting] = useState<null | 'excel' | 'pdf'>(null);
   const deferredQuery = useDeferredValue(query);
   const slipFilterStartedRef = useRef(false);
-  const activeYear = festivalYear(activeForm?.festival);
+  const activeYear = optimisticYear ?? festivalYear(activeForm?.festival);
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from(new Set([currentYear, currentYear + 1, activeYear].filter(Boolean) as number[])).sort();
   const mandalIdentity = getMandalIdentity(mandal, session);
@@ -3380,8 +3418,8 @@ function AdhyakshApp({
               <Metric green label="Member Vargani" note={metricNote(`${memberPaidCount} Members Paid`)} value={metricValue(money(memberVargani))} />
               <Metric green label="Slip Vargani" note={metricNote(`${paidSlipCount} Slips Paid`)} value={metricValue(money(paidSlipAmount))} />
               <Metric red label="Pending (Members)" note={metricNote(`${memberPendingCount} Pending`)} value={metricValue(money(pendingMemberVargani))} />
-              <Metric blue label="Mandal Expenses" note={metricNote('Paid by Mandal')} value={metricValue(money(expensesTotal))} />
-              <Metric blue label="Remaining Balance" note={metricNote('Available Funds')} value={metricValue(money(balance))} />
+              <Metric label="Mandal Expenses" note={metricNote('Paid by Mandal')} tone="warning" value={metricValue(money(expensesTotal))} />
+              <Metric label="Remaining Balance" note={metricNote('Available Funds')} tone="approved" value={metricValue(money(balance))} />
             </div>
             <div className="wide-card groups-card">
               <div>
@@ -3494,7 +3532,7 @@ function AdhyakshApp({
         )}
 
         {screen === 'expenses' && (
-          <section className="adhyaksh-page">
+          <section className="adhyaksh-page expenses-page">
             <div className="wide-card action-card">
               <div><h2>Expenses (2026)</h2><span>Total for 2026: <b>{money(expensesTotal)}</b></span></div>
               <button className="blue-action" onClick={() => { setExpenseProofName(''); setExpenseOpen(true); }} type="button"><Plus size={18} />Add Expense</button>
@@ -3885,9 +3923,13 @@ function AdhyakshApp({
   );
 }
 
-function Metric({ blue, green, label, note, red, value }: { blue?: boolean; green?: boolean; label: string; note?: string; red?: boolean; value: string }) {
+type MetricTone = 'approved' | 'danger' | 'neutral' | 'success' | 'warning';
+
+function Metric({ blue, green, label, note, red, tone, value }: { blue?: boolean; green?: boolean; label: string; note?: string; red?: boolean; tone?: MetricTone; value: string }) {
+  const semanticTone: MetricTone = tone ?? (green ? 'success' : red ? 'danger' : 'neutral');
+
   return (
-    <article className={`metric-card ${green ? 'green' : ''} ${red ? 'red' : ''} ${blue ? 'blue' : ''}`}>
+    <article className={`metric-card ${green ? 'green' : ''} ${red ? 'red' : ''} ${blue ? 'neutral' : ''} tone-${semanticTone}`}>
       <span>{label}</span>
       <strong>{value}</strong>
       {note && <small>{note}</small>}
@@ -8105,23 +8147,6 @@ function whatsappStatusMessage(slip: Slip, result: WhatsAppSendResult | null | u
   return `${base} WhatsApp could not be sent. Try Share again.`;
 }
 
-function normalizeIndianPhone(phone?: string | null) {
-  let digits = String(phone ?? '').replace(/\D/g, '');
-  if (!digits) return '';
-  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
-  if (digits.length === 13 && digits.startsWith('091')) digits = digits.slice(1);
-  if (digits.length === 10) return `91${digits}`;
-  if (digits.length === 12 && digits.startsWith('91')) return digits;
-  return digits;
-}
-
-function nationalIndianMobileNumber(phone?: string | null) {
-  let digits = String(phone ?? '').replace(/\D/g, '');
-  if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
-  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
-  return digits.slice(0, 10);
-}
-
 function workspaceQueryKey(session: AuthSession) {
   return ['workspace-bootstrap', session.user.role, session.user.mandalId ?? 'owner', session.user.id];
 }
@@ -8233,15 +8258,6 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '') || 'mandal';
-}
-
-function normalizeOptionalIndianPhone(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) return '';
-  const digits = trimmed.replace(/\D/g, '');
-  if (digits.length === 10) return `+91${digits}`;
-  if (digits.length === 12 && digits.startsWith('91')) return `+${digits}`;
-  return /^\+91[6-9]\d{9}$/.test(trimmed) ? trimmed : '';
 }
 
 function fileToDataUrl(file: File) {

@@ -1,0 +1,41 @@
+:root {
+  --color-canvas: #f8f9fb;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f5f4f3;
+  --color-border: #e3e0dd;
+  --color-border-strong: #cec8c2;
+  --color-text: #241f1c;
+  --color-text-muted: #6f6761;
+  --color-text-faint: #918983;
+  --color-brand: #49372e;
+  --color-brand-strong: #2b211b;
+  --color-brand-soft: #f1ece8;
+  --color-success: #24714a;
+  --color-success-soft: #eef7f1;
+  --color-danger: #9b2c2c;
+  --color-danger-soft: #fff5f3;
+  --color-warning: #8a5a12;
+  --color-warning-soft: #fff9eb;
+
+  --font-sans: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 28px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
+  --shadow-panel: 0 1px 2px rgba(36, 31, 28, 0.06);
+  --focus-ring: 0 0 0 3px rgba(73, 55, 46, 0.16);
+}

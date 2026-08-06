@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { AuthContext } from '../auth/auth-context';
 import { assertSameMandal } from '../auth/tenant-scope';
+import { sanitizeAuditPayload } from '../common/security/audit-redaction';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditEventsQueryDto } from './dto/audit-events-query.dto';
 
@@ -31,7 +32,7 @@ export class AuditService {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.auditEvent.findMany({
         include: {
-          actor: { select: { id: true, name: true, phone: true, role: true } },
+          actor: { select: { id: true, name: true, role: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -42,7 +43,12 @@ export class AuditService {
     ]);
 
     return {
-      items,
+      items: items.map((item) => ({
+        ...item,
+        after: sanitizeAuditPayload(item.after),
+        before: sanitizeAuditPayload(item.before),
+        metadata: sanitizeAuditPayload(item.metadata),
+      })),
       meta: {
         limit: query.limit,
         page: query.page,

@@ -6,7 +6,13 @@
     "dev": "node scripts/local-server.cjs",
     "dev:hot": "node scripts/dev-server.cjs",
     "build": "prisma generate && next build --webpack",
+    "api:build": "prisma generate && tsc -p tsconfig.api.json",
+    "api:start": "node dist/main.js",
     "db:generate": "prisma generate",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "verify": "npm run typecheck && npm test && npm run build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
@@ -47,16 +53,25 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.1.28",
+    "@playwright/test": "^1.62.1",
     "@types/canvas-confetti": "^1.9.0",
     "@types/compression": "^1.7.5",
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.12.7",
     "@types/pdfkit": "^0.17.6",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "eslint": "^9.32.0",
     "eslint-config-next": "^16.2.9",
+    "jest": "^30.4.2",
     "prisma": "^6.13.0",
+    "ts-jest": "^29.4.12",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "js-yaml": "5.2.3",
+    "uuid": "11.1.1"
   }
 }

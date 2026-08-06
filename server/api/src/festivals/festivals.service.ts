@@ -44,28 +44,41 @@ export class FestivalsService {
     const yearStart = new Date(Date.UTC(year, 0, 1));
     const nextYearStart = new Date(Date.UTC(year + 1, 0, 1));
 
+    const existingFestival = await this.prisma.festival.findFirst({
+      orderBy: { startDate: 'desc' },
+      where: { mandalId, startDate: { gte: yearStart, lt: nextYearStart } },
+    });
+
+    if (existingFestival) {
+      const [, activatedFestival] = await this.prisma.$transaction([
+        this.prisma.festival.updateMany({
+          data: { status: FestivalStatus.COMPLETED },
+          where: { id: { not: existingFestival.id }, mandalId, status: FestivalStatus.ACTIVE },
+        }),
+        this.prisma.festival.update({
+          data: { status: FestivalStatus.ACTIVE },
+          where: { id: existingFestival.id },
+        }),
+      ]);
+      return activatedFestival;
+    }
+
     return this.prisma.$transaction(async (tx) => {
-      let festival = await tx.festival.findFirst({
+      const sourceFestival = await tx.festival.findFirst({
         orderBy: { startDate: 'desc' },
-        where: { mandalId, startDate: { gte: yearStart, lt: nextYearStart } },
+        where: { mandalId },
       });
 
-      if (!festival) {
-        const sourceFestival = await tx.festival.findFirst({
-          orderBy: { startDate: 'desc' },
-          where: { mandalId },
+      let festival;
+      if (sourceFestival) {
+        festival = await this.createYearFromFestival(tx, ctx, mandalId, year, sourceFestival.id);
+      } else {
+        const setup = await ensureDefaultMandalWorkspace(tx, {
+          createdByUserId: ctx.userId,
+          festivalYear: year,
+          mandalId,
         });
-
-        if (sourceFestival) {
-          festival = await this.createYearFromFestival(tx, ctx, mandalId, year, sourceFestival.id);
-        } else {
-          const setup = await ensureDefaultMandalWorkspace(tx, {
-            createdByUserId: ctx.userId,
-            festivalYear: year,
-            mandalId,
-          });
-          festival = setup.activeFestival;
-        }
+        festival = setup.activeFestival;
       }
 
       await tx.festival.updateMany({

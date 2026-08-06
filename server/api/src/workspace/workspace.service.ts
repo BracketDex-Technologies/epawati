@@ -369,7 +369,7 @@ export class WorkspaceService {
       }),
       this.prisma.varganiSlip.findMany({
         include: {
-          collector: { select: { id: true, name: true, phone: true } },
+          collector: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: 'desc' },
         take: 25,

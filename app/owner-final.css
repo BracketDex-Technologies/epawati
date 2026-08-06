@@ -1,0 +1,1011 @@
+/* Owner console final design override.
+   White plus brown shades only, with calmer professional typography. */
+#root .owner-shell {
+  --owner-bg: var(--color-canvas) !important;
+  --owner-panel: var(--color-surface) !important;
+  --owner-panel-soft: var(--color-surface-subtle) !important;
+  --owner-line: var(--color-border) !important;
+  --owner-dark: var(--color-text) !important;
+  --owner-muted: var(--color-text-muted) !important;
+  --owner-accent: var(--color-brand) !important;
+  --owner-accent-soft: var(--color-brand-soft) !important;
+  --owner-shadow: var(--shadow-panel) !important;
+  background: var(--owner-bg) !important;
+  color: var(--owner-dark) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+#root .owner-shell *,
+#root .owner-shell *::before,
+#root .owner-shell *::after {
+  letter-spacing: 0 !important;
+}
+
+#root .owner-shell :where(h1, h2, h3, strong, b, button, label, input, select, textarea, span, small, p, em) {
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  text-transform: none !important;
+}
+
+#root .owner-shell :where(h1, h2, h3) {
+  color: var(--owner-dark) !important;
+  font-weight: 600 !important;
+  line-height: 1.18 !important;
+}
+
+#root .owner-shell h1,
+#root .owner-shell .page-header h1 {
+  font-size: clamp(24px, 4.5vw, 34px) !important;
+}
+
+#root .owner-shell h2,
+#root .owner-shell .owner-list-head h2,
+#root .owner-shell .panel-title strong {
+  font-size: clamp(18px, 3.6vw, 24px) !important;
+}
+
+#root .owner-shell :where(strong, b) {
+  color: var(--owner-dark) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(span, small, p, em, label) {
+  color: var(--owner-muted) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+#root .owner-shell :where(button, input, select, textarea) {
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell :where(.content, .app-main, .page-content) {
+  background: var(--owner-bg) !important;
+}
+
+#root .owner-shell :where(.sidebar, .brand, .user-chip, .app-topbar, .owner-client-card, .owner-detail-card, .owner-add-panel, .login-card, .empty-card, .card, .stat, .owner-toolbar, .search-input, .table-row, .partner-card, .partner-detail-card, .partner-mandal-card) {
+  background: var(--owner-panel) !important;
+  border-color: var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--owner-shadow) !important;
+}
+
+#root .owner-shell .brand {
+  box-shadow: none !important;
+}
+
+#root .owner-shell :where(.brand > span, .user-chip > span, .avatar, .avatar.small, .mandal-logo, .owner-client-main .mandal-logo, .stat div) {
+  background: var(--owner-accent-soft) !important;
+  border: 1px solid var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(svg, .sidebar > nav button svg, .header-actions svg, .primary svg, .logout svg) {
+  color: var(--owner-accent) !important;
+  stroke: currentColor !important;
+}
+
+#root .owner-shell .sidebar > nav button {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--owner-muted) !important;
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .sidebar > nav button.active {
+  background: var(--owner-accent-soft) !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 500 !important;
+}
+
+#root .owner-shell .sidebar > nav button.active::before,
+#root .owner-shell .owner-client-card::before {
+  background: var(--owner-accent) !important;
+}
+
+#root .owner-shell :where(.primary, .header-actions button, .owner-client-card button, .mandal-card-actions button, .partner-card-actions button, .partner-mandal-card button, .owner-edit-login-button, .detail-tabs button, .back-link, .logout) {
+  background: var(--owner-panel) !important;
+  border: 1px solid var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell :where(.primary, .header-actions button:first-child, .owner-add-panel .primary) {
+  background: var(--owner-accent) !important;
+  border-color: var(--owner-accent) !important;
+  color: #ffffff !important;
+}
+
+#root .owner-shell :where(.primary, .header-actions button:first-child, .owner-add-panel .primary) svg {
+  color: #ffffff !important;
+}
+
+#root .owner-shell :where(button:hover:not(:disabled), .logout:hover:not(:disabled)) {
+  background: var(--owner-accent-soft) !important;
+  border-color: #d8c8ba !important;
+  color: var(--owner-accent) !important;
+  transform: none !important;
+}
+
+#root .owner-shell :where(.primary:hover:not(:disabled), .header-actions button:first-child:hover:not(:disabled), .owner-add-panel .primary:hover:not(:disabled)) {
+  background: #4a2f24 !important;
+  border-color: #4a2f24 !important;
+  color: #ffffff !important;
+}
+
+#root .owner-shell .stat {
+  border-top: 1px solid var(--owner-line) !important;
+}
+
+#root .owner-shell .stat strong {
+  color: var(--owner-dark) !important;
+  font-size: clamp(24px, 5.8vw, 34px) !important;
+  font-weight: 550 !important;
+}
+
+#root .owner-shell :where(input, select, textarea) {
+  background: #ffffff !important;
+  border-color: var(--owner-line) !important;
+  box-shadow: none !important;
+  color: var(--owner-dark) !important;
+}
+
+#root .owner-shell input::placeholder,
+#root .owner-shell textarea::placeholder {
+  color: #958a81 !important;
+}
+
+#root .owner-shell :where(.notice, .chip, .badge, .status, .mandal-card-meta span, .mandal-card-meta em, .partner-card-main em, .partner-mandal-card em) {
+  background: var(--owner-accent-soft) !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+#root .owner-shell .sidebar-backdrop {
+  background: rgba(43, 33, 27, 0.48) !important;
+}
+
+@media (max-width: 760px) {
+  #root .owner-shell {
+    font-size: 14px !important;
+  }
+
+  #root .owner-shell .sidebar {
+    width: min(86vw, 420px) !important;
+  }
+
+  #root .owner-shell .brand strong {
+    font-size: 24px !important;
+    line-height: 1.1 !important;
+  }
+
+  #root .owner-shell .sidebar > nav button {
+    min-height: 52px !important;
+  }
+
+  #root .owner-shell .user-chip strong {
+    font-size: 16px !important;
+  }
+
+  #root .owner-shell .owner-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Same final owner rules without #root: this app renders directly under body. */
+.owner-shell {
+  --owner-bg: var(--color-canvas) !important;
+  --owner-panel: var(--color-surface) !important;
+  --owner-panel-soft: var(--color-surface-subtle) !important;
+  --owner-line: var(--color-border) !important;
+  --owner-dark: var(--color-text) !important;
+  --owner-muted: var(--color-text-muted) !important;
+  --owner-accent: var(--color-brand) !important;
+  --owner-accent-soft: var(--color-brand-soft) !important;
+  --owner-shadow: var(--shadow-panel) !important;
+  background: var(--owner-bg) !important;
+  color: var(--owner-dark) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+.owner-shell *,
+.owner-shell *::before,
+.owner-shell *::after {
+  letter-spacing: 0 !important;
+}
+
+.owner-shell :where(h1, h2, h3, strong, b, button, label, input, select, textarea, span, small, p, em) {
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  text-transform: none !important;
+}
+
+.owner-shell :where(h1, h2, h3) {
+  color: var(--owner-dark) !important;
+  font-weight: 600 !important;
+  line-height: 1.18 !important;
+}
+
+.owner-shell h1,
+.owner-shell .page-header h1 {
+  font-size: clamp(24px, 4.5vw, 34px) !important;
+}
+
+.owner-shell h2,
+.owner-shell .owner-list-head h2,
+.owner-shell .panel-title strong {
+  font-size: clamp(18px, 3.6vw, 24px) !important;
+}
+
+.owner-shell :where(strong, b) {
+  color: var(--owner-dark) !important;
+  font-weight: 550 !important;
+}
+
+.owner-shell :where(span, small, p, em, label) {
+  color: var(--owner-muted) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+.owner-shell :where(button, input, select, textarea) {
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+.owner-shell :where(.content, .app-main, .page-content) {
+  background: var(--owner-bg) !important;
+}
+
+.owner-shell :where(.sidebar, .brand, .user-chip, .app-topbar, .owner-client-card, .owner-detail-card, .owner-add-panel, .login-card, .empty-card, .card, .stat, .owner-toolbar, .search-input, .table-row, .partner-card, .partner-detail-card, .partner-mandal-card) {
+  background: var(--owner-panel) !important;
+  border-color: var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--owner-shadow) !important;
+}
+
+.owner-shell .brand {
+  box-shadow: none !important;
+}
+
+.owner-shell :where(.brand > span, .user-chip > span, .avatar, .avatar.small, .mandal-logo, .owner-client-main .mandal-logo, .stat div) {
+  background: var(--owner-accent-soft) !important;
+  border: 1px solid var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 550 !important;
+}
+
+.owner-shell :where(svg, .sidebar > nav button svg, .header-actions svg, .primary svg, .logout svg) {
+  color: var(--owner-accent) !important;
+  stroke: currentColor !important;
+}
+
+.owner-shell .sidebar > nav button {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--owner-muted) !important;
+  font-size: 14px !important;
+  font-weight: 450 !important;
+}
+
+.owner-shell .sidebar > nav button.active {
+  background: var(--owner-accent-soft) !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 500 !important;
+}
+
+.owner-shell .sidebar > nav button.active::before,
+.owner-shell .owner-client-card::before {
+  background: var(--owner-accent) !important;
+}
+
+.owner-shell :where(.primary, .header-actions button, .owner-client-card button, .mandal-card-actions button, .partner-card-actions button, .partner-mandal-card button, .owner-edit-login-button, .detail-tabs button, .back-link, .logout) {
+  background: var(--owner-panel) !important;
+  border: 1px solid var(--owner-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+.owner-shell :where(.primary, .header-actions button:first-child, .owner-add-panel .primary) {
+  background: var(--owner-accent) !important;
+  border-color: var(--owner-accent) !important;
+  color: #ffffff !important;
+}
+
+.owner-shell :where(.primary, .header-actions button:first-child, .owner-add-panel .primary) svg {
+  color: #ffffff !important;
+}
+
+.owner-shell :where(button:hover:not(:disabled), .logout:hover:not(:disabled)) {
+  background: var(--owner-accent-soft) !important;
+  border-color: #d8c8ba !important;
+  color: var(--owner-accent) !important;
+  transform: none !important;
+}
+
+.owner-shell :where(.primary:hover:not(:disabled), .header-actions button:first-child:hover:not(:disabled), .owner-add-panel .primary:hover:not(:disabled)) {
+  background: #4a2f24 !important;
+  border-color: #4a2f24 !important;
+  color: #ffffff !important;
+}
+
+.owner-shell .stat {
+  border-top: 1px solid var(--owner-line) !important;
+}
+
+.owner-shell .stat strong {
+  color: var(--owner-dark) !important;
+  font-size: clamp(24px, 5.8vw, 34px) !important;
+  font-weight: 550 !important;
+}
+
+.owner-shell :where(input, select, textarea) {
+  background: #ffffff !important;
+  border-color: var(--owner-line) !important;
+  box-shadow: none !important;
+  color: var(--owner-dark) !important;
+}
+
+.owner-shell input::placeholder,
+.owner-shell textarea::placeholder {
+  color: #958a81 !important;
+}
+
+.owner-shell :where(.notice, .chip, .badge, .status, .mandal-card-meta span, .mandal-card-meta em, .partner-card-main em, .partner-mandal-card em) {
+  background: var(--owner-accent-soft) !important;
+  border-color: var(--owner-line) !important;
+  color: var(--owner-accent) !important;
+  font-weight: 450 !important;
+}
+
+.owner-shell .sidebar-backdrop {
+  background: rgba(43, 33, 27, 0.48) !important;
+}
+
+@media (max-width: 760px) {
+  .owner-shell {
+    font-size: 14px !important;
+  }
+
+  .owner-shell .sidebar {
+    width: min(86vw, 420px) !important;
+  }
+
+  .owner-shell .brand strong {
+    font-size: 24px !important;
+    line-height: 1.1 !important;
+  }
+
+  .owner-shell .sidebar > nav button {
+    min-height: 52px !important;
+  }
+
+  .owner-shell .user-chip strong {
+    font-size: 16px !important;
+  }
+
+  .owner-shell .owner-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Mandal/member workspace: remove remaining blue accents. */
+.member-shell,
+.adhyaksh-shell,
+.collector-shell {
+  --workspace-bg: var(--color-canvas) !important;
+  --workspace-panel: var(--color-surface) !important;
+  --workspace-line: var(--color-border) !important;
+  --workspace-dark: var(--color-text) !important;
+  --workspace-muted: var(--color-text-muted) !important;
+  --workspace-accent: var(--color-brand) !important;
+  --workspace-accent-soft: var(--color-brand-soft) !important;
+  background: var(--workspace-bg) !important;
+  color: var(--workspace-dark) !important;
+}
+
+.member-shell :where(.member-content, .adhyaksh-content),
+.adhyaksh-shell .adhyaksh-content,
+.collector-shell .member-content {
+  background: var(--workspace-bg) !important;
+}
+
+.member-shell :where(.member-sidebar, .adhyaksh-sidebar, .mobile-workspace-bar, .mandal-identity, .mandal-contact-card),
+.adhyaksh-shell :where(.member-sidebar, .adhyaksh-sidebar, .mobile-workspace-bar, .mandal-identity, .mandal-contact-card),
+.collector-shell :where(.member-sidebar, .mobile-workspace-bar, .mandal-identity, .mandal-contact-card) {
+  background: var(--workspace-panel) !important;
+  border-color: var(--workspace-line) !important;
+}
+
+.member-shell :where(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span),
+.adhyaksh-shell :where(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span),
+.collector-shell :where(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span) {
+  background: var(--workspace-accent-soft) !important;
+  border-color: var(--workspace-line) !important;
+  color: var(--workspace-accent) !important;
+  font-weight: 550 !important;
+}
+
+.member-shell :where(.member-nav button, .adhyaksh-nav button),
+.adhyaksh-shell :where(.member-nav button, .adhyaksh-nav button),
+.collector-shell .member-nav button {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--workspace-muted) !important;
+  font-weight: 450 !important;
+}
+
+.member-shell :where(.member-nav button.active, .adhyaksh-nav button.active),
+.adhyaksh-shell :where(.member-nav button.active, .adhyaksh-nav button.active),
+.collector-shell .member-nav button.active {
+  background: var(--workspace-accent-soft) !important;
+  border-color: var(--workspace-line) !important;
+  color: var(--workspace-accent) !important;
+  font-weight: 500 !important;
+}
+
+.member-shell :where(.member-nav button.active::before, .adhyaksh-nav button.active::before),
+.adhyaksh-shell :where(.member-nav button.active::before, .adhyaksh-nav button.active::before),
+.collector-shell .member-nav button.active::before {
+  background: var(--workspace-accent) !important;
+}
+
+.member-shell :where(svg, .member-nav button svg, .adhyaksh-nav button svg),
+.adhyaksh-shell :where(svg, .member-nav button svg, .adhyaksh-nav button svg),
+.collector-shell :where(svg, .member-nav button svg) {
+  color: var(--workspace-accent) !important;
+  stroke: currentColor !important;
+}
+
+.member-shell :where(h1, h2, h3, strong, b),
+.adhyaksh-shell :where(h1, h2, h3, strong, b),
+.collector-shell :where(h1, h2, h3, strong, b) {
+  color: var(--workspace-dark) !important;
+  font-weight: 550 !important;
+}
+
+.member-shell :where(span, small, p, em),
+.adhyaksh-shell :where(span, small, p, em),
+.collector-shell :where(span, small, p, em) {
+  color: var(--workspace-muted) !important;
+  font-weight: 400 !important;
+}
+
+.member-shell :where(.blue-action, .primary),
+.adhyaksh-shell :where(.blue-action, .primary),
+.collector-shell :where(.blue-action, .primary) {
+  background: var(--workspace-accent) !important;
+  border-color: var(--workspace-accent) !important;
+  color: #ffffff !important;
+}
+
+.member-shell :where(.blue-action, .primary) svg,
+.adhyaksh-shell :where(.blue-action, .primary) svg,
+.collector-shell :where(.blue-action, .primary) svg {
+  color: #ffffff !important;
+}
+
+/* Strong specificity pass for older !important blue sidebar rules. */
+.member-shell .member-sidebar .member-nav button.active,
+.member-shell .member-sidebar .adhyaksh-nav button.active,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active,
+.collector-shell .member-sidebar .member-nav button.active {
+  background: #efe7dd !important;
+  border-color: #e7ded3 !important;
+  color: #5a3a2b !important;
+  font-weight: 500 !important;
+}
+
+.member-shell .member-sidebar .member-nav button.active *,
+.member-shell .member-sidebar .adhyaksh-nav button.active *,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active *,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active *,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active *,
+.collector-shell .member-sidebar .member-nav button.active * {
+  color: #5a3a2b !important;
+  stroke: currentColor !important;
+}
+
+.member-shell .member-sidebar .member-nav button.active::before,
+.member-shell .member-sidebar .adhyaksh-nav button.active::before,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active::before,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active::before,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active::before,
+.collector-shell .member-sidebar .member-nav button.active::before {
+  background: #5a3a2b !important;
+}
+
+.member-shell .member-sidebar :where(.mandal-seal, .mandal-logo, .mobile-user-avatar),
+.member-shell.adhyaksh-shell .adhyaksh-sidebar :where(.mandal-seal, .mandal-logo, .mobile-user-avatar),
+.adhyaksh-shell .adhyaksh-sidebar :where(.mandal-seal, .mandal-logo, .mobile-user-avatar),
+.collector-shell .member-sidebar :where(.mandal-seal, .mandal-logo, .mobile-user-avatar) {
+  background: #efe7dd !important;
+  border-color: #e7ded3 !important;
+  color: #5a3a2b !important;
+  font-weight: 550 !important;
+}
+
+/* Login screen: remove the dark outer brown frame/border. */
+html:has(.login-shell),
+body:has(.login-shell) {
+  background: #fbf8f4 !important;
+}
+
+.auth-shell,
+.login-shell {
+  background: #fbf8f4 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.login-shell::before,
+.login-shell::after,
+.auth-shell::before,
+.auth-shell::after {
+  display: none !important;
+}
+
+/* Login form values should read like typed text, not headings. */
+.login-panel.clean input,
+.login-panel.clean .password-field input,
+.login-panel.clean input[type="text"],
+.login-panel.clean input[type="password"],
+.login-panel.clean input:-webkit-autofill {
+  color: #2b211b !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+}
+
+.login-panel.clean input::placeholder {
+  color: #8f857c !important;
+  font-weight: 400 !important;
+}
+
+/* Actual app polish v2: neutral product UI, tiny brown brand accent only. */
+.member-shell,
+.member-shell.adhyaksh-shell,
+.adhyaksh-shell,
+.collector-shell {
+  --ui-bg: var(--color-canvas) !important;
+  --ui-panel: var(--color-surface) !important;
+  --ui-panel-soft: var(--color-surface-subtle) !important;
+  --ui-line: var(--color-border) !important;
+  --ui-line-strong: var(--color-border-strong) !important;
+  --ui-text: var(--color-text) !important;
+  --ui-muted: var(--color-text-muted) !important;
+  --ui-faint: var(--color-text-faint) !important;
+  --ui-brand: var(--color-brand) !important;
+  --ui-brand-strong: var(--color-brand-strong) !important;
+  --ui-success: var(--color-success) !important;
+  --ui-danger: var(--color-danger) !important;
+  --ui-shadow: var(--shadow-panel) !important;
+  background: var(--ui-bg) !important;
+  color: var(--ui-text) !important;
+  font-family: "Inter Variable", "Noto Sans Devanagari Variable", Inter, "Segoe UI", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+.member-shell *,
+.member-shell.adhyaksh-shell *,
+.adhyaksh-shell *,
+.collector-shell * {
+  letter-spacing: 0 !important;
+}
+
+.member-shell :is(h1, h2, h3, h4, strong, b),
+.member-shell.adhyaksh-shell :is(h1, h2, h3, h4, strong, b),
+.adhyaksh-shell :is(h1, h2, h3, h4, strong, b),
+.collector-shell :is(h1, h2, h3, h4, strong, b) {
+  color: var(--ui-text) !important;
+  font-weight: 500 !important;
+}
+
+.member-shell :is(span, small, p, em, i, label),
+.member-shell.adhyaksh-shell :is(span, small, p, em, i, label),
+.adhyaksh-shell :is(span, small, p, em, i, label),
+.collector-shell :is(span, small, p, em, i, label) {
+  color: var(--ui-muted) !important;
+  font-weight: 400 !important;
+}
+
+.member-shell :is(button, input, select, textarea),
+.member-shell.adhyaksh-shell :is(button, input, select, textarea),
+.adhyaksh-shell :is(button, input, select, textarea),
+.collector-shell :is(button, input, select, textarea) {
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+.member-shell :is(.member-content, .adhyaksh-content),
+.member-shell.adhyaksh-shell :is(.member-content, .adhyaksh-content),
+.adhyaksh-shell :is(.member-content, .adhyaksh-content),
+.collector-shell .member-content {
+  background: var(--ui-bg) !important;
+}
+
+.member-shell :is(.member-sidebar, .adhyaksh-sidebar, .mobile-workspace-bar, .adhyaksh-header, .member-header, .wide-card, .action-card, .groups-card, .metric-card, .ops-table, .group-chip-card, .insight-card),
+.member-shell.adhyaksh-shell :is(.member-sidebar, .adhyaksh-sidebar, .mobile-workspace-bar, .adhyaksh-header, .member-header, .wide-card, .action-card, .groups-card, .metric-card, .ops-table, .group-chip-card, .insight-card),
+.adhyaksh-shell :is(.member-sidebar, .adhyaksh-sidebar, .mobile-workspace-bar, .adhyaksh-header, .member-header, .wide-card, .action-card, .groups-card, .metric-card, .ops-table, .group-chip-card, .insight-card),
+.collector-shell :is(.member-sidebar, .mobile-workspace-bar, .member-header, .member-hero, .stat, .member-table-card, .member-task-card, .member-task-item) {
+  background: var(--ui-panel) !important;
+  border-color: var(--ui-line) !important;
+  border-radius: 10px !important;
+  box-shadow: var(--ui-shadow) !important;
+}
+
+.member-shell :is(.portal-brand, .mandal-identity, .mandal-contact-card, .sidebar-footer),
+.member-shell.adhyaksh-shell :is(.portal-brand, .mandal-identity, .mandal-contact-card, .sidebar-footer),
+.adhyaksh-shell :is(.portal-brand, .mandal-identity, .mandal-contact-card, .sidebar-footer),
+.collector-shell :is(.mandal-profile, .mandal-contact, .sidebar-footer) {
+  background: var(--ui-panel) !important;
+  border-color: var(--ui-line) !important;
+  box-shadow: none !important;
+}
+
+.member-shell :is(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span),
+.member-shell.adhyaksh-shell :is(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span),
+.adhyaksh-shell :is(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span),
+.collector-shell :is(.mandal-seal, .mandal-logo, .mobile-user-avatar, .avatar, .top-user > span) {
+  background: #f7f7f8 !important;
+  border: 1px solid var(--ui-line) !important;
+  color: var(--ui-brand) !important;
+  font-weight: 500 !important;
+}
+
+.member-shell :is(.member-nav button, .adhyaksh-nav button),
+.member-shell.adhyaksh-shell :is(.member-nav button, .adhyaksh-nav button),
+.adhyaksh-shell :is(.member-nav button, .adhyaksh-nav button),
+.collector-shell .member-nav button {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  color: var(--ui-muted) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+.member-shell .member-sidebar .member-nav button.active,
+.member-shell .member-sidebar .adhyaksh-nav button.active,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active,
+.collector-shell .member-sidebar .member-nav button.active,
+.member-shell :is(.member-nav button.active, .adhyaksh-nav button.active),
+.member-shell.adhyaksh-shell :is(.member-nav button.active, .adhyaksh-nav button.active),
+.adhyaksh-shell :is(.member-nav button.active, .adhyaksh-nav button.active),
+.collector-shell .member-nav button.active {
+  background: var(--ui-panel-soft) !important;
+  border-color: transparent !important;
+  color: var(--ui-text) !important;
+  font-weight: 500 !important;
+}
+
+.member-shell .member-sidebar .member-nav button.active *,
+.member-shell .member-sidebar .adhyaksh-nav button.active *,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active *,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active *,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active *,
+.collector-shell .member-sidebar .member-nav button.active *,
+.member-shell :is(.member-nav button.active, .adhyaksh-nav button.active) *,
+.member-shell.adhyaksh-shell :is(.member-nav button.active, .adhyaksh-nav button.active) *,
+.adhyaksh-shell :is(.member-nav button.active, .adhyaksh-nav button.active) *,
+.collector-shell .member-nav button.active * {
+  color: var(--ui-text) !important;
+  stroke: currentColor !important;
+}
+
+.member-shell .member-sidebar .member-nav button.active::before,
+.member-shell .member-sidebar .adhyaksh-nav button.active::before,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active::before,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active::before,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active::before,
+.collector-shell .member-sidebar .member-nav button.active::before,
+.member-shell :is(.member-nav button.active, .adhyaksh-nav button.active)::before,
+.member-shell.adhyaksh-shell :is(.member-nav button.active, .adhyaksh-nav button.active)::before,
+.adhyaksh-shell :is(.member-nav button.active, .adhyaksh-nav button.active)::before,
+.collector-shell .member-nav button.active::before {
+  background: var(--ui-brand) !important;
+}
+
+.member-shell :is(svg, .member-nav button svg, .adhyaksh-nav button svg, .row-actions svg),
+.member-shell.adhyaksh-shell :is(svg, .member-nav button svg, .adhyaksh-nav button svg, .row-actions svg),
+.adhyaksh-shell :is(svg, .member-nav button svg, .adhyaksh-nav button svg, .row-actions svg),
+.collector-shell :is(svg, .member-nav button svg, .row-actions svg) {
+  color: var(--ui-muted) !important;
+  stroke: currentColor !important;
+}
+
+.member-shell :is(.blue-action, .primary),
+.member-shell.adhyaksh-shell :is(.blue-action, .primary),
+.adhyaksh-shell :is(.blue-action, .primary),
+.collector-shell :is(.blue-action, .primary) {
+  background: var(--ui-brand-strong) !important;
+  border-color: var(--ui-brand-strong) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+.member-shell :is(.blue-action, .primary) *,
+.member-shell.adhyaksh-shell :is(.blue-action, .primary) *,
+.adhyaksh-shell :is(.blue-action, .primary) *,
+.collector-shell :is(.blue-action, .primary) * {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+.member-shell :is(.metric-card.blue, .metric-card.green, .metric-card.red, .insight-card.blue),
+.member-shell.adhyaksh-shell :is(.metric-card.blue, .metric-card.green, .metric-card.red, .insight-card.blue),
+.adhyaksh-shell :is(.metric-card.blue, .metric-card.green, .metric-card.red, .insight-card.blue),
+.collector-shell :is(.stat) {
+  background: var(--ui-panel) !important;
+  border-color: var(--ui-line) !important;
+}
+
+.member-shell :is(.metric-card strong, .stat strong),
+.member-shell.adhyaksh-shell :is(.metric-card strong, .stat strong),
+.adhyaksh-shell :is(.metric-card strong, .stat strong),
+.collector-shell :is(.metric-card strong, .stat strong) {
+  color: var(--ui-text) !important;
+  font-weight: 500 !important;
+}
+
+.member-shell :is(.pill, .chips span, .leader-badge),
+.member-shell.adhyaksh-shell :is(.pill, .chips span, .leader-badge),
+.adhyaksh-shell :is(.pill, .chips span, .leader-badge),
+.collector-shell :is(.pill, .chips span, .leader-badge) {
+  background: #f7f7f8 !important;
+  border-color: var(--ui-line) !important;
+  color: var(--ui-muted) !important;
+  font-weight: 400 !important;
+}
+
+.member-shell :is(.pill.paid),
+.member-shell.adhyaksh-shell :is(.pill.paid),
+.adhyaksh-shell :is(.pill.paid),
+.collector-shell :is(.pill.paid) {
+  background: #eef7f1 !important;
+  border-color: #cce8d4 !important;
+  color: var(--ui-success) !important;
+}
+
+.member-shell :is(.pill.pending),
+.member-shell.adhyaksh-shell :is(.pill.pending),
+.adhyaksh-shell :is(.pill.pending),
+.collector-shell :is(.pill.pending) {
+  background: #fff5f3 !important;
+  border-color: #f1d0ca !important;
+  color: var(--ui-danger) !important;
+}
+
+.member-shell :is(.ops-head, .members-head),
+.member-shell.adhyaksh-shell :is(.ops-head, .members-head),
+.adhyaksh-shell :is(.ops-head, .members-head),
+.collector-shell :is(.member-slip-head) {
+  background: #fafafa !important;
+  border-color: var(--ui-line) !important;
+  color: var(--ui-muted) !important;
+  font-weight: 400 !important;
+}
+
+.member-shell :is(.ops-row, .member-slip-row),
+.member-shell.adhyaksh-shell :is(.ops-row, .member-slip-row),
+.adhyaksh-shell :is(.ops-row, .member-slip-row),
+.collector-shell :is(.ops-row, .member-slip-row) {
+  background: var(--ui-panel) !important;
+  border-color: var(--ui-line) !important;
+  color: var(--ui-text) !important;
+  box-shadow: none !important;
+}
+
+.member-shell :is(.row-actions button, .mini-link, .whatsapp-action),
+.member-shell.adhyaksh-shell :is(.row-actions button, .mini-link, .whatsapp-action),
+.adhyaksh-shell :is(.row-actions button, .mini-link, .whatsapp-action),
+.collector-shell :is(.row-actions button, .mini-link, .whatsapp-action) {
+  background: var(--ui-panel) !important;
+  border-color: var(--ui-line) !important;
+  color: var(--ui-text) !important;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 760px) {
+  .member-shell .member-sidebar,
+  .member-shell.adhyaksh-shell .adhyaksh-sidebar,
+  .adhyaksh-shell .adhyaksh-sidebar,
+  .collector-shell .member-sidebar {
+    width: min(88vw, 430px) !important;
+  }
+
+  .member-shell :is(.mobile-workspace-bar, .adhyaksh-header, .member-header),
+  .member-shell.adhyaksh-shell :is(.mobile-workspace-bar, .adhyaksh-header, .member-header),
+  .adhyaksh-shell :is(.mobile-workspace-bar, .adhyaksh-header, .member-header),
+  .collector-shell :is(.mobile-workspace-bar, .member-header) {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .member-shell :is(.metric-strip, .metric-strip.six, .metric-strip.five-cols, .member-stats),
+  .member-shell.adhyaksh-shell :is(.metric-strip, .metric-strip.six, .metric-strip.five-cols, .member-stats),
+  .adhyaksh-shell :is(.metric-strip, .metric-strip.six, .metric-strip.five-cols, .member-stats),
+  .collector-shell :is(.member-stats) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .member-shell :is(.metric-card, .stat),
+  .member-shell.adhyaksh-shell :is(.metric-card, .stat),
+  .adhyaksh-shell :is(.metric-card, .stat),
+  .collector-shell :is(.metric-card, .stat) {
+    min-height: 86px !important;
+    padding: 12px !important;
+  }
+}
+
+/* Final no-tint icon cleanup for the live mandal sidebar. */
+.member-shell .member-sidebar .member-nav button.active svg,
+.member-shell .member-sidebar .adhyaksh-nav button.active svg,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active svg,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active svg,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active svg,
+.collector-shell .member-sidebar .member-nav button.active svg {
+  background: transparent !important;
+  border: 0 !important;
+  color: #1f2937 !important;
+  stroke: currentColor !important;
+}
+
+.member-shell .member-sidebar .member-nav button.active > *,
+.member-shell .member-sidebar .adhyaksh-nav button.active > *,
+.member-shell.adhyaksh-shell .member-sidebar .adhyaksh-nav button.active > *,
+.member-shell.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active > *,
+.adhyaksh-shell .adhyaksh-sidebar .adhyaksh-nav button.active > *,
+.collector-shell .member-sidebar .member-nav button.active > * {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Semantic finance/status colors for metric cards only. */
+.member-shell.adhyaksh-shell .metric-card.green strong,
+.adhyaksh-shell .metric-card.green strong,
+.member-shell.adhyaksh-shell .metric-card.green b,
+.adhyaksh-shell .metric-card.green b,
+.member-shell.adhyaksh-shell .metric-card.tone-success strong,
+.adhyaksh-shell .metric-card.tone-success strong,
+.member-shell.adhyaksh-shell .metric-card.tone-success b,
+.adhyaksh-shell .metric-card.tone-success b {
+  color: #24714a !important;
+}
+
+.member-shell.adhyaksh-shell .metric-card.red strong,
+.adhyaksh-shell .metric-card.red strong,
+.member-shell.adhyaksh-shell .metric-card.red b,
+.adhyaksh-shell .metric-card.red b,
+.member-shell.adhyaksh-shell .metric-card.tone-danger strong,
+.adhyaksh-shell .metric-card.tone-danger strong,
+.member-shell.adhyaksh-shell .metric-card.tone-danger b,
+.adhyaksh-shell .metric-card.tone-danger b {
+  color: #9b2c2c !important;
+}
+
+.member-shell.adhyaksh-shell .metric-card.neutral strong,
+.adhyaksh-shell .metric-card.neutral strong,
+.member-shell.adhyaksh-shell .metric-card.tone-neutral strong,
+.adhyaksh-shell .metric-card.tone-neutral strong {
+  color: #475467 !important;
+}
+
+.member-shell.adhyaksh-shell .metric-strip.six .metric-card:nth-child(5) strong,
+.adhyaksh-shell .metric-strip.six .metric-card:nth-child(5) strong,
+.member-shell.adhyaksh-shell .metric-card.tone-warning strong,
+.adhyaksh-shell .metric-card.tone-warning strong {
+  color: #8a5a12 !important;
+}
+
+.member-shell.adhyaksh-shell .metric-strip.six .metric-card:nth-child(6),
+.adhyaksh-shell .metric-strip.six .metric-card:nth-child(6),
+.member-shell.adhyaksh-shell .metric-card.tone-approved,
+.adhyaksh-shell .metric-card.tone-approved {
+  background: #f4fbf6 !important;
+  border-color: #cce8d4 !important;
+}
+
+.member-shell.adhyaksh-shell .metric-strip.six .metric-card:nth-child(6) strong,
+.adhyaksh-shell .metric-strip.six .metric-card:nth-child(6) strong,
+.member-shell.adhyaksh-shell .metric-card.tone-approved strong,
+.adhyaksh-shell .metric-card.tone-approved strong {
+  color: #24714a !important;
+}
+
+.member-shell.adhyaksh-shell .metric-strip.six .metric-card:nth-child(6) small,
+.adhyaksh-shell .metric-strip.six .metric-card:nth-child(6) small,
+.member-shell.adhyaksh-shell .metric-card.tone-approved small,
+.adhyaksh-shell .metric-card.tone-approved small {
+  color: #24714a !important;
+}
+
+/* Desktop expenses page: keep records close to the header instead of leaving a hero-sized blank. */
+@media (min-width: 1181px) {
+  .member-shell.adhyaksh-shell .adhyaksh-content,
+  .adhyaksh-shell .adhyaksh-content {
+    align-content: start !important;
+    grid-auto-rows: max-content !important;
+  }
+
+  .member-shell.adhyaksh-shell .adhyaksh-page,
+  .adhyaksh-shell .adhyaksh-page {
+    align-content: start !important;
+    align-self: start !important;
+    padding-top: 18px !important;
+  }
+
+  .member-shell.adhyaksh-shell .expenses-page,
+  .adhyaksh-shell .expenses-page {
+    gap: 14px !important;
+    padding-top: 18px !important;
+  }
+
+  .member-shell.adhyaksh-shell .expenses-page .action-card,
+  .adhyaksh-shell .expenses-page .action-card {
+    min-height: 88px !important;
+    padding: 18px 26px !important;
+  }
+
+  .member-shell.adhyaksh-shell .expenses-page .wide-card h2,
+  .adhyaksh-shell .expenses-page .wide-card h2 {
+    font-size: 24px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .member-shell.adhyaksh-shell .expenses-page .ops-head,
+  .member-shell.adhyaksh-shell .expenses-page .ops-row,
+  .adhyaksh-shell .expenses-page .ops-head,
+  .adhyaksh-shell .expenses-page .ops-row {
+    padding-bottom: 14px !important;
+    padding-top: 14px !important;
+  }
+}
+
+/* Template toolbar: no orange accents, keep the workspace to brown and white shades. */
+.member-shell.adhyaksh-shell .template-stage .upload-button,
+.adhyaksh-shell .template-stage .upload-button,
+.member-shell.adhyaksh-shell .template-stage .toolbar .upload-button,
+.adhyaksh-shell .template-stage .toolbar .upload-button {
+  background: var(--ui-brand-strong) !important;
+  border-color: var(--ui-brand-strong) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.member-shell.adhyaksh-shell .template-stage .upload-button *,
+.adhyaksh-shell .template-stage .upload-button *,
+.member-shell.adhyaksh-shell .template-stage .toolbar .upload-button *,
+.adhyaksh-shell .template-stage .toolbar .upload-button * {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+.member-shell.adhyaksh-shell .template-stage .upload-button:hover,
+.adhyaksh-shell .template-stage .upload-button:hover,
+.member-shell.adhyaksh-shell .template-stage .toolbar .upload-button:hover,
+.adhyaksh-shell .template-stage .toolbar .upload-button:hover {
+  background: var(--ui-brand) !important;
+  border-color: var(--ui-brand) !important;
+}

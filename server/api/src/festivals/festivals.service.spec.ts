@@ -39,9 +39,7 @@ describe('FestivalsService year activation', () => {
       },
       festival: {
         create: jest.fn().mockResolvedValue(createdFestival),
-        findFirst: jest.fn()
-          .mockResolvedValueOnce(null)
-          .mockResolvedValueOnce({ id: 'festival-2026' }),
+        findFirst: jest.fn().mockResolvedValue({ id: 'festival-2026' }),
         update: jest.fn()
           .mockResolvedValueOnce({ ...createdFestival, activeTemplateVersionId: 'version-1' })
           .mockResolvedValueOnce(activatedFestival),
@@ -94,6 +92,7 @@ describe('FestivalsService year activation', () => {
     };
     const prisma = {
       $transaction: jest.fn((callback: (transaction: typeof tx) => unknown) => callback(tx)),
+      festival: { findFirst: jest.fn().mockResolvedValue(null) },
     } as unknown as PrismaService;
     const service = new FestivalsService(prisma);
 
@@ -120,5 +119,25 @@ describe('FestivalsService year activation', () => {
         status: FestivalStatus.ACTIVE,
       },
     });
+  });
+
+  it('activates an existing year with a batched transaction', async () => {
+    const existing = { id: 'festival-2027', mandalId: 'mandal-1', status: FestivalStatus.COMPLETED };
+    const activated = { ...existing, status: FestivalStatus.ACTIVE };
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const update = jest.fn().mockResolvedValue(activated);
+    const prisma = {
+      $transaction: jest.fn(async (operations: Array<Promise<unknown>>) => Promise.all(operations)),
+      festival: {
+        findFirst: jest.fn().mockResolvedValue(existing),
+        update,
+        updateMany,
+      },
+    } as unknown as PrismaService;
+
+    const service = new FestivalsService(prisma);
+    await expect(service.activateYear(ctx, 'mandal-1', 2027)).resolves.toEqual(activated);
+    expect(updateMany).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledTimes(1);
   });
 });

@@ -366,7 +366,7 @@ model VarganiSlip {
   receiptImageUrl           String?      @map("receipt_image_url")
   publicShareTokenHash      String?      @map("public_share_token_hash")
   publicShareTokenExpiresAt DateTime?    @map("public_share_token_expires_at") @db.Timestamptz(6)
-  idempotencyKey            String?      @unique @map("idempotency_key")
+  idempotencyKey            String?      @map("idempotency_key")
   createdAt                 DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   cancelledAt               DateTime?    @map("cancelled_at") @db.Timestamptz(6)
   cancellationReason        String?      @map("cancellation_reason")
@@ -378,6 +378,7 @@ model VarganiSlip {
   group           MemberGroup?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@unique([mandalId, festivalId, slipNumber])
+  @@unique([mandalId, festivalId, idempotencyKey])
   @@index([mandalId, festivalId, createdAt])
   @@index([mandalId, festivalId, status, createdAt])
   @@index([mandalId, festivalId, paymentMode, createdAt])

@@ -12,6 +12,7 @@ const mandalScopedCtx = {
 describe('ReportsService', () => {
   it('exports filtered collection slips as CSV', async () => {
     const prisma = {
+      festival: { findFirst: jest.fn().mockResolvedValue({ id: 'festival-1' }) },
       varganiSlip: {
         findMany: jest.fn().mockResolvedValue([
           {
@@ -60,7 +61,10 @@ describe('ReportsService', () => {
 
   it('exports every Vargani status as a formatted Excel workbook', async () => {
     const prisma = {
-      festival: { findUnique: jest.fn().mockResolvedValue({ name: 'Ganeshotsav 2026' }) },
+      festival: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'festival-1' }),
+        findUnique: jest.fn().mockResolvedValue({ name: 'Ganeshotsav 2026' }),
+      },
       mandal: { findUnique: jest.fn().mockResolvedValue({ name: 'Ganesh Mitra Mandal' }) },
       varganiSlip: {
         count: jest.fn().mockResolvedValue(1),

@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { assertSameMandal, requireMandalId } from './tenant-scope';
+import { assertFestivalInMandal, assertSameMandal, requireMandalId } from './tenant-scope';
 
 describe('tenant scope', () => {
   const member = {
@@ -21,5 +21,16 @@ describe('tenant scope', () => {
 
   it('rejects unscoped users from mandal-only operations', () => {
     expect(() => requireMandalId({ ...member, mandalId: null })).toThrow(ForbiddenException);
+  });
+
+  it('rejects a festival identifier from another mandal', async () => {
+    const prisma = { festival: { findFirst: jest.fn().mockResolvedValue(null) } };
+
+    await expect(assertFestivalInMandal(prisma, 'mandal-a', 'festival-b'))
+      .rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.festival.findFirst).toHaveBeenCalledWith({
+      select: { id: true },
+      where: { id: 'festival-b', mandalId: 'mandal-a' },
+    });
   });
 });

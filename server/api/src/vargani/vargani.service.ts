@@ -16,7 +16,9 @@ import {
 } from '@prisma/client';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { AuthContext } from '../auth/auth-context';
-import { assertSameMandal, requireMandalId } from '../auth/tenant-scope';
+import { assertFestivalInMandal, assertSameMandal, requireMandalId } from '../auth/tenant-scope';
+import { maskPhone, sanitizeAuditPayload } from '../common/security/audit-redaction';
+import { normalizeIndianMobile } from '../common/security/indian-phone';
 import type { AppConfig } from '../config/app-config';
 import { JobsService } from '../jobs/jobs.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -179,6 +181,7 @@ export class VarganiService {
   async createSlip(ctx: AuthContext, dto: CreateVarganiSlipDto) {
     const mandalId = requireMandalId(ctx);
     const festival = await this.getActiveFestival(mandalId);
+    const contributorPhone = normalizeIndianMobile(dto.contributorPhone);
     const canAssignGroup = ctx.role === UserRole.MANDAL_ADMIN || ctx.role === UserRole.KHAJINDAR;
     const [member, customFields, existing, requestedGroup] = await Promise.all([
       this.prisma.member.findFirst({
@@ -196,12 +199,12 @@ export class VarganiService {
         where: { festivalId: festival.id, mandalId },
       }),
       dto.idempotencyKey
-        ? this.prisma.varganiSlip.findUnique({
+        ? this.prisma.varganiSlip.findFirst({
             include: {
-              collector: { select: { id: true, name: true, phone: true } },
+              collector: { select: { id: true, name: true } },
               mandal: { select: { id: true, name: true, nameMr: true } },
             },
-            where: { idempotencyKey: dto.idempotencyKey },
+            where: { festivalId: festival.id, idempotencyKey: dto.idempotencyKey, mandalId },
           })
         : Promise.resolve(null),
       dto.groupId && canAssignGroup
@@ -250,7 +253,7 @@ export class VarganiService {
 
       const slip = await tx.varganiSlip.create({
         include: {
-          collector: { select: { id: true, name: true, phone: true } },
+          collector: { select: { id: true, name: true } },
           mandal: { select: { id: true, name: true, nameMr: true } },
         },
         data: {
@@ -259,7 +262,7 @@ export class VarganiService {
           collectedByUserId: ctx.userId,
           contributorAddress: dto.contributorAddress,
           contributorName: dto.contributorName,
-          contributorPhone: dto.contributorPhone,
+          contributorPhone,
           customData: toJsonWriteValue(dto.customData ?? {}),
           festivalId: festival.id,
           groupId,
@@ -280,7 +283,7 @@ export class VarganiService {
           action: 'created',
           // Preserve the full scalar audit snapshot while avoiding duplicated
           // mandal and collector relationship objects on every high-volume row.
-          after: toJsonWriteValue(auditSlip),
+          after: toJsonWriteValue(sanitizeAuditPayload(auditSlip)),
           actorUserId: ctx.userId,
           entityId: slip.id,
           entityType: 'vargani_slip',
@@ -291,12 +294,12 @@ export class VarganiService {
       return slip;
     }).catch(async (error: unknown) => {
       if (dto.idempotencyKey && error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        const concurrentSlip = await this.prisma.varganiSlip.findUnique({
+        const concurrentSlip = await this.prisma.varganiSlip.findFirst({
           include: {
-            collector: { select: { id: true, name: true, phone: true } },
+            collector: { select: { id: true, name: true } },
             mandal: { select: { id: true, name: true, nameMr: true } },
           },
-          where: { idempotencyKey: dto.idempotencyKey },
+          where: { festivalId: festival.id, idempotencyKey: dto.idempotencyKey, mandalId },
         });
         if (concurrentSlip) {
           return concurrentSlip;
@@ -321,6 +324,7 @@ export class VarganiService {
     query: ListVarganiSlipsQueryDto | Record<string, unknown>,
   ) {
     assertSameMandal(ctx, mandalId);
+    await assertFestivalInMandal(this.prisma, mandalId, festivalId);
     return this.listScopedSlips(ctx, mandalId, festivalId, query);
   }
 
@@ -360,7 +364,7 @@ export class VarganiService {
     const [items, total] = await this.prisma.$transaction([
       this.prisma.varganiSlip.findMany({
         include: {
-          collector: { select: { id: true, name: true, phone: true } },
+          collector: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -385,7 +389,7 @@ export class VarganiService {
     const mandalId = requireMandalId(ctx);
     const slip = await this.prisma.varganiSlip.findFirst({
       include: {
-        collector: { select: { id: true, name: true, phone: true } },
+        collector: { select: { id: true, name: true } },
         festival: true,
         group: true,
         mandal: {
@@ -544,7 +548,7 @@ export class VarganiService {
           metadata: toJsonWriteValue({
             channel: dto.channel?.trim() || 'WHATSAPP',
             expiresAt: shareTokenExpiresAt.toISOString(),
-            phone: dto.phone?.trim() || slip.contributorPhone || null,
+            phone: normalizeIndianMobile(dto.phone) || slip.contributorPhone || null,
             receiptUrl,
             slipNumber: slip.slipNumber,
           }),
@@ -571,7 +575,7 @@ export class VarganiService {
         deduplicationKey: `whatsapp-receipt:${event.id}`,
         mandalId: slip.mandalId,
         payload: {
-          phone: dto.phone?.trim() || slip.contributorPhone || null,
+          phone: normalizeIndianMobile(dto.phone) || slip.contributorPhone || null,
           receiptUrl,
           slipId: slip.id,
         },
@@ -594,7 +598,7 @@ export class VarganiService {
     const tokenHash = hashShareToken(token);
     const slip = await this.prisma.varganiSlip.findFirst({
       include: {
-        collector: { select: { id: true, name: true, phone: true } },
+        collector: { select: { id: true, name: true } },
         festival: true,
         group: true,
         mandal: {
@@ -660,7 +664,7 @@ export class VarganiService {
     const tokenHash = hashShareToken(token);
     const slip = await this.prisma.varganiSlip.findFirst({
       include: {
-        collector: { select: { id: true, name: true, phone: true } },
+        collector: { select: { id: true, name: true } },
         festival: true,
         group: true,
         mandal: {
@@ -760,7 +764,7 @@ export class VarganiService {
         entityType: 'vargani_slip',
         mandalId: slip.mandalId,
         metadata: toJsonWriteValue({
-          phone: preferredPhone || slip.contributorPhone || null,
+          phone: maskPhone(preferredPhone || slip.contributorPhone),
           reason: result.reason ?? null,
           receiptUrl,
           slipNumber: slip.slipNumber,
@@ -870,7 +874,7 @@ export class VarganiService {
       donorType: String(customData.donorType ?? ''),
       paymentMode: slip.paymentMode,
       shopName: slip.shopName ?? '',
-      slipNumber: lastSlipNumberPart(slip.slipNumber).replace(/^0+/, '') || slip.slipNumber,
+      slipNumber: printableSlipSequence(slip.slipNumber),
     };
 
     for (const field of customFields) {
@@ -962,8 +966,8 @@ export class VarganiService {
         data: {
           action: 'cancelled',
           actorUserId: ctx.userId,
-          before: toJsonWriteValue(slip),
-          after: toJsonWriteValue(updated),
+          before: toJsonWriteValue(sanitizeAuditPayload(slip)),
+          after: toJsonWriteValue(sanitizeAuditPayload(updated)),
           entityId: id,
           entityType: 'vargani_slip',
           mandalId,
@@ -988,7 +992,7 @@ export class VarganiService {
         data: {
           action: 'deleted',
           actorUserId: ctx.userId,
-          before: toJsonWriteValue(slip),
+          before: toJsonWriteValue(sanitizeAuditPayload(slip)),
           entityId: id,
           entityType: 'vargani_slip',
           mandalId,
@@ -1022,7 +1026,9 @@ export class VarganiService {
           areaName: dto.areaName,
           contributorAddress: dto.contributorAddress,
           contributorName: dto.contributorName,
-          contributorPhone: dto.contributorPhone,
+          contributorPhone: dto.contributorPhone === undefined
+            ? undefined
+            : normalizeIndianMobile(dto.contributorPhone),
           customData: dto.customData ? toJsonWriteValue(dto.customData) : undefined,
           paymentMode: dto.paymentMode,
           renderStatus: dto.customData ? RenderStatus.PENDING : undefined,
@@ -1036,8 +1042,8 @@ export class VarganiService {
         data: {
           action: 'slip_updated',
           actorUserId: ctx.userId,
-          after: toJsonWriteValue(updated),
-          before: toJsonWriteValue(slip),
+          after: toJsonWriteValue(sanitizeAuditPayload(updated)),
+          before: toJsonWriteValue(sanitizeAuditPayload(slip)),
           entityId: id,
           entityType: 'vargani_slip',
           mandalId,
@@ -1103,6 +1109,11 @@ function toJsonWriteValue(value: unknown): JsonWriteValue {
 function lastSlipNumberPart(slipNumber: string): string {
   const parts = slipNumber.split('-');
   return parts[parts.length - 1] ?? slipNumber;
+}
+
+export function printableSlipSequence(slipNumber: string): string {
+  const sequence = lastSlipNumberPart(slipNumber);
+  return sequence.replace(/^0+(?=\d)/, '') || sequence;
 }
 
 function hashShareToken(token: string): string {

@@ -2666,6 +2666,10 @@ export default function App() {
     </>
   );
 
+  if (isSocietyRegistrationRoute()) {
+    return <SocietyRegistrationPage />;
+  }
+
   if (!authReady) {
     return <AuthLoadingScreen detail="Checking saved login..." />;
   }
@@ -2845,6 +2849,10 @@ function parseOwnerRoute(hash = typeof window === 'undefined' ? '' : window.loca
 
 function isMemberRoute(hash = typeof window === 'undefined' ? '' : window.location.hash) {
   return cleanHash(hash) === 'member/slips';
+}
+
+function isSocietyRegistrationRoute(hash = typeof window === 'undefined' ? '' : window.location.hash) {
+  return cleanHash(hash) === 'society-registration';
 }
 
 function routeForLogin(type: 'mandal' | 'owner') {
@@ -6075,6 +6083,122 @@ function ThemedDialogModal({
         </div>
       </form>
     </div>
+  );
+}
+
+function SocietyRegistrationPage() {
+  const [templateAvailable, setTemplateAvailable] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+  const [submittedId, setSubmittedId] = useState('');
+
+  async function submitSocietyRegistration(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage('');
+    setSubmittedId('');
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const templateFile = form.get('templateFile');
+    let templatePayload: {
+      templateDataUrl?: string;
+      templateFileName?: string;
+      templateMimeType?: string;
+    } = {};
+
+    if (templateAvailable) {
+      if (!(templateFile instanceof File) || templateFile.size === 0) {
+        setMessage('Please upload the society template, or choose No if template is not available.');
+        return;
+      }
+      if (templateFile.size > 6 * 1024 * 1024) {
+        setMessage('Template file must be 6 MB or smaller.');
+        return;
+      }
+      const allowedTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']);
+      if (!allowedTypes.has(templateFile.type)) {
+        setMessage('Upload PDF, JPG, PNG, SVG, or WebP template file only.');
+        return;
+      }
+      templatePayload = {
+        templateDataUrl: await fileToDataUrl(templateFile),
+        templateFileName: templateFile.name,
+        templateMimeType: templateFile.type,
+      };
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await apiRequest<{ id: string; ok: boolean; societyName: string }>('/society-registrations', {
+        body: JSON.stringify({
+          chairmanMobile: String(form.get('chairmanMobile') || '').trim(),
+          chairmanName: String(form.get('chairmanName') || '').trim() || undefined,
+          email: String(form.get('email') || '').trim() || undefined,
+          numberOfFlats: Number(form.get('numberOfFlats') || 0),
+          secretaryMobile: String(form.get('secretaryMobile') || '').trim() || undefined,
+          secretaryName: String(form.get('secretaryName') || '').trim() || undefined,
+          societyAddress: String(form.get('societyAddress') || '').trim(),
+          societyName: String(form.get('societyName') || '').trim(),
+          templateAvailable,
+          ...templatePayload,
+        }),
+        method: 'POST',
+      });
+      formElement.reset();
+      setTemplateAvailable(false);
+      setSubmittedId(result.id);
+      setMessage(`Registration saved for ${result.societyName}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not save society registration.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="society-registration-page">
+      <section className="society-registration-shell">
+        <div className="society-registration-brand">
+          <span className="society-mark"><Building2 size={28} /></span>
+          <div>
+            <h1>Society Registration</h1>
+            <p>Submit society details for data collection setup.</p>
+          </div>
+        </div>
+
+        <form className="society-registration-form" onSubmit={submitSocietyRegistration}>
+          <div className="form-grid two">
+            <label>Society Name *<input name="societyName" placeholder="Sai Residency CHS" required /></label>
+            <label>No. of Flats *<input inputMode="numeric" min={1} name="numberOfFlats" placeholder="72" required type="number" /></label>
+          </div>
+          <label>Society Address *<textarea name="societyAddress" placeholder="Building name, road, locality, city" required rows={3} /></label>
+          <div className="form-grid two">
+            <label>Chairman Name<input name="chairmanName" placeholder="Chairman name" /></label>
+            <label>Secretary Name<input name="secretaryName" placeholder="Secretary name" /></label>
+          </div>
+          <div className="form-grid two">
+            <label>Chairman Mobile No. *<input inputMode="tel" name="chairmanMobile" placeholder="9876543210" required /></label>
+            <label>Secretary Mobile No.<input inputMode="tel" name="secretaryMobile" placeholder="9876543210" /></label>
+          </div>
+          <label>Email ID<input inputMode="email" name="email" placeholder="society@example.com" type="email" /></label>
+
+          <fieldset className="template-choice">
+            <legend>Template Available?</legend>
+            <label><input checked={templateAvailable} name="templateChoice" onChange={() => setTemplateAvailable(true)} type="radio" />Yes, upload template</label>
+            <label><input checked={!templateAvailable} name="templateChoice" onChange={() => setTemplateAvailable(false)} type="radio" />No, continue without template</label>
+          </fieldset>
+
+          {templateAvailable && (
+            <label>Upload Template *
+              <input accept="application/pdf,image/jpeg,image/png,image/svg+xml,image/webp" name="templateFile" required={templateAvailable} type="file" />
+              <small>PDF, JPG, PNG, SVG, or WebP. Max 6 MB.</small>
+            </label>
+          )}
+
+          <button className="primary" disabled={submitting} type="submit"><Upload size={18} />{submitting ? 'Saving...' : 'Submit Registration'}</button>
+          {message && <div className={submittedId ? 'notice success-note' : 'notice'}>{message}{submittedId && <small>Reference ID: {submittedId}</small>}</div>}
+        </form>
+      </section>
+    </main>
   );
 }
 

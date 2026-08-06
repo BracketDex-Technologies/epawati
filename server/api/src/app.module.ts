@@ -17,6 +17,7 @@ import { PartnersModule } from './partners/partners.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReportsModule } from './reports/reports.module';
 import { RootController } from './root.controller';
+import { SocietyRegistrationsModule } from './society-registrations/society-registrations.module';
 import { TemplatesModule } from './templates/templates.module';
 import { TasksModule } from './tasks/tasks.module';
 import { TranslationModule } from './translation/translation.module';
@@ -52,6 +53,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     JobsModule,
     TemplatesModule,
     ReportsModule,
+    SocietyRegistrationsModule,
     AuditModule,
     HealthModule,
     WorkspaceModule,

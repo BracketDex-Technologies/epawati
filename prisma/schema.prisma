@@ -146,6 +146,30 @@ model Partner {
   @@map("partners")
 }
 
+model SocietyRegistration {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  societyName          String   @map("society_name")
+  societyAddress       String   @map("society_address")
+  chairmanName         String?  @map("chairman_name")
+  secretaryName        String?  @map("secretary_name")
+  chairmanMobile       String   @map("chairman_mobile")
+  secretaryMobile      String?  @map("secretary_mobile")
+  numberOfFlats        Int      @map("number_of_flats")
+  email                String?
+  templateAvailable    Boolean  @default(false) @map("template_available")
+  templateFileName     String?  @map("template_file_name")
+  templateMimeType     String?  @map("template_mime_type")
+  templateDataUrl      String?  @map("template_data_url")
+  registrationSource   String   @default("public_society_registration") @map("registration_source")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@index([societyName])
+  @@index([chairmanMobile])
+  @@map("society_registrations")
+}
+
 model User {
   id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   mandalId     String?       @map("mandal_id") @db.Uuid

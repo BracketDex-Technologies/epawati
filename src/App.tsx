@@ -6251,6 +6251,11 @@ function SocietyRegistrationPage() {
       setMessage('Secretary mobile number must be exactly 10 digits.');
       return;
     }
+    if (secretaryMobile && secretaryMobile === chairmanMobile) {
+      setFormFieldError(formElement, 'secretaryMobile', 'Chairman and secretary mobile numbers must be different.');
+      setMessage('Chairman and secretary mobile numbers must be different.');
+      return;
+    }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setFormFieldError(formElement, 'email', 'Enter a valid email address.');
       setMessage('Enter a valid email address.');
@@ -6308,6 +6313,12 @@ function SocietyRegistrationPage() {
 
   return (
     <main className="society-registration-page">
+      {message && (
+        <div aria-live="polite" className={`society-registration-toast ${submittedId ? 'success' : 'error'}`} role={submittedId ? 'status' : 'alert'}>
+          {submittedId ? <CheckCircle2 size={18} /> : <ShieldCheck size={18} />}
+          <span>{message}</span>
+        </div>
+      )}
       <section className="society-registration-shell">
         <div className="society-registration-brand">
           <span className="society-mark"><Building2 size={28} /></span>

@@ -63,6 +63,26 @@ export class SocietyRegistrationsService {
     if (secretaryMobileText && !secretaryMobile) {
       throw new BadRequestException('Secretary mobile number must be a valid Indian mobile number.');
     }
+    if (secretaryMobile && secretaryMobile === chairmanMobile) {
+      throw new BadRequestException('Chairman and secretary mobile numbers must be different.');
+    }
+
+    const existing = await this.prisma.societyRegistration.findFirst({
+      where: {
+        OR: [
+          { societyName: { equals: societyName, mode: 'insensitive' } },
+          { chairmanMobile: { in: compact([chairmanMobile, secretaryMobile]) } },
+          { secretaryMobile: { in: compact([chairmanMobile, secretaryMobile]) } },
+        ],
+      },
+    });
+    if (existing) {
+      if (existing.societyName.toLowerCase() === societyName.toLowerCase()) {
+        throw new BadRequestException('This society/building is already registered.');
+      }
+      throw new BadRequestException('This mobile number is already registered with another society.');
+    }
+
     const registration = await this.prisma.societyRegistration.create({
       data: {
         chairmanMobile,
@@ -136,4 +156,8 @@ function normalizeSocietyMobile(value: string | undefined, message: string): str
   const normalized = normalizeIndianMobile(text);
   if (!normalized) throw new BadRequestException(message);
   return normalized;
+}
+
+function compact<T>(values: Array<T | undefined>): T[] {
+  return values.filter((value): value is T => value !== undefined);
 }

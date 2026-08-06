@@ -41,6 +41,7 @@ describe('SocietyRegistrationsService', () => {
           id: 'registration-1',
           societyName: 'Sai Residency',
         }),
+        findFirst: jest.fn().mockResolvedValue(null),
       },
     };
     const service = new SocietyRegistrationsService(prisma as never);
@@ -68,10 +69,13 @@ describe('SocietyRegistrationsService', () => {
         templateAvailable: false,
       }),
     });
+    expect(prisma.societyRegistration.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ OR: expect.any(Array) }),
+    }));
   });
 
   it('requires a template upload when template is marked available', async () => {
-    const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn() } } as never);
+    const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn(), findFirst: jest.fn() } } as never);
 
     await expect(service.create({
       chairmanMobile: '9876543210',
@@ -83,7 +87,7 @@ describe('SocietyRegistrationsService', () => {
   });
 
   it('rejects society mobile numbers that are not exactly 10 digits', async () => {
-    const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn() } } as never);
+    const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn(), findFirst: jest.fn() } } as never);
 
     await expect(service.create({
       chairmanMobile: '+919876543210',
@@ -101,5 +105,47 @@ describe('SocietyRegistrationsService', () => {
       societyName: 'Sai Residency',
       templateAvailable: false,
     })).rejects.toThrow('Secretary mobile number must be exactly 10 digits.');
+  });
+
+  it('rejects duplicate society registrations by building name or mobile number', async () => {
+    const prisma = {
+      societyRegistration: {
+        create: jest.fn(),
+        findFirst: jest.fn()
+          .mockResolvedValueOnce({ chairmanMobile: '+919876543210', secretaryMobile: null, societyName: 'Sai Residency' })
+          .mockResolvedValueOnce({ chairmanMobile: '+919876543210', secretaryMobile: null, societyName: 'Other Residency' }),
+      },
+    };
+    const service = new SocietyRegistrationsService(prisma as never);
+
+    await expect(service.create({
+      chairmanMobile: '9876543210',
+      numberOfFlats: 72,
+      societyAddress: 'Main Road, Pune',
+      societyName: 'sai residency',
+      templateAvailable: false,
+    })).rejects.toThrow('This society/building is already registered.');
+
+    await expect(service.create({
+      chairmanMobile: '9876543210',
+      numberOfFlats: 72,
+      societyAddress: 'Main Road, Pune',
+      societyName: 'New Residency',
+      templateAvailable: false,
+    })).rejects.toThrow('This mobile number is already registered with another society.');
+    expect(prisma.societyRegistration.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects using the same mobile number for chairman and secretary', async () => {
+    const service = new SocietyRegistrationsService({ societyRegistration: { create: jest.fn(), findFirst: jest.fn() } } as never);
+
+    await expect(service.create({
+      chairmanMobile: '9876543210',
+      numberOfFlats: 72,
+      secretaryMobile: '9876543210',
+      societyAddress: 'Main Road, Pune',
+      societyName: 'Sai Residency',
+      templateAvailable: false,
+    })).rejects.toThrow('Chairman and secretary mobile numbers must be different.');
   });
 });

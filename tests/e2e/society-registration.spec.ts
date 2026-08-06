@@ -26,7 +26,7 @@ test('public society registration form stores society data', async ({ page }) =>
   await page.getByLabel(/no, continue without template/i).check();
   await page.getByRole('button', { name: /submit registration/i }).click();
 
-  await expect(page.getByText(/registration saved for sai residency chs/i)).toBeVisible();
+  await expect(page.locator('.society-registration-toast.success', { hasText: /registration saved for sai residency chs/i })).toBeVisible();
   expect(submittedBody).toMatchObject({
     chairmanMobile: '9876543210',
     chairmanName: 'Amit Patil',
@@ -64,6 +64,12 @@ test('public society registration validates mobile numbers before submit', async
   await page.getByRole('button', { name: /submit registration/i }).click();
 
   await expect(page.locator('.notice', { hasText: /secretary mobile number must be exactly 10 digits/i })).toBeVisible();
+  expect(submitCount).toBe(0);
+
+  await page.getByLabel(/secretary mobile/i).fill('9876543210');
+  await page.getByRole('button', { name: /submit registration/i }).click();
+
+  await expect(page.locator('.notice', { hasText: /chairman and secretary mobile numbers must be different/i })).toBeVisible();
   expect(submitCount).toBe(0);
 });
 

@@ -11348,6 +11348,41 @@ nav button.active svg,
   padding: 32px 16px;
 }
 
+.society-registration-toast {
+  align-items: center;
+  border: 1px solid #f0c16e;
+  border-radius: 12px;
+  box-shadow: 0 16px 38px rgba(42, 32, 25, 0.16);
+  display: inline-flex;
+  gap: 10px;
+  left: 50%;
+  max-width: min(92vw, 520px);
+  padding: 13px 15px;
+  position: fixed;
+  top: 18px;
+  transform: translateX(-50%);
+  width: max-content;
+  z-index: 60;
+}
+
+.society-registration-toast.success {
+  background: #eaf7ef;
+  border-color: #bfe4cb;
+  color: #145c39;
+}
+
+.society-registration-toast.error {
+  background: #fff8e6;
+  border-color: #f0c16e;
+  color: #8a3d0a;
+}
+
+.society-registration-toast span {
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
 .society-registration-shell {
   background: #fff;
   border: 1px solid #e7ded5;
@@ -11507,6 +11542,15 @@ nav button.active svg,
   .society-registration-page {
     align-items: stretch;
     padding: 0;
+  }
+
+  .society-registration-toast {
+    left: 10px;
+    max-width: calc(100vw - 20px);
+    right: 10px;
+    top: 10px;
+    transform: none;
+    width: auto;
   }
 
   .society-registration-shell {

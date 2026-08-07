@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { FestivalsModule } from './festivals/festivals.module';
 import { HealthModule } from './health/health.module';
+import { ItemDonationsModule } from './item-donations/item-donations.module';
 import { JobsModule } from './jobs/jobs.module';
 import { MandalsModule } from './mandals/mandals.module';
 import { MembersModule } from './members/members.module';
@@ -48,6 +49,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     MembersModule,
     VarganiModule,
     ExpensesModule,
+    ItemDonationsModule,
     TasksModule,
     TranslationModule,
     JobsModule,

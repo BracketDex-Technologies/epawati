@@ -87,6 +87,19 @@ enum TaskPriority {
   URGENT
 }
 
+enum ItemDonationCategory {
+  GOLD
+  SILVER
+  JEWELLERY
+  OTHER
+}
+
+enum ItemDonationWeightUnit {
+  GRAM
+  TOLA
+  KG
+}
+
 model Mandal {
   id                            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   partnerId                     String?       @map("partner_id") @db.Uuid
@@ -120,6 +133,7 @@ model Mandal {
   slips        VarganiSlip[]
   expenses     Expense[]
   tasks        FestivalTask[]
+  itemDonations ItemDonation[]
   auditEvents  AuditEvent[]
   jobs         BackgroundJob[]
   partner      Partner?        @relation("MandalPartner", fields: [partnerId], references: [id], onDelete: SetNull)
@@ -190,6 +204,8 @@ model User {
   approvedExpenses Expense[]      @relation("ExpenseApprover")
   assignedTasks    FestivalTask[] @relation("TaskAssignee")
   createdTasks     FestivalTask[] @relation("TaskCreator")
+  createdItemDonations ItemDonation[] @relation("ItemDonationCreator")
+  updatedItemDonations ItemDonation[] @relation("ItemDonationUpdater")
   auditEvents      AuditEvent[]
   ledGroups        MemberGroup[]  @relation("GroupLeader")
   sessions         UserSession[]
@@ -241,6 +257,7 @@ model Festival {
   slips                 VarganiSlip[]
   expenses              Expense[]
   tasks                 FestivalTask[]
+  itemDonations         ItemDonation[]
   slipSequence          SlipSequence?
 
   @@index([mandalId, status])
@@ -451,6 +468,40 @@ model Expense {
   @@index([mandalId, festivalId, expenseDate])
   @@index([mandalId, festivalId, status, expenseDate])
   @@map("expenses")
+}
+
+model ItemDonation {
+  id              String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mandalId        String                  @map("mandal_id") @db.Uuid
+  festivalId      String                  @map("festival_id") @db.Uuid
+  receiptNumber   String                  @map("receipt_number")
+  donorName       String                  @map("donor_name")
+  donorPhone      String?                 @map("donor_phone")
+  donorAddress    String?                 @map("donor_address")
+  donationDate    DateTime                @map("donation_date") @db.Date
+  category        ItemDonationCategory
+  itemName        String                  @map("item_name")
+  weight          Decimal?                @db.Decimal(14, 3)
+  weightUnit      ItemDonationWeightUnit? @map("weight_unit")
+  purity          String?
+  quantity        Int                     @default(1)
+  storageLocation String?                 @map("storage_location")
+  notes           String?
+  createdBy       String                  @map("created_by") @db.Uuid
+  updatedBy       String?                 @map("updated_by") @db.Uuid
+  createdAt       DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mandal   Mandal   @relation(fields: [mandalId], references: [id], onDelete: Restrict)
+  festival Festival @relation(fields: [festivalId], references: [id], onDelete: Cascade)
+  creator  User     @relation("ItemDonationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater  User?    @relation("ItemDonationUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@unique([mandalId, festivalId, receiptNumber])
+  @@index([mandalId, festivalId, donationDate])
+  @@index([mandalId, festivalId, category, donationDate])
+  @@index([mandalId, festivalId, createdAt])
+  @@map("item_donations")
 }
 
 model FestivalTask {

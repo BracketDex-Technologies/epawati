@@ -66,13 +66,15 @@ type TextAlign = 'left' | 'center' | 'right';
 type TextWrapMode = 'single' | 'wrap' | 'shrink';
 type TextDecoration = 'none' | 'underline' | 'line-through';
 type UserRole = 'MANDAL_ADMIN' | 'KHAJINDAR' | 'GROUP_LEADER' | 'MEMBER' | 'SUPER_ADMIN';
-type AdhyakshScreen = 'members' | 'tasks' | 'expenses' | 'template' | 'slips' | 'form' | 'users' | 'logs';
+type AdhyakshScreen = 'members' | 'tasks' | 'expenses' | 'item-donations' | 'template' | 'slips' | 'form' | 'users' | 'logs';
 type OwnerScreen = 'dashboard' | 'mandals' | 'partners' | 'society-registrations';
 type OwnerMandalTab = 'overview' | 'template';
 type Language = 'en' | 'mr' | 'hi';
 type ExpenseStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 type TaskStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
 type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+type ItemDonationCategory = 'GOLD' | 'SILVER' | 'JEWELLERY' | 'OTHER';
+type ItemDonationWeightUnit = 'GRAM' | 'TOLA' | 'KG';
 type ThemedDialogRequest =
   | {
       cancelLabel?: string;
@@ -376,6 +378,28 @@ interface Expense {
   vendorName?: string | null;
 }
 
+interface ItemDonation {
+  id: string;
+  category: ItemDonationCategory;
+  createdAt: string;
+  createdBy?: string;
+  creator?: { id: string; name: string } | null;
+  donationDate: string;
+  donorAddress?: string | null;
+  donorName: string;
+  donorPhone?: string | null;
+  itemName: string;
+  notes?: string | null;
+  purity?: string | null;
+  quantity: number;
+  receiptNumber: string;
+  storageLocation?: string | null;
+  updatedAt?: string;
+  updater?: { id: string; name: string } | null;
+  weight?: number | string | null;
+  weightUnit?: ItemDonationWeightUnit | null;
+}
+
 interface FestivalTask {
   id: string;
   assignee?: { id: string; name: string; role: UserRole } | null;
@@ -519,6 +543,7 @@ interface MandalWorkspaceBootstrap {
   activeForm: ActiveForm | null;
   auditEvents?: AuditEvent[];
   expenses?: Expense[];
+  itemDonations?: ItemDonation[];
   generatedAt: string;
   groups: Group[];
   kind: 'MANDAL';
@@ -570,6 +595,7 @@ const LANGUAGE_KEY = 'digital-vargani-language';
 const WORKSPACE_CACHE_PREFIX = 'samavet:workspace-cache';
 const DEFAULT_OWNER_IDENTIFIER = 'owner@digitalvargani.local';
 const TEMPLATE_IMAGE = '/templates/default-vargani-receipt.svg';
+const ITEM_DONATION_CATEGORIES: ItemDonationCategory[] = ['GOLD', 'SILVER', 'JEWELLERY', 'OTHER'];
 
 const translations: Record<Exclude<Language, 'en'>, Record<string, string>> = {
   hi: {},
@@ -691,6 +717,7 @@ export default function App() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [itemDonations, setItemDonations] = useState<ItemDonation[]>([]);
   const [slips, setSlips] = useState<Slip[]>([]);
   const [slipMeta, setSlipMeta] = useState<SlipPageMeta>({ limit: 25, page: 1, total: 0, totalPages: 0 });
   const [workspaceMetrics, setWorkspaceMetrics] = useState<MandalMetrics>({});
@@ -866,6 +893,7 @@ export default function App() {
       setMembers([]);
       setCurrentMandal(null);
       setExpenses([]);
+      setItemDonations([]);
       setSlips([]);
       setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
       setWorkspaceMetrics({});
@@ -1099,6 +1127,7 @@ export default function App() {
       setGroups([]);
       setMembers([]);
       setExpenses([]);
+      setItemDonations([]);
       setSlips([]);
       setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
       setWorkspaceMetrics({});
@@ -1131,6 +1160,7 @@ export default function App() {
     setGroups(activeGroups);
     setMembers(activeMembers);
     setExpenses(payload.expenses ?? []);
+    setItemDonations(payload.itemDonations ?? []);
     setSlips(nextSlips);
     setSlipMeta(payload.slips.meta);
     setWorkspaceMetrics(payload.metrics ?? {});
@@ -1288,6 +1318,7 @@ export default function App() {
     setMembers([]);
     setCurrentMandal(null);
     setExpenses([]);
+    setItemDonations([]);
     setSlips([]);
     setSlipMeta({ limit: 25, page: 1, total: 0, totalPages: 0 });
     setWorkspaceMetrics({});
@@ -1330,7 +1361,7 @@ export default function App() {
     const festivalPath = `/mandals/${currentMandalId}/festivals/${currentFestivalId}`;
     const isCollectorSession = currentSession.user.role === 'MEMBER' || currentSession.user.role === 'GROUP_LEADER';
     const shouldRefreshSlips = !Object.values(slipListFilters).some(Boolean);
-    const [latestSlips, liveTasks, liveExpenses] = await Promise.all([
+    const [latestSlips, liveTasks, liveExpenses, liveItemDonations] = await Promise.all([
       shouldRefreshSlips
         ? apiRequest<{ items: Slip[]; meta: SlipPageMeta }>(
             slipsListPath(new URLSearchParams({ limit: '25', page: '1' }), currentMandalId, currentFestivalId),
@@ -1342,6 +1373,9 @@ export default function App() {
       isCollectorSession
         ? Promise.resolve([])
         : apiRequest<Expense[]>(`${festivalPath}/expenses`, {}, currentSession),
+      isCollectorSession
+        ? Promise.resolve([])
+        : apiRequest<ItemDonation[]>(`${festivalPath}/item-donations`, {}, currentSession),
     ]);
 
     if (latestSlips) {
@@ -1355,6 +1389,7 @@ export default function App() {
     }
     setTasks(liveTasks);
     setExpenses(liveExpenses);
+    setItemDonations(liveItemDonations);
   }
 
   function scheduleWorkspaceSync(currentSession = session, delay = 750) {
@@ -1461,15 +1496,18 @@ export default function App() {
       if (isCollectorSession) {
         const liveTasks = await apiRequest<FestivalTask[]>(`${festivalPath}/tasks`, {}, currentSession);
         setExpenses([]);
+        setItemDonations([]);
         setTasks(liveTasks);
         return;
       }
 
-      const [liveExpenses, liveTasks] = await Promise.all([
+      const [liveExpenses, liveTasks, liveItemDonations] = await Promise.all([
         apiRequest<Expense[]>(`${festivalPath}/expenses`, {}, currentSession),
         apiRequest<FestivalTask[]>(`${festivalPath}/tasks`, {}, currentSession),
+        apiRequest<ItemDonation[]>(`${festivalPath}/item-donations`, {}, currentSession),
       ]);
       setExpenses(liveExpenses);
+      setItemDonations(liveItemDonations);
       setTasks(liveTasks);
     } catch {
       // The bootstrap is enough to open the app. Secondary cards can refresh
@@ -1502,6 +1540,7 @@ export default function App() {
       setTasks([]);
       setAuditEvents([]);
       setExpenses([]);
+      setItemDonations([]);
       setWorkspaceMetrics({});
       setNotice(`Year ${year} is active. Entries are saved separately for this year.`);
 
@@ -2307,6 +2346,130 @@ export default function App() {
     }
   }
 
+  function itemDonationPayloadFromForm(form: FormData) {
+    const rawWeight = String(form.get('weight') || '').trim();
+    const weightUnit = String(form.get('weightUnit') || '') as ItemDonationWeightUnit | '';
+    const category = String(form.get('category') || 'GOLD') as ItemDonationCategory;
+    return {
+      category,
+      donationDate: String(form.get('donationDate') || new Date().toISOString().slice(0, 10)),
+      donorAddress: String(form.get('donorAddress') || '').trim() || null,
+      donorName: String(form.get('donorName') || '').trim(),
+      donorPhone: String(form.get('donorPhone') || '').trim() || null,
+      itemName: String(form.get('itemName') || '').trim(),
+      notes: String(form.get('notes') || '').trim() || null,
+      purity: String(form.get('purity') || '').trim() || null,
+      quantity: Number(form.get('quantity') || 1),
+      storageLocation: String(form.get('storageLocation') || '').trim() || null,
+      weight: rawWeight ? Number(rawWeight) : null,
+      weightUnit: weightUnit || null,
+    };
+  }
+
+  async function downloadItemDonationReceipt(donation: ItemDonation) {
+    if (!session || !mandalId || !festivalId) return;
+    try {
+      const { blob, fileName } = await apiDownload(
+        `/mandals/${mandalId}/festivals/${festivalId}/item-donations/${donation.id}/receipt.pdf`,
+        session,
+      );
+      downloadBlob(blob, fileName || `${donation.receiptNumber}-item-donation-receipt.pdf`);
+      setNotice(`Receipt ${donation.receiptNumber} downloaded.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not download item donation receipt.');
+    }
+  }
+
+  async function createItemDonation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!session || !mandalId || !festivalId) return false;
+    const formElement = event.currentTarget;
+    const payload = itemDonationPayloadFromForm(new FormData(formElement));
+    if (!payload.donorName) {
+      setFormFieldError(formElement, 'donorName', 'Donor name is required.');
+      return false;
+    }
+    if (!payload.itemName) {
+      setFormFieldError(formElement, 'itemName', 'Item name is required.');
+      return false;
+    }
+    if (payload.weight && !payload.weightUnit) {
+      setFormFieldError(formElement, 'weightUnit', 'Select a weight unit.');
+      return false;
+    }
+
+    try {
+      const donation = await apiRequest<ItemDonation>(
+        `/mandals/${mandalId}/festivals/${festivalId}/item-donations`,
+        { body: JSON.stringify(payload), method: 'POST' },
+        session,
+      );
+      setItemDonations((current) => upsertById(current, donation));
+      setWorkspaceMetrics((current) => ({
+        ...current,
+        itemDonationCount: Number(current.itemDonationCount ?? 0) + 1,
+      }));
+      formElement.reset();
+      setNotice(`Item donation ${donation.receiptNumber} saved. Downloading PDF receipt...`);
+      void downloadItemDonationReceipt(donation);
+      scheduleWorkspaceSync(session);
+      return true;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not save item donation.');
+      focusFormErrorFromMessage(formElement, error);
+      return false;
+    }
+  }
+
+  async function updateItemDonation(donation: ItemDonation, event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!session || !mandalId || !festivalId) return false;
+    const formElement = event.currentTarget;
+    const payload = itemDonationPayloadFromForm(new FormData(formElement));
+    try {
+      const updated = await apiRequest<ItemDonation>(
+        `/mandals/${mandalId}/festivals/${festivalId}/item-donations/${donation.id}`,
+        { body: JSON.stringify(payload), method: 'PATCH' },
+        session,
+      );
+      setItemDonations((current) => upsertById(current, updated));
+      setNotice(`Item donation ${updated.receiptNumber} updated.`);
+      scheduleWorkspaceSync(session);
+      return true;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not update item donation.');
+      focusFormErrorFromMessage(formElement, error);
+      return false;
+    }
+  }
+
+  async function deleteItemDonation(donation: ItemDonation) {
+    if (!session || !mandalId || !festivalId) return;
+    const confirmed = await askConfirm({
+      confirmLabel: 'Delete Item',
+      danger: true,
+      message: `${donation.receiptNumber} for ${donation.donorName} will be permanently deleted.`,
+      title: 'Delete item donation?',
+    });
+    if (!confirmed) return;
+    try {
+      await apiRequest(
+        `/mandals/${mandalId}/festivals/${festivalId}/item-donations/${donation.id}`,
+        { method: 'DELETE' },
+        session,
+      );
+      setItemDonations((current) => current.filter((item) => item.id !== donation.id));
+      setWorkspaceMetrics((current) => ({
+        ...current,
+        itemDonationCount: Math.max(0, Number(current.itemDonationCount ?? itemDonations.length) - 1),
+      }));
+      setNotice('Item donation deleted.');
+      scheduleWorkspaceSync(session);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not delete item donation.');
+    }
+  }
+
   function taskPayloadFromForm(form: FormData): Partial<FestivalTask> {
     return {
       assigneeUserId: String(form.get('assigneeUserId') || '') || undefined,
@@ -2768,6 +2931,7 @@ export default function App() {
       entryFields={entryFields}
       expenses={expenses}
       groups={groups}
+      itemDonations={itemDonations}
       members={members}
       mandal={currentMandal}
       notice={notice}
@@ -2775,6 +2939,7 @@ export default function App() {
       onAddTemplateField={addTemplateCustomField}
       onAssignMemberGroup={assignMemberGroup}
       onDeleteSlip={deleteSlip}
+      onCreateItemDonation={createItemDonation}
       onCreateMember={createMember}
       onCreateExpense={createExpense}
       onCreateGroup={createGroup}
@@ -2782,9 +2947,11 @@ export default function App() {
       onCreateTask={createTask}
       onDeleteCustomField={deleteCustomField}
       onDeleteExpense={deleteExpense}
+      onDeleteItemDonation={deleteItemDonation}
       onDeleteTask={deleteTask}
       onDownloadSlip={downloadSlipAsJpeg}
       onEditExpense={updateExpense}
+      onEditItemDonation={updateItemDonation}
       onEditMember={updateMember}
       onEditSlip={updateSlip}
       onEditTask={(task, event) => updateTask(task, event)}
@@ -2830,6 +2997,7 @@ const adhyakshNavItems: Array<{ id: AdhyakshScreen; icon: ReactNode; label: stri
   { id: 'members', icon: <UsersRound size={20} />, label: 'Members & Vargani' },
   { id: 'tasks', icon: <ShieldCheck size={20} />, label: 'Tasks' },
   { id: 'expenses', icon: <WalletCards size={20} />, label: 'Expenses' },
+  { id: 'item-donations', icon: <Ruler size={20} />, label: 'Item Donations' },
   { id: 'template', icon: <FileText size={20} />, label: 'Vargani Template' },
   { id: 'slips', icon: <BadgeIndianRupee size={20} />, label: 'Vargani Slips' },
   { id: 'form', icon: <SlidersHorizontal size={20} />, label: 'Form Management' },
@@ -2949,6 +3117,7 @@ function AdhyakshApp({
   entryFields,
   expenses,
   groups,
+  itemDonations,
   latestTemplateVersion,
   mandal,
   members,
@@ -2957,6 +3126,7 @@ function AdhyakshApp({
   onAddTemplateField,
   onAssignMemberGroup,
   onDeleteSlip,
+  onCreateItemDonation,
   onCreateMember,
   onCreateExpense,
   onCreateGroup,
@@ -2964,9 +3134,11 @@ function AdhyakshApp({
   onCreateTask,
   onDeleteCustomField,
   onDeleteExpense,
+  onDeleteItemDonation,
   onDeleteTask,
   onDownloadSlip,
   onEditExpense,
+  onEditItemDonation,
   onEditMember,
   onEditSlip,
   onEditTask,
@@ -3010,6 +3182,7 @@ function AdhyakshApp({
   entryFields: EntryFieldConfig[];
   expenses: Expense[];
   groups: Group[];
+  itemDonations: ItemDonation[];
   latestTemplateVersion?: Template['versions'][number];
   mandal: DemoMandal | null;
   members: Member[];
@@ -3018,6 +3191,7 @@ function AdhyakshApp({
   onAddTemplateField: (label: string, required?: boolean) => Promise<CustomField | void>;
   onAssignMemberGroup: (member: Member, groupId: string) => Promise<void> | void;
   onDeleteSlip: (slip: Slip) => Promise<void> | void;
+  onCreateItemDonation: (event: FormEvent<HTMLFormElement>) => Promise<boolean | void> | boolean | void;
   onCreateMember: (event: FormEvent<HTMLFormElement>) => Promise<boolean | void> | boolean | void;
   onCreateExpense: (event: FormEvent<HTMLFormElement>) => Promise<boolean | void> | boolean | void;
   onCreateGroup: (event: FormEvent<HTMLFormElement>) => Promise<boolean | void> | boolean | void;
@@ -3025,9 +3199,11 @@ function AdhyakshApp({
   onCreateTask: (event: FormEvent<HTMLFormElement>) => Promise<boolean | void> | boolean | void;
   onDeleteCustomField: (field: CustomField) => Promise<void> | void;
   onDeleteExpense: (expense: Expense) => Promise<void> | void;
+  onDeleteItemDonation: (donation: ItemDonation) => Promise<void> | void;
   onDeleteTask: (task: FestivalTask) => Promise<void> | void;
   onDownloadSlip: (slip: Slip) => Promise<void>;
   onEditExpense: (expense: Expense) => Promise<void> | void;
+  onEditItemDonation: (donation: ItemDonation, event: FormEvent<HTMLFormElement>) => Promise<boolean | void> | boolean | void;
   onEditMember: (member: Member) => Promise<void> | void;
   onEditSlip: (slip: Slip) => Promise<void> | void;
   onEditTask: (task: FestivalTask, event: FormEvent<HTMLFormElement>) => Promise<void> | void;
@@ -3074,12 +3250,18 @@ function AdhyakshApp({
   const [editingTask, setEditingTask] = useState<FestivalTask | null>(null);
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [expenseProofName, setExpenseProofName] = useState('');
-  const [modalSubmitting, setModalSubmitting] = useState<null | 'entry' | 'expense' | 'group' | 'member' | 'task'>(null);
+  const [itemDonationOpen, setItemDonationOpen] = useState(false);
+  const [editingItemDonation, setEditingItemDonation] = useState<ItemDonation | null>(null);
+  const [modalSubmitting, setModalSubmitting] = useState<null | 'entry' | 'expense' | 'group' | 'itemDonation' | 'member' | 'task'>(null);
   const [localNotice, setLocalNotice] = useState('');
   const [slipFilter, setSlipFilter] = useState<'all' | 'paid' | 'pending'>('all');
   const [slipCreatorFilter, setSlipCreatorFilter] = useState('');
   const [slipDateFilter, setSlipDateFilter] = useState('');
+  const [itemDonationCategoryFilter, setItemDonationCategoryFilter] = useState<'ALL' | ItemDonationCategory>('ALL');
+  const [itemDonationDateFilter, setItemDonationDateFilter] = useState('');
+  const [itemDonationSearch, setItemDonationSearch] = useState('');
   const [entriesExporting, setEntriesExporting] = useState<null | 'excel' | 'pdf' | 'slipsPdf'>(null);
+  const [itemDonationExporting, setItemDonationExporting] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const slipFilterStartedRef = useRef(false);
   const activeYear = optimisticYear ?? festivalYear(activeForm?.festival);
@@ -3259,6 +3441,23 @@ function AdhyakshApp({
       return haystack.toLowerCase().includes(normalizedQuery);
     });
   }, [deferredQuery, paidSlipRows, pendingSlipRows, slipCreatorFilter, slipDateFilter, slipFilter, slipRows]);
+  const {
+    filteredItemDonations,
+    itemDonationSummary,
+  } = useMemo(() => {
+    const normalizedQuery = itemDonationSearch.trim().toLowerCase();
+    const filtered = itemDonations.filter((donation) => {
+      if (itemDonationCategoryFilter !== 'ALL' && donation.category !== itemDonationCategoryFilter) return false;
+      if (itemDonationDateFilter && donation.donationDate.slice(0, 10) !== itemDonationDateFilter) return false;
+      if (!normalizedQuery) return true;
+      const haystack = `${donation.receiptNumber} ${donation.donorName} ${donation.itemName} ${donation.storageLocation ?? ''} ${donation.notes ?? ''}`;
+      return haystack.toLowerCase().includes(normalizedQuery);
+    });
+    return {
+      filteredItemDonations: filtered,
+      itemDonationSummary: summarizeItemDonations(itemDonations),
+    };
+  }, [itemDonationCategoryFilter, itemDonationDateFilter, itemDonationSearch, itemDonations]);
   const balance = Number(workspaceMetrics.balance ?? (totalSlipCollection + memberVargani - expensesTotal));
   const isInitialSync = workspaceRefreshing && !workspaceLoaded;
   const displayNotice = localNotice || (notice && /error|failed|expired|could not|logged out|unauthorized/i.test(notice) ? notice : '');
@@ -3379,6 +3578,56 @@ function AdhyakshApp({
     }
   }
 
+  async function downloadItemDonationReport() {
+    const mandalId = mandal?.id;
+    const festivalId = activeForm?.festival.id;
+    if (!mandalId || !festivalId) {
+      showToast('Active mandal festival not found. Refresh and try again.');
+      return;
+    }
+
+    setItemDonationExporting(true);
+    try {
+      const params = new URLSearchParams();
+      if (itemDonationDateFilter) {
+        params.set('dateFrom', itemDonationDateFilter);
+        params.set('dateTo', itemDonationDateFilter);
+      }
+      if (itemDonationSearch.trim()) params.set('search', itemDonationSearch.trim());
+      const queryString = params.toString();
+      const { blob, fileName } = await apiDownload(
+        `/mandals/${mandalId}/festivals/${festivalId}/item-donations/report.pdf${queryString ? `?${queryString}` : ''}`,
+        session,
+      );
+      downloadBlob(blob, fileName || `${slugify(mandal.name)}-item-donation-report.pdf`);
+      showToast('Item donation report downloaded.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not download item donation report.');
+    } finally {
+      setItemDonationExporting(false);
+    }
+  }
+
+  async function downloadItemDonationReceiptFromPortal(donation: ItemDonation) {
+    const mandalId = mandal?.id;
+    const festivalId = activeForm?.festival.id;
+    if (!mandalId || !festivalId) {
+      showToast('Active mandal festival not found. Refresh and try again.');
+      return;
+    }
+
+    try {
+      const { blob, fileName } = await apiDownload(
+        `/mandals/${mandalId}/festivals/${festivalId}/item-donations/${donation.id}/receipt.pdf`,
+        session,
+      );
+      downloadBlob(blob, fileName || `${donation.receiptNumber}-item-donation-receipt.pdf`);
+      showToast(`Receipt ${donation.receiptNumber} downloaded.`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not download receipt.');
+    }
+  }
+
   async function saveTemplate(placements: Record<string, TemplatePlacement>) {
     await onTemplateSaved(placements);
     showToast('Template saved successfully.');
@@ -3416,6 +3665,7 @@ function AdhyakshApp({
     return {
       expenses: 'Expenses',
       form: 'Form Management',
+      'item-donations': 'Item Donations',
       logs: 'Logs',
       members: 'Members',
       slips: 'Vargani Slips',
@@ -3654,6 +3904,59 @@ function AdhyakshApp({
                   <span className="row-actions">
                     <button onClick={() => void onEditExpense(expense)} type="button"><Edit3 size={16} /></button>
                     <button onClick={() => void onDeleteExpense(expense)} type="button"><Trash2 size={16} /></button>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {screen === 'item-donations' && (
+          <section className="adhyaksh-page item-donations-page">
+            <div className="wide-card action-card">
+              <div><h2>Item Donations</h2><span>Gold, silver, jewellery, mukut, and other physical offerings.</span></div>
+              <div className="vargani-page-actions">
+                <button disabled={itemDonationExporting} onClick={() => void downloadItemDonationReport()} type="button"><FileText size={18} />{itemDonationExporting ? 'Preparing...' : 'Item Report PDF'}</button>
+                <button className="blue-action" onClick={() => { setEditingItemDonation(null); setItemDonationOpen(true); }} type="button"><Plus size={18} />Add Item</button>
+              </div>
+            </div>
+            <div className="metric-strip five-cols">
+              <Metric label="Total Entries" note={metricNote(`${itemDonationSummary.totalQuantity} total quantity`)} value={metricValue(String(workspaceMetrics.itemDonationCount ?? itemDonations.length))} />
+              <Metric green label="Gold" note={metricNote(itemDonationSummary.goldWeight || 'No weight recorded')} value={metricValue(String(itemDonationSummary.goldCount))} />
+              <Metric blue label="Silver" note={metricNote(itemDonationSummary.silverWeight || 'No weight recorded')} value={metricValue(String(itemDonationSummary.silverCount))} />
+              <Metric green label="Jewellery" note={metricNote(itemDonationSummary.jewelleryWeight || 'No weight recorded')} value={metricValue(String(itemDonationSummary.jewelleryCount))} />
+              <Metric label="Other Items" note={metricNote('Custom item names')} value={metricValue(String(itemDonationSummary.otherCount))} />
+            </div>
+            <div className="table-toolbar">
+              <div className="segmented">
+                <button className={itemDonationCategoryFilter === 'ALL' ? 'active' : ''} onClick={() => setItemDonationCategoryFilter('ALL')} type="button">All</button>
+                {ITEM_DONATION_CATEGORIES.map((category) => (
+                  <button className={itemDonationCategoryFilter === category ? 'active' : ''} key={category} onClick={() => setItemDonationCategoryFilter(category)} type="button">
+                    {itemDonationCategoryLabel(category)}
+                  </button>
+                ))}
+              </div>
+              <label className="slip-filter-control">
+                <span>Date</span>
+                <input onChange={(event) => setItemDonationDateFilter(event.target.value)} type="date" value={itemDonationDateFilter} />
+              </label>
+              <label className="search-inline"><Search size={18} /><input value={itemDonationSearch} onChange={(event) => setItemDonationSearch(event.target.value)} placeholder="Search donor, item, receipt..." /></label>
+            </div>
+            <div className="ops-table item-donations-table">
+              <div className="ops-head item-donation-head"><span>Receipt</span><span>Donor</span><span>Item</span><span>Weight</span><span>Date / Storage</span><span>Actions</span></div>
+              {isInitialSync && <EmptyTableState message="Loading item donation data..." />}
+              {workspaceLoaded && filteredItemDonations.length === 0 && <EmptyTableState message="No item donations found for this filter." />}
+              {filteredItemDonations.map((donation) => (
+                <div className="ops-row item-donation-row" key={donation.id}>
+                  <b>{donation.receiptNumber}</b>
+                  <strong>{donation.donorName}<small>{donation.donorPhone || '-'}</small><small className="slip-address">{donation.donorAddress || 'Address not added'}</small></strong>
+                  <span><i className="pill role">{itemDonationCategoryLabel(donation.category)}</i><b>{donation.itemName}</b><small>Qty {donation.quantity}{donation.purity ? ` | ${donation.purity}` : ''}</small></span>
+                  <b>{formatItemDonationWeight(donation)}</b>
+                  <span>{new Date(donation.donationDate).toLocaleDateString('en-IN')}<small>{donation.storageLocation || 'Storage not added'}</small></span>
+                  <span className="row-actions">
+                    <button onClick={() => void downloadItemDonationReceiptFromPortal(donation)} type="button"><Download size={16} />Receipt</button>
+                    <button onClick={() => { setEditingItemDonation(donation); setItemDonationOpen(true); }} type="button"><Edit3 size={16} />Edit</button>
+                    <button aria-label={`Delete ${donation.receiptNumber}`} onClick={() => void onDeleteItemDonation(donation)} type="button"><Trash2 size={16} /></button>
                   </span>
                 </div>
               ))}
@@ -4028,6 +4331,62 @@ function AdhyakshApp({
               <small>Attach a bill, invoice, or payment screenshot. JPG, PNG, or WebP up to 6 MB.</small>
             </div>
             <div className="modal-actions"><button disabled={modalSubmitting === 'expense'} type="button" onClick={() => { setExpenseProofName(''); setExpenseOpen(false); }}>Cancel</button><button className="blue-action" disabled={modalSubmitting === 'expense'} type="submit">{modalSubmitting === 'expense' ? 'Saving...' : 'Save Expense'}</button></div>
+          </form>
+        </div>
+      )}
+
+      {itemDonationOpen && (
+        <div className="modal-backdrop">
+          <form
+            className="vargani-modal adhyaksh-modal item-donation-modal"
+            onSubmit={async (event) => {
+              setModalSubmitting('itemDonation');
+              try {
+                const ok = editingItemDonation
+                  ? await onEditItemDonation(editingItemDonation, event)
+                  : await onCreateItemDonation(event);
+                if (!ok) return;
+                setItemDonationOpen(false);
+                setEditingItemDonation(null);
+              } finally {
+                setModalSubmitting(null);
+              }
+            }}
+          >
+            <button aria-label="Close item donation" className="modal-close" disabled={modalSubmitting === 'itemDonation'} onClick={() => { setItemDonationOpen(false); setEditingItemDonation(null); }} type="button"><X size={20} /></button>
+            <h2>{editingItemDonation ? 'Edit Item Donation' : 'Add Item Donation'}</h2>
+            <label>Donor Name<input name="donorName" required defaultValue={editingItemDonation?.donorName ?? ''} placeholder="Donor full name" /></label>
+            <label>Mobile Number<input name="donorPhone" defaultValue={editingItemDonation?.donorPhone ?? ''} placeholder="9876543210" /></label>
+            <label>Donation Date<input name="donationDate" required defaultValue={editingItemDonation?.donationDate?.slice(0, 10) ?? new Date().toISOString().slice(0, 10)} type="date" /></label>
+            <label>
+              Category
+              <select name="category" required defaultValue={editingItemDonation?.category ?? 'GOLD'}>
+                <option value="GOLD">Gold</option>
+                <option value="SILVER">Silver</option>
+                <option value="JEWELLERY">Jewellery</option>
+                <option value="OTHER">Other Item</option>
+              </select>
+            </label>
+            <label>Item Name<input name="itemName" required defaultValue={editingItemDonation?.itemName ?? ''} placeholder="Mukut, chain, coin, plate..." /></label>
+            <label>Quantity<input inputMode="numeric" min={1} name="quantity" required defaultValue={editingItemDonation?.quantity ?? 1} /></label>
+            <label>Weight<input inputMode="decimal" min="0" name="weight" step="0.001" defaultValue={editingItemDonation?.weight ?? ''} placeholder="Optional" type="number" /></label>
+            <label>
+              Weight Unit
+              <select name="weightUnit" defaultValue={editingItemDonation?.weightUnit ?? ''}>
+                <option value="">No weight</option>
+                <option value="GRAM">Gram</option>
+                <option value="TOLA">Tola</option>
+                <option value="KG">Kg</option>
+              </select>
+            </label>
+            <label>Purity<input name="purity" defaultValue={editingItemDonation?.purity ?? ''} placeholder="22K, 24K, silver purity..." /></label>
+            <label>Storage Location<input name="storageLocation" defaultValue={editingItemDonation?.storageLocation ?? ''} placeholder="Mandal locker, decoration, custody..." /></label>
+            <label className="full">Donor Address<textarea name="donorAddress" defaultValue={editingItemDonation?.donorAddress ?? ''} placeholder="Address optional" /></label>
+            <label className="full">Remarks<textarea name="notes" defaultValue={editingItemDonation?.notes ?? ''} placeholder="Certificate, bill, condition, or any other note" /></label>
+            <div className="modal-actions">
+              <button disabled={modalSubmitting === 'itemDonation'} type="button" onClick={() => { setItemDonationOpen(false); setEditingItemDonation(null); }}>Cancel</button>
+              <button className="blue-action" disabled={modalSubmitting === 'itemDonation'} type="submit">{modalSubmitting === 'itemDonation' ? 'Saving...' : editingItemDonation ? 'Save Item' : 'Save & Download Receipt'}</button>
+            </div>
           </form>
         </div>
       )}
@@ -8603,6 +8962,62 @@ function money(value: number) {
   }).format(Number.isFinite(value) ? value : 0);
 }
 
+function itemDonationCategoryLabel(category: ItemDonationCategory) {
+  return category.charAt(0) + category.slice(1).toLowerCase();
+}
+
+function itemDonationUnitLabel(unit?: ItemDonationWeightUnit | null) {
+  if (unit === 'GRAM') return 'g';
+  if (unit === 'KG') return 'kg';
+  if (unit === 'TOLA') return 'tola';
+  return '';
+}
+
+function formatItemDonationWeight(donation: Pick<ItemDonation, 'weight' | 'weightUnit'>) {
+  if (!donation.weight || !donation.weightUnit) return '-';
+  const weight = Number(donation.weight);
+  if (!Number.isFinite(weight)) return '-';
+  return `${weight.toLocaleString('en-IN', { maximumFractionDigits: 3 })} ${itemDonationUnitLabel(donation.weightUnit)}`;
+}
+
+function summarizeItemDonations(items: ItemDonation[]) {
+  const summary = {
+    goldCount: 0,
+    goldWeight: '',
+    jewelleryCount: 0,
+    jewelleryWeight: '',
+    otherCount: 0,
+    silverCount: 0,
+    silverWeight: '',
+    totalQuantity: 0,
+  };
+  const weights = new Map<ItemDonationCategory, Map<ItemDonationWeightUnit, number>>();
+  items.forEach((item) => {
+    if (item.category === 'GOLD') summary.goldCount += 1;
+    if (item.category === 'SILVER') summary.silverCount += 1;
+    if (item.category === 'JEWELLERY') summary.jewelleryCount += 1;
+    if (item.category === 'OTHER') summary.otherCount += 1;
+    summary.totalQuantity += Number(item.quantity || 0);
+    if (!item.weight || !item.weightUnit) return;
+    const amount = Number(item.weight);
+    if (!Number.isFinite(amount)) return;
+    const byUnit = weights.get(item.category) ?? new Map<ItemDonationWeightUnit, number>();
+    byUnit.set(item.weightUnit, (byUnit.get(item.weightUnit) ?? 0) + amount);
+    weights.set(item.category, byUnit);
+  });
+  summary.goldWeight = formatWeightSummary(weights.get('GOLD'));
+  summary.silverWeight = formatWeightSummary(weights.get('SILVER'));
+  summary.jewelleryWeight = formatWeightSummary(weights.get('JEWELLERY'));
+  return summary;
+}
+
+function formatWeightSummary(weights?: Map<ItemDonationWeightUnit, number>) {
+  if (!weights || weights.size === 0) return '';
+  return Array.from(weights.entries())
+    .map(([unit, total]) => `${total.toLocaleString('en-IN', { maximumFractionDigits: 3 })} ${itemDonationUnitLabel(unit)}`)
+    .join(' | ');
+}
+
 function formatLogTimestamp(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -8709,6 +9124,17 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '') || 'mandal';
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = objectUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
 function fileToDataUrl(file: File) {

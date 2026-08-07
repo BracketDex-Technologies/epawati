@@ -54,7 +54,7 @@ export class WorkspaceService {
       };
     }
 
-    const [activeSlipAmount, pendingSlipAmount, approvedExpenseAmount, paidCollectorCount, memberTotal] =
+    const [activeSlipAmount, pendingSlipAmount, approvedExpenseAmount, itemDonationCount, paidCollectorCount, memberTotal] =
       await this.prisma.$transaction([
         this.prisma.varganiSlip.aggregate({
           _count: { id: true },
@@ -70,6 +70,9 @@ export class WorkspaceService {
           _count: { id: true },
           _sum: { amount: true },
           where: { festivalId: activeFestival.id, mandalId, status: ExpenseStatus.APPROVED },
+        }),
+        this.prisma.itemDonation.count({
+          where: { festivalId: activeFestival.id, mandalId },
         }),
         this.prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
           SELECT COUNT(DISTINCT collected_by_user_id) AS count
@@ -106,6 +109,7 @@ export class WorkspaceService {
         slipPendingAmount: Number(pendingSlipAmount._sum.amount ?? 0),
         slipPendingCount: pendingSlipAmount._count.id,
         slipTotalCount: activeSlipAmount._count.id + pendingSlipAmount._count.id,
+        itemDonationCount,
         totalExpenses,
       },
     };
@@ -293,6 +297,7 @@ export class WorkspaceService {
       memberTotal,
       users,
       auditEvents,
+      itemDonations,
       user,
     ] = await Promise.all([
       isCollectorWorkspace ? this.prisma.member.findFirst({
@@ -421,6 +426,15 @@ export class WorkspaceService {
         take: 100,
         where: { mandalId },
       }),
+      isCollectorWorkspace ? Promise.resolve([]) : this.prisma.itemDonation.findMany({
+        include: {
+          creator: { select: { id: true, name: true } },
+          updater: { select: { id: true, name: true } },
+        },
+        orderBy: [{ donationDate: 'desc' }, { createdAt: 'desc' }],
+        take: 100,
+        where: { festivalId: activeFestival.id, mandalId },
+      }),
       this.getUser(ctx.userId),
     ]);
 
@@ -495,6 +509,7 @@ export class WorkspaceService {
         slipPendingAmount: Number(pendingSlipAmount._sum.amount ?? 0),
         slipPendingCount: pendingSlipAmount._count.id,
         slipTotalCount: slipTotal,
+        itemDonationCount: itemDonations.length,
         totalExpenses,
       },
       report: {
@@ -528,6 +543,7 @@ export class WorkspaceService {
       templates,
       user,
       users,
+      itemDonations,
     };
   }
 
@@ -592,6 +608,7 @@ function emptyMandalMetrics() {
     slipPendingAmount: 0,
     slipPendingCount: 0,
     slipTotalCount: 0,
+    itemDonationCount: 0,
     totalExpenses: 0,
   };
 }

@@ -2824,6 +2824,29 @@ button.pending-action {
   grid-template-columns: 1.2fr 1fr 0.75fr 1fr 0.85fr 0.75fr 0.8fr 0.8fr;
 }
 
+.item-donations-table .item-donation-head,
+.item-donations-table .item-donation-row {
+  grid-template-columns: 0.78fr 1.35fr 1.1fr 0.7fr 1fr 1.2fr;
+  min-width: 1060px;
+}
+
+.item-donation-row > span,
+.item-donation-row > strong {
+  min-width: 0;
+}
+
+.item-donation-row .row-actions {
+  flex-wrap: wrap;
+}
+
+.item-donation-modal {
+  max-width: 760px;
+}
+
+.item-donation-modal .full {
+  grid-column: 1 / -1;
+}
+
 .ops-row {
   border-top: 1px solid #edf0f3;
 }
@@ -11900,6 +11923,10 @@ nav button.active svg,
   .expenses-table .ops-row > :nth-child(5)::before { content: "Date"; }
   .expenses-table .ops-row > :nth-child(6)::before { content: "Amount"; }
   .expenses-table .ops-row > :nth-child(7)::before { content: "Status"; }
+  .item-donations-table .ops-row > :nth-child(2)::before { content: "Donor"; }
+  .item-donations-table .ops-row > :nth-child(3)::before { content: "Item"; }
+  .item-donations-table .ops-row > :nth-child(4)::before { content: "Weight"; }
+  .item-donations-table .ops-row > :nth-child(5)::before { content: "Date / storage"; }
   .slips-table .ops-row > :nth-child(2)::before { content: "Name / shop"; }
   .slips-table .ops-row > :nth-child(3)::before { content: "Amount"; }
   .slips-table .ops-row > :nth-child(4)::before { content: "Mobile"; }
